@@ -160,24 +160,7 @@ export default async function Blog({
           )}
 
           {/* ---------- Tags ---------- */}
-          {post.metadata.tag && (
-            <Row gap="8" wrap marginBottom="12">
-              {post.metadata.tag.map((tag: string, index: number) => (
-                <Text
-                  key={index}
-                  variant="label-default-s"
-                  onBackground="neutral-strong"
-                  style={{
-                    padding: "4px 10px",
-                    borderRadius: "8px",
-                    background: "var(--neutral-alpha-weak)",
-                  }}
-                >
-                  #{tag}
-                </Text>
-              ))}
-            </Row>
-          )}
+          {post.metadata.tag}
 
           {/* ---------- Contenido MDX ---------- */}
           <Column as="article" maxWidth="s" marginTop="16">
