@@ -27,32 +27,29 @@ import { SmartLink } from "@once-ui-system/core";
 
 ### Resumen ejecutivo
 
-<Text marginBottom="8">
-  Esta práctica aborda un aspecto clave del ciclo de vida del software: lograr que un proyecto pueda
-  ser accesible públicamente sin intervención manual en cada actualización.
-</Text>
+Esta práctica aborda un aspecto clave del ciclo de vida del software: lograr que un proyecto pueda
+ser accesible públicamente sin intervención manual en cada actualización.
 
-<Text>
-  Para ello se aprovechan herramientas de automatización como GitHub Actions, junto con la
-  simplicidad y eficiencia del framework <strong>MkDocs</strong>, logrando documentar y publicar
-  un portafolio técnico directamente en <strong>GitHub Pages</strong>.  
-  Cada nuevo cambio realizado en la rama <InlineCode>main</InlineCode> dispara un proceso de build
-  y despliegue completamente automático, reforzando buenas prácticas de integración continua.
-</Text>
+Para ello se aprovechan herramientas de automatización como GitHub Actions, junto con la
+simplicidad y eficiencia del framework <strong>MkDocs</strong>, logrando documentar y publicar
+un portafolio técnico directamente en <strong>GitHub Pages</strong>.  
+Cada nuevo cambio realizado en la rama <InlineCode>main</InlineCode> dispara un proceso de build
+y despliegue completamente automático, reforzando buenas prácticas de integración continua.
+
 
 ---
 
 ## Objetivos y alcances
 
-<Text>
-  El propósito principal consistió en habilitar una versión online del portafolio académico con
-  contenido mínimo pero funcional, utilizando un proceso de publicación confiable, reproducible
-  y sin pasos manuales adicionales.  
-  Se creó un repositorio público a partir del template asignado, se configuró GitHub Pages con
-  <strong>Source: GitHub Actions</strong>, se completó la estructura inicial con About, navegación
-  y primeras prácticas, y finalmente se verificó el pipeline de deploy junto a la correcta
-  accesibilidad de la URL pública entregada como resultado final.
-</Text>
+
+El propósito principal consistió en habilitar una versión online del portafolio académico con
+contenido mínimo pero funcional, utilizando un proceso de publicación confiable, reproducible
+y sin pasos manuales adicionales.  
+Se creó un repositorio público a partir del template asignado, se configuró GitHub Pages con
+<strong>Source: GitHub Actions</strong>, se completó la estructura inicial con About, navegación
+y primeras prácticas, y finalmente se verificó el pipeline de deploy junto a la correcta
+accesibilidad de la URL pública entregada como resultado final.
+
 
 ---
 
@@ -66,63 +63,53 @@ import { SmartLink } from "@once-ui-system/core";
 | Commit / Push y verificación | 10m | 5m | Pipeline verde |
 | Entrega de URL pública | 5m | 10m | Validación externa |
 
-<Text marginTop="12">
-  <strong>Resultado:</strong> publicación garantizada en menos de una hora, con flujo automatizado listo para iterar.
-</Text>
+<strong>Resultado:</strong> publicación garantizada en menos de una hora, con flujo automatizado listo para iterar.
+
 
 ---
 
 ## Desarrollo técnico
 
-<Text>
-  Se utilizó la opción <InlineCode>Use this template</InlineCode> en GitHub para crear un repositorio
-  inicial con la estructura de MkDocs ya configurada. Se habilitó el despliegue mediante
-  <strong>Settings → Pages → Source: GitHub Actions</strong>, estableciendo un pipeline totalmente
-  automatizado.  
-  Además se agregaron enlaces internos para asegurar navegación futura y se constató que cada
-  actualización en la rama principal se publicara automáticamente sin participación humana,
-  cumpliendo así con los principios de CI/CD desde el principio del proyecto.
-</Text>
+Se utilizó la opción <InlineCode>Use this template</InlineCode> en GitHub para crear un repositorio
+inicial con la estructura de MkDocs ya configurada. Se habilitó el despliegue mediante
+<strong>Settings → Pages → Source: GitHub Actions</strong>, estableciendo un pipeline totalmente
+automatizado.  
+Además se agregaron enlaces internos para asegurar navegación futura y se constató que cada
+actualización en la rama principal se publicara automáticamente sin participación humana,
+cumpliendo así con los principios de CI/CD desde el principio del proyecto.
 
 ---
 
 ## Decisiones y fundamentos
 
-<Text>
-  Se mantuvo la estructura base del template para preservar orden y simplicidad en la gestión del
-  contenido estático. Se evitó el uso de la rama <InlineCode>gh-pages</InlineCode> en favor de una
-  automatización más robusta mediante GitHub Actions.  
-  Los enlaces relativos fueron seleccionados para prevenir errores derivados de posibles cambios de
-  nombre en el repositorio o en la ruta del sitio generado.  
-  El enfoque se centró en una integración mínima viable que permitiera escalar el portafolio
-  rápidamente, manteniendo tiempos de entrega breves y asegurando una experiencia profesional desde
-  el inicio.
-</Text>
+Se mantuvo la estructura base del template para preservar orden y simplicidad en la gestión del
+contenido estático. Se evitó el uso de la rama <InlineCode>gh-pages</InlineCode> en favor de una
+automatización más robusta mediante GitHub Actions.  
+Los enlaces relativos fueron seleccionados para prevenir errores derivados de posibles cambios de
+nombre en el repositorio o en la ruta del sitio generado.  
+El enfoque se centró en una integración mínima viable que permitiera escalar el portafolio
+rápidamente, manteniendo tiempos de entrega breves y asegurando una experiencia profesional desde el inicio.
 
 ---
 
 ## Reproducibilidad local
 
-<Text marginBottom="12">
-  El entorno necesario es sencillo: basta con contar con Python, MkDocs y conexión a GitHub para
-  continuar iterando en el sitio localmente.
-</Text>
+El entorno necesario es sencillo: basta con contar con Python, MkDocs y conexión a GitHub para continuar iterando en el sitio localmente.
 
 ```bash
 pip install -q mkdocs mkdocs-material
 mkdocs serve   # http://127.0.0.1:8000
 ```
 
-<Text marginTop="12"> No es necesario ejecutar comandos de publicación: GitHub Actions se encarga automáticamente tras cada commit en la rama principal. </Text>
+No es necesario ejecutar comandos de publicación: GitHub Actions se encarga automáticamente tras cada commit en la rama principal. 
 
 ---
 
 ## Reflexión personal
-<Text> La principal enseñanza de esta práctica fue comprender la importancia de automatizar los procesos repetitivos
+
+La principal enseñanza de esta práctica fue comprender la importancia de automatizar los procesos repetitivos
 dentro del ciclo de desarrollo de software. El hecho de que cada actualización se publique sin intervención manual 
 minimiza errores, acelera el ritmo de iteración y habilita una mentalidad más profesional alineada con flujos reales de DevOps. 
-</Text> 
- 
-<Text marginTop="8"> Además, entender cómo GitHub Pages gestiona la estructura de URLs según el tipo de repositorio 
+
+Además, entender cómo GitHub Pages gestiona la estructura de URLs según el tipo de repositorio 
 permitió tomar decisiones informadas desde el inicio, garantizando que el portafolio sea robusto, accesible y escalable. 
-</Text> 
