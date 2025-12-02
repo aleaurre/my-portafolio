@@ -5,7 +5,7 @@ tag: "Curso: Ingeniería de Datos"
 summary: "Automatización del despliegue de un portafolio académico utilizando GitHub Pages, MkDocs y CI/CD con GitHub Actions."
 ---
 
-import { Heading, Text, InlineCode, Row, Line, List, ListItem, CodeBlock } from "@once-ui-system/core";
+import { Heading, Text, InlineCode, Row, Line, CodeBlock } from "@once-ui-system/core";
 import { SmartLink } from "@once-ui-system/core";
 
 <Card
@@ -19,50 +19,43 @@ import { SmartLink } from "@once-ui-system/core";
     Luego de esta primera versión del portafolio con MkDocs + GitHub Pages, migré el sitio a una
     plantilla profesional basada en Next.js + Once UI desplegada en Vercel. Ahora puedo integrar
     visualizaciones dinámicas, contenido MDX, mejor SEO y un flujo de despliegue optimizado.  
-    El portafolio dejó de ser estático para convertirse en una plataforma viva,
-    alineada con mi stack real de ingeniería de datos.
+    El portafolio dejó de ser estático para convertirse en una plataforma viva, alineada con mi
+    stack real de ingeniería de datos.
   </Text>
 </Card>
 
 ---
 
-
 ### Resumen ejecutivo
 
 <Text marginBottom="8">
-  Esta práctica aborda un aspecto clave del ciclo de vida del software: lograr que un proyecto
-  pueda ser accesible públicamente sin intervención manual en cada actualización.
+  Esta práctica aborda un aspecto clave del ciclo de vida del software: lograr que un proyecto pueda
+  ser accesible públicamente sin intervención manual en cada actualización.
 </Text>
 
 <Text>
   Para ello se aprovechan herramientas de automatización como GitHub Actions, junto con la
-  simplicidad y eficiencia del framework <strong>MkDocs</strong> para documentar y publicar un
-  portafolio técnico hospedado directamente en <strong>GitHub Pages</strong>.  
+  simplicidad y eficiencia del framework <strong>MkDocs</strong>, logrando documentar y publicar
+  un portafolio técnico directamente en <strong>GitHub Pages</strong>.  
   Cada nuevo cambio realizado en la rama <InlineCode>main</InlineCode> dispara un proceso de build
   y despliegue completamente automático, reforzando buenas prácticas de integración continua.
 </Text>
 
 ---
 
-
 ## Objetivos y alcances
 
-<Text marginBottom="16">
-  El propósito principal fue habilitar una versión online del portafolio académico, con información
-  mínima pero funcional, asegurando un proceso de publicación confiable, reproducible y sin pasos
-  manuales adicionales.
+<Text>
+  El propósito principal consistió en habilitar una versión online del portafolio académico con
+  contenido mínimo pero funcional, utilizando un proceso de publicación confiable, reproducible
+  y sin pasos manuales adicionales.  
+  Se creó un repositorio público a partir del template asignado, se configuró GitHub Pages con
+  <strong>Source: GitHub Actions</strong>, se completó la estructura inicial con About, navegación
+  y primeras prácticas, y finalmente se verificó el pipeline de deploy junto a la correcta
+  accesibilidad de la URL pública entregada como resultado final.
 </Text>
 
-<List>
-  <ListItem>Crear un repositorio público desde el template asignado</ListItem>
-  <ListItem>Configurar GitHub Pages con <strong>Source: GitHub Actions</strong></ListItem>
-  <ListItem>Completar el contenido inicial: About, navegación y primeras prácticas</ListItem>
-  <ListItem>Verificar el pipeline de deploy y correcto funcionamiento del sitio</ListItem>
-  <ListItem>Publicar la URL final para su entrega</ListItem>
-</List>
-
 ---
-
 
 ## Planificación y ejecución
 
@@ -80,61 +73,55 @@ import { SmartLink } from "@once-ui-system/core";
 
 ---
 
-
 ## Desarrollo técnico
 
-<Text marginBottom="12">
-  El proceso se centró en establecer un canal fluido desde la edición local hasta la visibilidad
-  pública en la web:
+<Text>
+  Se utilizó la opción <InlineCode>Use this template</InlineCode> en GitHub para crear un repositorio
+  inicial con la estructura de MkDocs ya configurada. Se habilitó el despliegue mediante
+  <strong>Settings → Pages → Source: GitHub Actions</strong>, estableciendo un pipeline totalmente
+  automatizado.  
+  Además se agregaron enlaces internos para asegurar navegación futura y se constató que cada
+  actualización en la rama principal se publicara automáticamente sin participación humana,
+  cumpliendo así con los principios de CI/CD desde el principio del proyecto.
 </Text>
 
-<List>
-  <ListItem>Se utilizó la opción <InlineCode>Use this template</InlineCode> en GitHub para crear el repositorio inicial</ListItem>
-  <ListItem>Se habilitó la página en <strong>Settings → Pages → Source: GitHub Actions</strong></ListItem>
-  <ListItem>El template de MkDocs brindó estructura de navegación y estilo uniforme</ListItem>
-  <ListItem>Se agregaron enlaces internos para futuras visualizaciones y prácticas técnicas</ListItem>
-  <ListItem>Cada actualización en <InlineCode>main</InlineCode> publica automáticamente el sitio</ListItem>
-</List>
-
 ---
-
 
 ## Decisiones y fundamentos
 
-<Text marginBottom="12">
-  Varias elecciones de diseño y configuración aseguraron la escalabilidad del proyecto:
+<Text>
+  Se mantuvo la estructura base del template para preservar orden y simplicidad en la gestión del
+  contenido estático. Se evitó el uso de la rama <InlineCode>gh-pages</InlineCode> en favor de una
+  automatización más robusta mediante GitHub Actions.  
+  Los enlaces relativos fueron seleccionados para prevenir errores derivados de posibles cambios de
+  nombre en el repositorio o en la ruta del sitio generado.  
+  El enfoque se centró en una integración mínima viable que permitiera escalar el portafolio
+  rápidamente, manteniendo tiempos de entrega breves y asegurando una experiencia profesional desde
+  el inicio.
 </Text>
 
-<List>
-  <ListItem>Mantener la estructura original del template: <InlineCode>docs/</InlineCode> + <InlineCode>assets/</InlineCode></ListItem>
-  <ListItem>Evitar despliegues manuales usando la rama <InlineCode>gh-pages</InlineCode></ListItem>
-  <ListItem>Uso de enlaces relativos para prevenir errores en URLs</ListItem>
-  <ListItem>Despliegue automático ante cada push → enfoque CI/CD</ListItem>
-  <ListItem>Integración mínima viable para favorecer iteración rápida</ListItem>
-</List>
-
 ---
-
 
 ## Reproducibilidad local
 
 <Text marginBottom="12">
-  El entorno necesario es sencillo: Python, MkDocs y conexión a GitHub.
+  El entorno necesario es sencillo: basta con contar con Python, MkDocs y conexión a GitHub para
+  continuar iterando en el sitio localmente.
 </Text>
 
 ```bash
 pip install -q mkdocs mkdocs-material
-mkdocs serve   # Servidor local: http://127.0.0.1:8000
+mkdocs serve   # http://127.0.0.1:8000
 ```
-<Text marginTop="12"> No es necesario ejecutar comandos de publicación: GitHub Actions se encarga automáticamente tras cada commit. </Text>
+
+<Text marginTop="12"> No es necesario ejecutar comandos de publicación: GitHub Actions se encarga automáticamente tras cada commit en la rama principal. </Text>
 
 ---
 
-
 ## Reflexión personal
-<Text> La principal enseñanza de esta práctica es la importancia de automatizar los procesos repetitivos. 
-El simple hecho de que cada actualización se publique sin pasos manuales minimiza errores, reduce la fricción al iterar 
-y habilita una mentalidad más profesional alineada con flujos reales de DevOps. </Text> 
-
-<Text marginTop="8"> Además, comprender las particularidades de GitHub Pages —como la estructura de las URLs según el tipo 
-de repositorio— permitió tomar decisiones conscientes que garantizan la robustez del sitio desde el inicio. </Text>
+<Text> La principal enseñanza de esta práctica fue comprender la importancia de automatizar los procesos repetitivos
+dentro del ciclo de desarrollo de software. El hecho de que cada actualización se publique sin intervención manual 
+minimiza errores, acelera el ritmo de iteración y habilita una mentalidad más profesional alineada con flujos reales de DevOps. 
+ 
+</Text> <Text marginTop="8"> Además, entender cómo GitHub Pages gestiona la estructura de URLs según el tipo de repositorio 
+permitió tomar decisiones informadas desde el inicio, garantizando que el portafolio sea robusto, accesible y escalable. </Text> 

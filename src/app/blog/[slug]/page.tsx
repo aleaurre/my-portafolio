@@ -6,6 +6,7 @@ import {
   Column,
   Heading,
   HeadingNav,
+  Icon,
   Row,
   Text,
   SmartLink,
@@ -13,14 +14,16 @@ import {
   Media,
   Line
 } from "@once-ui-system/core";
-
 import { baseURL, about, blog, person } from "@/resources";
 import { formatDate } from "@/utils/formatDate";
 import { getPosts } from "@/utils/utils";
 import { Metadata } from "next";
-import Image from "next/image";
+import React from "react";
 import { Posts } from "@/components/blog/Posts";
 import { ShareSection } from "@/components/blog/ShareSection";
+
+import Image from "next/image";
+
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getPosts(["src", "app", "blog", "posts"]);
@@ -53,35 +56,34 @@ export async function generateMetadata({
   });
 }
 
-export default async function Blog({
-  params,
-}: {
-  params: Promise<{ slug: string | string[] }>;
-}) {
+export default async function Blog({ params }: { params: Promise<{ slug: string | string[] }> }) {
   const routeParams = await params;
   const slugPath = Array.isArray(routeParams.slug)
     ? routeParams.slug.join("/")
     : routeParams.slug || "";
 
-  let post = getPosts(["src", "app", "blog", "posts"]).find(
-    (post) => post.slug === slugPath
-  );
+  let post = getPosts(["src", "app", "blog", "posts"]).find((post) => post.slug === slugPath);
 
   if (!post) {
     notFound();
   }
 
+  const avatars =
+    post.metadata.team?.map((person) => ({
+      src: person.avatar,
+    })) || [];
+
+  // 🆕 Registro de componentes MDX
+  const components = {
+    img: (props: any) => <Image {...props} />,
+    Image,
+  };
+
   return (
     <Row fillWidth>
       <Row maxWidth={12} m={{ hide: true }} />
       <Row fillWidth horizontal="center">
-        <Column
-          as="section"
-          maxWidth="m"
-          horizontal="center"
-          gap="l"
-          paddingTop="24"
-        >
+        <Column as="section" maxWidth="m" horizontal="center" gap="l" paddingTop="24">
           <Schema
             as="blogPosting"
             baseURL={baseURL}
@@ -92,9 +94,7 @@ export default async function Blog({
             dateModified={post.metadata.publishedAt}
             image={
               post.metadata.image ||
-              `/api/og/generate?title=${encodeURIComponent(
-                post.metadata.title
-              )}`
+              `/api/og/generate?title=${encodeURIComponent(post.metadata.title)}`
             }
             author={{
               name: person.name,
@@ -102,39 +102,26 @@ export default async function Blog({
               image: `${baseURL}${person.avatar}`,
             }}
           />
-
-          {/* ---------- Título y fecha ---------- */}
           <Column maxWidth="s" gap="16" horizontal="center" align="center">
             <SmartLink href="/blog">
               <Text variant="label-strong-m">Portafolio</Text>
             </SmartLink>
-
-            <Text
-              variant="body-default-xs"
-              onBackground="neutral-weak"
-              marginBottom="12"
-            >
-              {post.metadata.publishedAt &&
-                formatDate(post.metadata.publishedAt)}
+            <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
+              {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
             </Text>
-
-            <Heading variant="display-strong-m">
-              {post.metadata.title}
+            <Heading variant="display-strong-m">{post.metadata.title}
             </Heading>
-
             {post.metadata.subtitle && (
-              <Text
-                variant="body-default-l"
-                onBackground="neutral-weak"
+              <Text 
+                variant="body-default-l" 
+                onBackground="neutral-weak" 
                 align="center"
-                style={{ fontStyle: "italic" }}
+                style={{ fontStyle: 'italic' }}
               >
                 {post.metadata.subtitle}
               </Text>
             )}
           </Column>
-
-          {/* ---------- Autor ---------- */}
           <Row marginBottom="32" horizontal="center">
             <Row gap="16" vertical="center">
               <Avatar size="s" src={person.avatar} />
@@ -143,8 +130,6 @@ export default async function Blog({
               </Text>
             </Row>
           </Row>
-
-          {/* ---------- Imagen principal ---------- */}
           {post.metadata.image && (
             <Media
               src={post.metadata.image}
@@ -159,44 +144,28 @@ export default async function Blog({
             />
           )}
 
-          {/* ---------- Tags ---------- */}
-          {post.metadata.tag}
-
-          {/* ---------- Contenido MDX ---------- */}
-          <Column as="article" maxWidth="s" marginTop="16">
+          {/* 🆕 Aquí se habilita <Image /> en MDX */}
+          {/* 🆕 MDX con componentes resueltos */}
+          <Column as="article" maxWidth="s">
             <CustomMDX source={post.content} />
           </Column>
 
-          {/* ---------- Sección de compartir ---------- */}
-          <ShareSection
-            title={post.metadata.title}
-            url={`${baseURL}${blog.path}/${post.slug}`}
+
+          <ShareSection 
+            title={post.metadata.title} 
+            url={`${baseURL}${blog.path}/${post.slug}`} 
           />
 
-          {/* ---------- Posts recientes ---------- */}
           <Column fillWidth gap="40" horizontal="center" marginTop="40">
             <Line maxWidth="40" />
-            <Heading
-              as="h2"
-              variant="heading-strong-xl"
-              marginBottom="24"
-            >
+            <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
               Recent posts
             </Heading>
-            <Posts
-              exclude={[post.slug]}
-              range={[1, 2]}
-              columns="2"
-              thumbnail
-              direction="column"
-            />
+            <Posts exclude={[post.slug]} range={[1, 2]} columns="2" thumbnail direction="column" />
           </Column>
-
           <ScrollToHash />
         </Column>
       </Row>
-
-      {/* ---------- Navegación lateral ---------- */}
       <Column
         maxWidth={12}
         paddingLeft="40"
