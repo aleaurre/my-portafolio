@@ -160,9 +160,9 @@ export default async function Blog({
           )}
 
           {/* ---------- Tags ---------- */}
-          {post.metadata.tags && (
+          {post.metadata.tag && (
             <Row gap="8" wrap marginBottom="12">
-              {post.metadata.tags.map((tag: string, index: number) => (
+              {post.metadata.tag.map((tag: string, index: number) => (
                 <Text
                   key={index}
                   variant="label-default-s"
