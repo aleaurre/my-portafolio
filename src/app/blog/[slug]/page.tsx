@@ -22,6 +22,9 @@ import React from "react";
 import { Posts } from "@/components/blog/Posts";
 import { ShareSection } from "@/components/blog/ShareSection";
 
+// 🆕 IMPORTANTE: habilita <Image /> en MDX
+import Image from "next/image";
+
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getPosts(["src", "app", "blog", "posts"]);
   return posts.map((post) => ({
@@ -70,6 +73,12 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
       src: person.avatar,
     })) || [];
 
+  // 🆕 Registro de componentes MDX
+  const components = {
+    img: (props: any) => <Image {...props} />,
+    Image,
+  };
+
   return (
     <Row fillWidth>
       <Row maxWidth={12} m={{ hide: true }} />
@@ -95,7 +104,7 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
           />
           <Column maxWidth="s" gap="16" horizontal="center" align="center">
             <SmartLink href="/blog">
-              <Text variant="label-strong-m">Blog</Text>
+              <Text variant="label-strong-m">Portafolio</Text>
             </SmartLink>
             <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
               {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
@@ -133,10 +142,12 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
               marginBottom="8"
             />
           )}
+
+          {/* 🆕 Aquí se habilita <Image /> en MDX */}
           <Column as="article" maxWidth="s">
-            <CustomMDX source={post.content} />
+            <CustomMDX source={post.content} components={components} />
           </Column>
-          
+
           <ShareSection 
             title={post.metadata.title} 
             url={`${baseURL}${blog.path}/${post.slug}`} 
@@ -161,18 +172,10 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
         gap="16"
         m={{ hide: true }}
       >
-        <Row
-          gap="12"
-          paddingLeft="2"
-          vertical="center"
-          onBackground="neutral-medium"
-          textVariant="label-default-s"
-        >
-          <Icon name="document" size="xs" />
-          On this page
-        </Row>
         <HeadingNav fitHeight />
       </Column>
     </Row>
   );
 }
+
+

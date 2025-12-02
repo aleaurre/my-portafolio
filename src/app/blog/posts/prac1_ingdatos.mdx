@@ -1,154 +1,186 @@
 ---
-title: "01 - Análisis Exploratorio del dataset Iris"
-date: 2025-09-07
+title: "El Origen de la Taxonomía con Python: Inmersión en el EDA del Dataset Iris."
+summary: "Dataset Iris"
+publishedAt: "2025-09-07"
+tag: "Iris"
+tags: ["EDA", "Visualización", "Estadística descriptiva", "Iris"]
 number: 1
 status: "Completado"
-tags: ["EDA", "Visualización", "Estadística descriptiva", "Iris"]
-notebook: "https://colab.research.google.com/drive/1chwkGY58rcG1R15Nguavc-XTnVwCsA0s?usp=sharing"
-drive_viz: "https://drive.google.com/drive/folders/1qglTzvqdFPrNMxUhH_MtQFcRrafXEG7x?usp=sharing"
 dataset: "Iris (Fisher 1936) — scikit-learn / UCI"
 time_est: "2 h 30 m"
 time_spent: "—"
+image: "/practica1/portada.jpg"
 ---
-
-# 01 - Análisis Exploratorio del dataset Iris
-
-<span class="pill">Completado</span>
-<span class="pill">#1</span>
-<span class="pill">EDA</span>
-<span class="pill">Visualización</span>
-<span class="pill">Estadística descriptiva</span>
-<span class="pill">Iris</span>
 
 ### Resumen ejecutivo
 
-!!! abstract
-    **Objetivo:** familiarizarme con el flujo del portafolio y caracterizar Iris para el modelado posterior.  
-    **Datos:** 150 filas, 4 rasgos continuos, 3 especies balanceadas.  
-    **Hallazgos:** `petal_length < 2.0` separa setosa casi perfectamente; correlaciones fuertes entre variables de pétalo; señal dominante en variables de pétalo.  
-    **Resultado:** notebook reproducible, visualizaciones en Drive y lineamientos para baseline.
+El propósito central de esta práctica consistió en familiarizarme con el flujo operativo del portafolio y en caracterizar rigurosamente el dataset Iris como punto de partida para futuros modelos. 
+
+El análisis se realizó sobre un conjunto compuesto por 150 observaciones, con cuatro rasgos continuos y tres especies perfectamente balanceadas, lo que permitió estudiar de forma clara la estructura interna de los datos. Los hallazgos más relevantes indican que el valor `petal_length < 2.0` constituye una frontera casi perfecta para separar la especie setosa, mientras que las correlaciones entre las variables asociadas a los pétalos revelan una señal especialmente dominante frente al resto de las mediciones. 
+
+El trabajo concluye con un notebook completamente reproducible, un conjunto de visualizaciones almacenadas en Drive y los primeros lineamientos para construir un modelo baseline.
 
 ---
 
 ## 1. Contexto
 
-Esta práctica inaugura el flujo técnico del portafolio: integración entre Google Colab, Drive y MDX. El dataset Iris, publicado originalmente por Fisher (1936), constituye un caso emblemático para comprender la estructura de un análisis exploratorio formal.
+Esta práctica constituye el inicio formal del flujo técnico del portafolio y articula, de manera integrada, el uso de Google Colab, Google Drive y archivos MDX. 
 
-El objetivo es doble:  
-1) desarrollar un **EDA metodológicamente sólido**, y  
-2) establecer el estándar de calidad de documentación para el resto de las prácticas.
+El dataset Iris, originalmente publicado por Fisher en 1936, se ha consolidado como un ejemplo clásico para ilustrar los fundamentos del análisis exploratorio de datos. Su estructura clara, la ausencia de valores faltantes y la presencia de tres clases balanceadas lo convierten en un escenario idóneo para estudiar conceptos como separabilidad, correlaciones internas y variabilidad entre grupos. 
 
-El dataset está compuesto por cuatro mediciones morfológicas (cm) y tres especies perfectamente balanceadas, permitiendo observar de forma clara conceptos como separabilidad, correlación y variabilidad intra e intergrupo.
+El objetivo específico de la práctica es doble: por un lado, desarrollar un EDA metodológicamente sólido y, por otro, establecer el estándar de documentación que guiará a las restantes prácticas del portafolio. Las cuatro mediciones morfológicas (en centímetros) permiten observar diferencias inter-especie bien definidas y facilitan la comprensión de la geometría del espacio de características.
 
 ---
 
 ## 2. Objetivos
 
-- Consolidar el **flujo Colab → Drive → Portafolio**.  
-- Recuperar técnicas de estadística descriptiva y análisis exploratorio.  
-- Identificar patrones relevantes para la posterior modelización.  
-- Detectar separabilidad y relaciones estructurales entre variables.  
+- Consolidar el **flujo Colab → Drive → Portafolio**. 
+- Recuperar técnicas de estadística descriptiva y análisis exploratorio. 
+- Identificar patrones relevantes para la posterior modelización. 
+- Detectar separabilidad y relaciones estructurales entre variables. 
 - Preparar heurísticas basales y comprender la geometría del dataset.
 
 ---
 
-## 3. Desarrollo
+## 3. Marco teórico
 
-### 3.1 Carga y schema del dataset
+### 3.1. Importancia del Análisis Exploratorio (EDA)
 
-El dataset se carga mediante `load_iris(as_frame=True)`, facilitando un DataFrame de pandas. La estructura muestra:
+El análisis exploratorio de datos, formalizado por Tukey en 1977, se concibe como una fase diagnóstica fundamental dentro del ciclo analítico. Su principal función es brindar una comprensión preliminar pero exhaustiva del comportamiento de los datos, permitiendo detectar patrones, anomalías, agrupamientos y relaciones internas antes de aplicar cualquier técnica de modelización. Este enfoque privilegia la intuición informada y la lectura crítica de la estructura del dataset, asegurando que el posterior modelado se apoye en un entendimiento adecuado de la variabilidad, la distribución y la coherencia de las observaciones.
 
-- 150 observaciones  
-- 4 variables numéricas  
-- 1 variable categórica derivada (`species`)  
-- 0 nulos  
-- 0 duplicados  
+### 3.2. Separabilidad en Iris
 
-```md
-<!-- FIGURA: df.info() -->
-```
+El dataset Iris presenta propiedades de separabilidad particularmente útiles para ilustrar métodos de clasificación supervisada. La fuerte señal aportada por las variables de pétalo, junto con el perfecto balance entre especies, permite analizar conceptos como fronteras de decisión, variabilidad intra e inter-grupo y clustering natural en el espacio de características.
 
 ---
 
-### 3.2 Análisis univariado
+## 4. Desarrollo
 
-El análisis de distribuciones revela diferencias clave entre variables:
+### 4.1 Carga y schema del dataset
 
-* Las variables de sépalos exhiben mayor variabilidad y menor capacidad discriminante.
-* Las variables de pétalos presentan patrones más definidos y rangos marcadamente diferentes entre especies.
-* `petal_length` muestra una bimodalidad clara, indicando la existencia de dos agrupamientos estructurados.
+La carga inicial del dataset se realizó mediante `load_iris(as_frame=True)`, obteniendo un DataFrame con 150 observaciones independientes, cuatro variables numéricas continuas y una clase categórica derivada (`species`). La ausencia de valores nulos y duplicados permite trabajar sin preprocesamiento adicional.
 
-```md
-<!-- FIGURA: histogramas univariados -->
-```
+### 4.2 Análisis univariado: distribución por especie
 
----
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica1/hist_petal_length.png"
+    alt="Histograma de petal_length por especie"
+    width={800}
+    height={600}
+  />
+</div>
 
-### 3.3 Análisis bivariado: separabilidad
+El histograma con KDE muestra una separación casi perfecta entre setosa y el resto de las especies. Mientras que esta se concentra en `petal_length < 2`, versicolor y virginica presentan distribuciones más amplias y parcialmente solapadas, aunque mantienen centros bien diferenciados. Esto confirma el fuerte poder discriminante de la variable en fases iniciales del modelado.
 
-El scatterplot `petal_length` vs `petal_width` constituye el hallazgo principal del EDA:
+### 4.3 Análisis bivariado: pairplot entre características
 
-* setosa aparece completamente separada del resto.
-* versicolor y virginica se superponen parcialmente, pero mantienen diferencias estructurales.
-* La frontera heurística `petal_length < 2.0` separa setosa de manera exacta en la muestra.
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica1/pairplot.png"
+    alt="Pairplot de las variables del Iris"
+    width={900}
+    height={900}
+  />
+</div>
 
-```md
-<!-- FIGURA: scatterplot petal_length vs petal_width -->
-```
+El pairplot permite visualizar simultáneamente la variación univariada y las relaciones cruzadas entre las variables. Setosa forma un clúster totalmente aislado, reforzando su separabilidad. Versicolor y virginica muestran cierto solapamiento, pero presentan tendencias lineales diferentes, lo que sugiere que modelos basados en hiperplanos podrían separar adecuadamente las clases.
 
----
+### 4.4 Correlaciones
 
-### 3.4 Correlaciones
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica1/corr.png"
+    alt="Matriz de correlación Iris"
+    width={800}
+    height={650}
+  />
+</div>
 
-La matriz de correlación muestra que:
-
-* `petal_length` y `petal_width` presentan correlación > 0.95.
-* Las variables de sépalo presentan correlaciones moderadas.
-* La estructura confirma la predominancia de variables de pétalo en la explicación de la variabilidad inter-especies.
-
-```md
-<!-- FIGURA: heatmap de correlaciones -->
-```
-
----
-
-## 4. Marco teórico
-
-### 4.1. Importancia del Análisis Exploratorio (EDA)
-
-El EDA, propuesto formalmente por Tukey (1977), constituye la fase diagnóstica del ciclo analítico. Sus funciones principales incluyen:
-
-* Identificar patrones de variabilidad.
-* Comprender geometría y estructura de grupos.
-* Detectar señales claves antes del modelado.
-* Verificar integridad y plausibilidad de los datos.
-
-### 4.2. Separabilidad en Iris
-
-Fisher (1936) demostró que la estructura de las mediciones permite separar eficazmente las especies mediante análisis discriminante lineal (LDA). La alta señal de las variables de pétalo, sumada al balance perfecto de clases, convierte al dataset en un caso de enseñanza fundamental en clasificación.
+Las correlaciones altas entre `petal_width` y `petal_length` (superiores a 0.95) confirman que son las variables fundamentales para la diferenciación entre especies. Por el contrario, las variables relacionadas al sépalo exhiben relaciones moderadas y resultan menos informativas para un modelo de clasificación supervisada.
 
 ---
 
 ## 5. Métricas e indicadores exploratorios
 
-| Indicador                                | Observación              |
-| ---------------------------------------- | ------------------------ |
-| Clases                                   | 3 (balanceadas 50–50–50) |
-| Nulos / Duplicados                       | 0 / 0                    |
-| Correlación `petal_length`–`petal_width` | > 0.95                   |
-| Heurística para setosa                   | `petal_length < 2.0`     |
+<table>
+  <thead>
+    <tr>
+      <th>Indicador</th>
+      <th>Observación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Clases</td>
+      <td>3 (balanceadas 50–50–50)</td>
+    </tr>
+    <tr>
+      <td>Nulos / Duplicados</td>
+      <td>0 / 0</td>
+    </tr>
+    <tr>
+      <td>Mayor correlación</td>
+      <td><code>petal_length</code>–<code>petal_width</code> &gt; 0.95</td>
+    </tr>
+    <tr>
+      <td>Heurística para setosa</td>
+      <td><code>petal_length &lt; 2.0</code></td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
 ## 6. Diccionario de datos
 
-| Variable       | Unidad |              Rango              | Nota                     |
-| -------------- | :----: | :-----------------------------: | ------------------------ |
-| `sepal_length` |   cm   |             4.3–7.9             | continuo                 |
-| `sepal_width`  |   cm   |             2.0–4.4             | continuo                 |
-| `petal_length` |   cm   |             1.0–6.9             | clave para separabilidad |
-| `petal_width`  |   cm   |             0.1–2.5             | clave para separabilidad |
-| `species`      |    —   | {setosa, versicolor, virginica} | categórica               |
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Unidad</th>
+      <th>Rango</th>
+      <th>Nota</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>sepal_length</code></td>
+      <td>cm</td>
+      <td>4.3–7.9</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code>sepal_width</code></td>
+      <td>cm</td>
+      <td>2.0–4.4</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code>petal_length</code></td>
+      <td>cm</td>
+      <td>1.0–6.9</td>
+      <td>clave para separabilidad</td>
+    </tr>
+    <tr>
+      <td><code>petal_width</code></td>
+      <td>cm</td>
+      <td>0.1–2.5</td>
+      <td>clave para separabilidad</td>
+    </tr>
+    <tr>
+      <td><code>species</code></td>
+      <td>—</td>
+      <td>setosa, versicolor, virginica</td>
+      <td>categórica</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Los indicadores presentados permiten confirmar que el dataset posee una estructura altamente favorable para la modelización supervisada. La ausencia de valores faltantes y duplicados garantiza calidad y consistencia en los datos. El balance perfecto de clases evita sesgos en el entrenamiento de clasificadores; y la fuerte correlación observada entre las variables de pétalo refuerza su rol central en la separabilidad de especies, tal como se evidenció en los gráficos previos.
+
+
 
 ---
 
@@ -184,6 +216,8 @@ label: "reproducibilidad"
 ]}
 />
 
+El diccionario de datos resume las características morfológicas que componen el dataset, destacando que todas las variables predictoras son numéricas, continuas y medidas en centímetros. Esta homogeneidad facilita futuros procesos de estandarización y modelado. La última columna evidencia que las variables de pétalo aportan la señal más relevante para la clasificación, lo que orienta la selección de atributos en etapas posteriores del pipeline.
+
 ---
 
 ## 8. Reflexión
@@ -207,4 +241,3 @@ Integrar Colab y Drive permitió consolidar un flujo reproducible y escalable. L
 * Fisher, R. A. (1936). The use of multiple measurements in taxonomic problems.  
 * Tukey, J. (1977). Exploratory Data Analysis.  
 * UCI Machine Learning Repository — Iris Dataset.
-

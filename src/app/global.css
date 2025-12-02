@@ -1,0 +1,5 @@
+/* Ocultar el texto original "On this page" dentro del sidebar */
+.display-flex.position-relative.pl-2.g-12.align-center.neutral-on-background-medium.font-label.font-default.font-s {
+  display: none !important;
+}
+
