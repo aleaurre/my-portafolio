@@ -13,6 +13,10 @@ import {
   Avatar,
   Media,
   Line,
+  List,
+  ListItem,
+  CodeBlock,
+  InlineCode
 } from "@once-ui-system/core";
 import { baseURL, about, blog, person } from "@/resources";
 import { formatDate } from "@/utils/formatDate";
@@ -109,7 +113,8 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
             <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
               {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
             </Text>
-            <Heading variant="display-strong-m">{post.metadata.title}</Heading>
+            <Heading variant="display-strong-m">{post.metadata.title}
+            </Heading>
             {post.metadata.subtitle && (
               <Text 
                 variant="body-default-l" 
@@ -144,9 +149,28 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
           )}
 
           {/* 🆕 Aquí se habilita <Image /> en MDX */}
+          {/* 🆕 MDX con componentes resueltos */}
           <Column as="article" maxWidth="s">
-            <CustomMDX source={post.content} />
+            <CustomMDX
+              source={post.content}
+              components={{
+                img: (props: any) => <Image {...props} />,
+                Image,
+                List,
+                ListItem,
+                CodeBlock,
+                InlineCode,
+                Media,
+                Heading,
+                Text,
+                Row,
+                Column,
+                Icon,
+                SmartLink
+              }}
+            />
           </Column>
+
 
           <ShareSection 
             title={post.metadata.title} 
