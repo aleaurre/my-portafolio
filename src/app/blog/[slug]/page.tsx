@@ -12,11 +12,7 @@ import {
   SmartLink,
   Avatar,
   Media,
-  Line,
-  List,
-  ListItem,
-  CodeBlock,
-  InlineCode
+  Line
 } from "@once-ui-system/core";
 import { baseURL, about, blog, person } from "@/resources";
 import { formatDate } from "@/utils/formatDate";
