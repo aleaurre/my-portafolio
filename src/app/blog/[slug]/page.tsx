@@ -151,24 +151,7 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
           {/* 🆕 Aquí se habilita <Image /> en MDX */}
           {/* 🆕 MDX con componentes resueltos */}
           <Column as="article" maxWidth="s">
-            <CustomMDX
-              source={post.content}
-              components={{
-                img: (props: any) => <Image {...props} />,
-                Image,
-                List,
-                ListItem,
-                CodeBlock,
-                InlineCode,
-                Media,
-                Heading,
-                Text,
-                Row,
-                Column,
-                Icon,
-                SmartLink
-              }}
-            />
+            <CustomMDX source={post.content} />
           </Column>
 
 
