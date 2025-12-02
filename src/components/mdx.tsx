@@ -1,6 +1,8 @@
 import { MDXRemote, MDXRemoteProps } from "next-mdx-remote/rsc";
 import React, { ReactNode } from "react";
 import { slugify as transliterate } from "transliteration";
+import Image from "next/image";
+
 
 import {
   Heading,
@@ -179,6 +181,7 @@ const components = {
   h5: createHeading("h5") as any,
   h6: createHeading("h6") as any,
   img: createImage as any,
+  Image, // <-- ESTA LÍNEA NUEVA
   a: CustomLink as any,
   code: createInlineCode as any,
   pre: createCodeBlock as any,
@@ -203,6 +206,7 @@ const components = {
   Media,
   SmartLink,
 };
+
 
 type CustomMDXProps = MDXRemoteProps & {
   components?: typeof components;
