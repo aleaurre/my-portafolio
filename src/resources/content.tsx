@@ -7,7 +7,7 @@ const person: Person = {
   lastName: "Aurrecochea",
   name: `Alexia Aurrecochea`,
   role: "Ingeniera en Datos Jr.",
-  avatar: "/images/avatar.jpg",
+  avatar: "/images/yo.jpg",
   email: "alexiaurrecochea@gmail.com",
   location: "America/Montevideo",
   languages: ["Español", "Inglés", "Alemán"],
@@ -186,7 +186,7 @@ const about: About = {
 const blog: Blog = {
   path: "/blog",
   label: "Portafolio",
-  title: "Proyectos y Aplicaciones en Entornos Reales",
+  title: "Aplicaciones en Entornos Reales",
   description: `Explora los últimos proyectos y prácticas desarrolladas por ${person.name}`,
 };
 

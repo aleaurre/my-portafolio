@@ -22,8 +22,8 @@ import React from "react";
 import { Posts } from "@/components/blog/Posts";
 import { ShareSection } from "@/components/blog/ShareSection";
 
-// 🆕 IMPORTANTE: habilita <Image /> en MDX
 import Image from "next/image";
+
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getPosts(["src", "app", "blog", "posts"]);
@@ -145,7 +145,7 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
 
           {/* 🆕 Aquí se habilita <Image /> en MDX */}
           <Column as="article" maxWidth="s">
-            <CustomMDX source={post.content} components={components} />
+            <CustomMDX source={post.content} />
           </Column>
 
           <ShareSection 
