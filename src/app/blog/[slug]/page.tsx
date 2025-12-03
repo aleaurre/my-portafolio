@@ -9,25 +9,20 @@ import {
   Row,
   Text,
   SmartLink,
-  Avatar,
   Media,
-  Line
+  Line,
 } from "@once-ui-system/core";
-import { baseURL, about, blog, person } from "@/resources";
-import { formatDate } from "@/utils/formatDate";
+import { baseURL, about, work, person } from "@/resources";
 import { getPosts } from "@/utils/utils";
 import { Metadata } from "next";
-import React from "react";
-import { Posts } from "@/components/blog/Posts";
-import { ShareSection } from "@/components/blog/ShareSection";
-import Image from "next/image";
+import { formatDate } from "@/utils/formatDate";
 
 // ─────────────────────────────
 //  GENERATE STATIC PARAMS
 // ─────────────────────────────
 export async function generateStaticParams() {
-  const posts = getPosts(["src", "app", "blog", "posts"]);
-  return posts.map((post) => ({ slug: post.slug }));
+  const works = getWorks(["src", "app", "work", "posts"]);
+  return works.map((work) => ({ slug: work.slug }));
 }
 
 // ─────────────────────────────
@@ -40,53 +35,63 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  const posts = getPosts(["src", "app", "blog", "posts"]);
-  const post = posts.find((p) => p.slug === slug);
+  const works = getWorks(["src", "app", "work", "posts"]);
+  const workItem = works.find((w) => w.slug === slug);
 
-  if (!post) return {};
+  if (!workItem) return {};
 
   return Meta.generate({
-    title: post.metadata.title,
-    description: post.metadata.summary,
-    baseURL: baseURL,
+    title: workItem.metadata.title,
+    description: workItem.metadata.summary,
+    baseURL,
     image:
-      post.metadata.image ||
-      `/api/og/generate?title=${encodeURIComponent(post.metadata.title)}`,
-    path: `${blog.path}/${post.slug}`,
+      workItem.metadata.image ||
+      `/api/og/generate?title=${encodeURIComponent(
+        workItem.metadata.title
+      )}`,
+    path: `${work.path}/${workItem.slug}`,
   });
 }
 
 // ─────────────────────────────
-//  BLOG PAGE
+//  WORK PAGE
 // ─────────────────────────────
-export default async function Blog({
+export default async function WorkPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
 
-  const posts = getPosts(["src", "app", "blog", "posts"]);
-  const post = posts.find((p) => p.slug === slug);
+  const works = getWorks(["src", "app", "work", "posts"]);
+  const workItem = works.find((w) => w.slug === slug);
 
-  if (!post) return notFound();
+  if (!workItem) return notFound();
 
   return (
     <Row fillWidth>
       <Row maxWidth={12} m={{ hide: true }} />
       <Row fillWidth horizontal="center">
-        <Column as="section" maxWidth="m" horizontal="center" gap="l" paddingTop="24">
+        <Column
+          as="section"
+          maxWidth="m"
+          horizontal="center"
+          gap="l"
+          paddingTop="24"
+        >
           <Schema
-            as="blogPosting"
+            as="creativeWork"
             baseURL={baseURL}
-            path={`${blog.path}/${post.slug}`}
-            title={post.metadata.title}
-            description={post.metadata.summary}
-            datePublished={post.metadata.publishedAt}
-            dateModified={post.metadata.publishedAt}
+            path={`${work.path}/${workItem.slug}`}
+            title={workItem.metadata.title}
+            description={workItem.metadata.summary}
+            datePublished={workItem.metadata.publishedAt}
+            dateModified={workItem.metadata.publishedAt}
             image={
-              post.metadata.image ||
-              `/api/og/generate?title=${encodeURIComponent(post.metadata.title)}`
+              workItem.metadata.image ||
+              `/api/og/generate?title=${encodeURIComponent(
+                workItem.metadata.title
+              )}`
             }
             author={{
               name: person.name,
@@ -95,38 +100,37 @@ export default async function Blog({
             }}
           />
 
-          {/* Encabezado */}
-          <Column maxWidth="s" gap="16" horizontal="center" align="center">
-            <SmartLink href="/blog">
-              <Text variant="label-strong-m">Portafolio</Text>
+          {/* Header */}
+          <Column
+            maxWidth="s"
+            gap="16"
+            horizontal="center"
+            align="center"
+          >
+            <SmartLink href="/work">
+              <Text variant="label-strong-m">Work</Text>
             </SmartLink>
 
-            {post.metadata.publishedAt && (
-              <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
-                {formatDate(post.metadata.publishedAt)}
+            {workItem.metadata.publishedAt && (
+              <Text
+                variant="body-default-xs"
+                onBackground="neutral-weak"
+                marginBottom="12"
+              >
+                {formatDate(workItem.metadata.publishedAt)}
               </Text>
             )}
 
             <Heading variant="display-strong-m">
-              {post.metadata.title}
+              {workItem.metadata.title}
             </Heading>
           </Column>
 
-          {/* Autor */}
-          <Row marginBottom="32" horizontal="center">
-            <Row gap="16" vertical="center">
-              <Avatar size="s" src={person.avatar} />
-              <Text variant="label-default-m" onBackground="brand-weak">
-                {person.name}
-              </Text>
-            </Row>
-          </Row>
-
-          {/* Imagen destacada */}
-          {post.metadata.image && (
+          {/* Featured Image */}
+          {workItem.metadata.image && (
             <Media
-              src={post.metadata.image}
-              alt={post.metadata.title}
+              src={workItem.metadata.image}
+              alt={workItem.metadata.title}
               aspectRatio="16/9"
               priority
               sizes="(min-width: 768px) 100vw, 768px"
@@ -137,31 +141,16 @@ export default async function Blog({
             />
           )}
 
-          {/* Contenido MDX */}
+          {/* Content */}
           <Column as="article" maxWidth="s">
-            <CustomMDX source={post.content} />
-          </Column>
-
-          {/* Compartir */}
-          <ShareSection
-            title={post.metadata.title}
-            url={`${baseURL}${blog.path}/${post.slug}`}
-          />
-
-          {/* Posts recientes */}
-          <Column fillWidth gap="40" horizontal="center" marginTop="40">
-            <Line maxWidth="40" />
-            <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
-              Recent posts
-            </Heading>
-            <Posts exclude={[post.slug]} range={[1, 2]} columns="2" thumbnail direction="column" />
+            <CustomMDX source={workItem.content} />
           </Column>
 
           <ScrollToHash />
         </Column>
       </Row>
 
-      {/* Navegación lateral */}
+      {/* Side Navigation */}
       <Column
         maxWidth={12}
         paddingLeft="40"
