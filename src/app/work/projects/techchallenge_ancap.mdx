@@ -1,0 +1,88 @@
+---
+title: "Asistente Virtual ANCAP con Agentes Especializados y Acceso a Datos Privados"
+publishedAt: "2025-06-01"
+summary: "Diseño y desarrollo desde cero de un asistente virtual para ANCAP, con interfaz interactiva, conexión a base de datos privada, control de permisos por usuario y arquitectura basada en Agentes."
+images:
+  - "/images/projects/techchallenge.jpg"
+team:
+  - name: "Equipo Desafío ANCAP"
+    role: "Product, Data & Engineering"
+    avatar: "/images/avatar.jpg"
+link: "https://www.antel.com.uy/institucional/sala-de-prensa/eventos/premiacion-del-ia-tech-challenge-2025"
+---
+
+## Overview
+
+Este trabajo fue presentado y reconocido en el **IA Tech Challenge 2025 de ANTEL**, cuya premiación fue publicada oficialmente:  
+**https://www.antel.com.uy/institucional/sala-de-prensa/eventos/premiacion-del-ia-tech-challenge-2025**
+
+En este desafío se diseñó y desarrolló **desde cero** un asistente virtual corporativo para ANCAP, pensado para integrarse con información interna y flujos de trabajo reales.  
+
+El objetivo principal fue construir una solución capaz de:
+
+- responder consultas sobre documentación y datos internos,
+- interactuar mediante una **interfaz web amigable**,
+- respetar **permisos y roles de usuario**,
+- y aprovechar una **arquitectura orientada a Agentes**, cada uno especializado en un tipo de tarea (datos, documentación, operaciones, etc.).
+
+---
+
+## Key Features
+
+- **Interfaz interactiva tipo chat**  
+  - Experiencia de usuario estilo chat moderno.  
+  - Contexto persistente por sesión de usuario.  
+  - Soporte para respuestas enriquecidas (tablas, links, resúmenes, pasos).
+
+- **Conexión a Base de Datos Privada**  
+  - Integración con BD interna para consultar información operativa y documental.  
+  - Consultas parametrizadas y controladas (no acceso directo sin filtros).  
+  - Capa de abstracción que traduce preguntas de lenguaje natural a queries estructuradas.
+
+- **Gestión de Permisos y Roles**  
+  - Autenticación de usuarios y asociación a roles (operaciones, ingeniería, gestión, etc.).  
+  - El asistente solo accede a datos y funcionalidades según el perfil del usuario.  
+  - Auditoría básica de consultas (quién preguntó qué y cuándo).
+
+- **Diseño y Orquestación de Agentes**  
+  - Agentes especializados para distintas funciones, por ejemplo:
+    - Agente de datos: consultas a BD y generación de reportes simples.  
+    - Agente de documentación: búsqueda y resumen de documentos internos.  
+    - Agente de ayuda operativa: guías paso a paso y SOPs.  
+  - Un orquestador decide qué Agente responde según la intención del usuario.
+
+---
+
+## Technologies Used
+
+- **Backend**: Python / Node.js (según stack elegido), APIs REST para el motor del asistente.  
+- **Frontend**: Aplicación web con framework moderno (React / Next.js o similar) para la interfaz de chat interactiva.  
+- **Base de Datos**: Integración con BD privada (SQL/NoSQL) mediante capa de servicios segura.  
+- **Control de Acceso**: Middleware de autenticación/autorización (JWT, OAuth2 o equivalente).  
+- **Orquestación de Agentes**: Diseño modular para agregar o modificar Agentes sin romper el sistema central.
+
+---
+
+## Challenges and Learnings
+
+- **Seguridad y permisos**: hubo que equilibrar facilidad de uso con restricciones de acceso a datos sensibles.  
+- **Traducción NL → Queries**: diseñar un flujo robusto que convierta preguntas en consultas válidas y seguras.  
+- **Diseño de Agentes**: definir límites claros entre Agentes, responsabilidades y criterios para la selección automática.  
+- **Experiencia de usuario**: iterar sobre la interfaz para que usuarios no técnicos puedan interactuar sin fricción.
+
+Entre los principales aprendizajes se destacan la importancia de:
+
+- diseñar primero la **arquitectura de permisos**,  
+- mantener un **modelo de Agentes extensible**,  
+- y cuidar la **observabilidad** (logs, métricas, trazas) para mejorar el asistente con el tiempo.
+
+---
+
+## Outcome
+
+El resultado del desafío fue un **asistente virtual funcional**, capaz de:
+
+- responder consultas internas con contexto y precisión,
+- utilizar datos de la BD privada respetando perfiles de acceso,
+- delegar tareas en Agentes especializados,
+- y servir como base para futuras extensiones (nuevos Agentes, más fuentes de datos, mayor integración con sistemas corporativos).

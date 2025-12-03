@@ -1,0 +1,80 @@
+---
+title: "Estimación en Línea del PCI y Contenido de Hidrógeno del Fuel Gas en ANCAP"
+publishedAt: "2025-10-01"
+summary: "Desarrollo de modelos de estimación continua para PCI y H₂ en corrientes de FCC y CCR, utilizando datos operativos históricos y de laboratorio."
+images:
+  - "/images/projects/ancap.jpg"
+team:
+  - name: "Equipo Data Challenge ANCAP"
+    role: "Ingeniería de Procesos & Ciencia de Datos"
+    avatar: "/images/avatar.jpg"
+link: "https://www.ancap.com.uy/"
+---
+
+## Overview
+
+El Data Challenge ANCAP se centra en estimar de forma **continua (en línea)** dos propiedades claves del sistema de fuel gas (FG) de la Refinería de La Teja: el **Poder Calorífico Inferior (PCI)** y el **contenido de hidrógeno (H₂)** de las corrientes provenientes de las unidades de **FCC** y **CCR**.  
+Actualmente, estas propiedades se obtienen a partir de análisis de laboratorio realizados **una vez por día**, lo que limita la visibilidad del impacto inmediato de cambios operativos.  
+
+El objetivo del proyecto es construir modelos que, usando **datos operativos históricos de 2024** y **datos de laboratorio**, permitan estimar el PCI y el H₂ en tiempo real. Posteriormente, estos modelos se validan contra datos reales de **2025**, evaluando su desempeño.  
+
+---
+
+## Key Features
+
+- **Integración de datos operativos (FCC y CCR)**  
+  Se utilizaron caudales, temperaturas, presiones y variables de composición de carga provenientes del sistema de adquisición de datos de la refinería, considerando todas las señales relevantes para explicar la composición del FG.  
+
+- **Modelado de PCI y H₂**  
+  Se desarrollaron modelos capaces de estimar PCI y fracción molar de H₂ a partir de condiciones de operación. Estos modelos integran:
+  - relaciones físico-químicas,
+  - técnicas de regresión avanzado,
+  - validación temporal con datos de 2025.
+
+- **Cálculo teórico del PCI por componente**  
+  El PCI del gas se determinó siguiendo la fórmula industrial usando los PCI individuales de H₂, metano, etano, propano, butanos, CO, CO₂ y compuestos pesados.  
+
+- **Evaluación continua del modelo**  
+Las estimaciones se compararon con los análisis de laboratorio de 2025 para cuantificar error, sesgos y robustez ante diferentes condiciones operativas.
+
+---
+
+## Technologies Used
+
+- **Python (Pandas, Scikit-learn, Statsmodels)**  
+Para limpieza, unificación y modelado de datos.
+- **XGBoost / Random Forest / Modelos Lineales Regularizados**  
+Para estimación de PCI y contenido de H₂.
+- **Dash / Streamlit**  
+Para construir interfaces que permitan visualizar estimaciones en línea.
+- **Pipelines ETL**  
+Para procesar señales horarias como FICs, TICs, PICs y composiciones.
+
+---
+
+## Challenges and Learnings
+
+Uno de los principales desafíos del Data Challenge fue **capturar la relación no lineal** entre variables operativas y composición del gas. Algunas señales presentan ruido, discontinuidades o falta de alineación temporal con los análisis de laboratorio.
+
+Otros aprendizajes claves:
+
+- La respuesta del sistema FCC tiene mayor complejidad por variabilidad de la carga, vapor de dispersión y condiciones del regenerador.  
+- En CCR, la generación de H₂ responde fuertemente a temperaturas de reactores y recirculación.  
+- Integrar datos operativos y de laboratorio requiere una estrategia de resampleo, limpieza y sincronización temporal robusta.  
+- Se comprobó que algunos tags tienen correlación débil o redundante, lo que motivó una etapa intensa de selección de variables.
+
+---
+
+## Outcome
+
+El proyecto permitió generar un conjunto de modelos capaces de:
+
+- Estimar el **PCI** y el **contenido de H₂** de las corrientes de FG de FCC y CCR en tiempo casi real.
+- Reemplazar parcial o totalmente mediciones diarias con estimaciones continuas.
+- Dar visibilidad a cambios operativos que no se capturaban con la frecuencia actual.
+- Proveer a ingeniería y operación herramientas para mejorar la optimización energética y el control del balance de masa de hidrógeno.  
+
+El trabajo representa un paso significativo hacia la **digitalización de propiedades clave del fuel gas** y habilita futuros desarrollos como:
+- control avanzado del sistema de FG,  
+- optimización de hornos,  
+- reconciliación de datos en línea.
