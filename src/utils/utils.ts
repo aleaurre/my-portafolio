@@ -68,7 +68,34 @@ function getMDXData(dir: string) {
   });
 }
 
-export function getPosts(customPath = ["", "", "", ""]) {
-  const postsDir = path.join(process.cwd(), ...customPath);
-  return getMDXData(postsDir);
+
+/**
+ * Obtiene todos los posts en formato MDX, leyendo metadata (front-matter)
+ * y devolviendo el contenido limpio sin YAML.
+ *
+ * Se usa en:
+ * - generateStaticParams
+ * - generateMetadata
+ * - render del Blog con <CustomMDX source={post.content} />
+ */
+export function getPosts(postPath: string[]) {
+  const basePath = path.join(process.cwd(), ...postPath);
+  const files = fs.readdirSync(basePath);
+
+  return files
+    .filter((file) => file.endsWith(".mdx"))
+    .map((file) => {
+      const filePath = path.join(basePath, file);
+      const fileContent = fs.readFileSync(filePath, "utf8");
+
+      // Extrae metadata + contenido limpio
+      const { data: metadata, content } = matter(fileContent);
+
+      return {
+        slug: file.replace(/\.mdx$/, ""),
+        metadata,
+        content: content.trim(), // 👈 solo MDX, sin front-matter
+      };
+    });
 }
+

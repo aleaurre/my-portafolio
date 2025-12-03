@@ -6,7 +6,6 @@ import {
   Column,
   Heading,
   HeadingNav,
-  Icon,
   Row,
   Text,
   SmartLink,
@@ -21,29 +20,28 @@ import { Metadata } from "next";
 import React from "react";
 import { Posts } from "@/components/blog/Posts";
 import { ShareSection } from "@/components/blog/ShareSection";
-
 import Image from "next/image";
 
-
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
+// ─────────────────────────────
+//  GENERATE STATIC PARAMS
+// ─────────────────────────────
+export async function generateStaticParams() {
   const posts = getPosts(["src", "app", "blog", "posts"]);
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
+// ─────────────────────────────
+//  GENERATE METADATA
+// ─────────────────────────────
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string | string[] }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const routeParams = await params;
-  const slugPath = Array.isArray(routeParams.slug)
-    ? routeParams.slug.join("/")
-    : routeParams.slug || "";
+  const { slug } = await params;
 
   const posts = getPosts(["src", "app", "blog", "posts"]);
-  let post = posts.find((post) => post.slug === slugPath);
+  const post = posts.find((p) => p.slug === slug);
 
   if (!post) return {};
 
@@ -51,33 +49,27 @@ export async function generateMetadata({
     title: post.metadata.title,
     description: post.metadata.summary,
     baseURL: baseURL,
-    image: post.metadata.image || `/api/og/generate?title=${post.metadata.title}`,
+    image:
+      post.metadata.image ||
+      `/api/og/generate?title=${encodeURIComponent(post.metadata.title)}`,
     path: `${blog.path}/${post.slug}`,
   });
 }
 
-export default async function Blog({ params }: { params: Promise<{ slug: string | string[] }> }) {
-  const routeParams = await params;
-  const slugPath = Array.isArray(routeParams.slug)
-    ? routeParams.slug.join("/")
-    : routeParams.slug || "";
+// ─────────────────────────────
+//  BLOG PAGE
+// ─────────────────────────────
+export default async function Blog({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-  let post = getPosts(["src", "app", "blog", "posts"]).find((post) => post.slug === slugPath);
+  const posts = getPosts(["src", "app", "blog", "posts"]);
+  const post = posts.find((p) => p.slug === slug);
 
-  if (!post) {
-    notFound();
-  }
-
-  const avatars =
-    post.metadata.team?.map((person) => ({
-      src: person.avatar,
-    })) || [];
-
-  // 🆕 Registro de componentes MDX
-  const components = {
-    img: (props: any) => <Image {...props} />,
-    Image,
-  };
+  if (!post) return notFound();
 
   return (
     <Row fillWidth>
@@ -102,26 +94,25 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
               image: `${baseURL}${person.avatar}`,
             }}
           />
+
+          {/* Encabezado */}
           <Column maxWidth="s" gap="16" horizontal="center" align="center">
             <SmartLink href="/blog">
               <Text variant="label-strong-m">Portafolio</Text>
             </SmartLink>
-            <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
-              {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
-            </Text>
-            <Heading variant="display-strong-m">{post.metadata.title}
-            </Heading>
-            {post.metadata.subtitle && (
-              <Text 
-                variant="body-default-l" 
-                onBackground="neutral-weak" 
-                align="center"
-                style={{ fontStyle: 'italic' }}
-              >
-                {post.metadata.subtitle}
+
+            {post.metadata.publishedAt && (
+              <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
+                {formatDate(post.metadata.publishedAt)}
               </Text>
             )}
+
+            <Heading variant="display-strong-m">
+              {post.metadata.title}
+            </Heading>
           </Column>
+
+          {/* Autor */}
           <Row marginBottom="32" horizontal="center">
             <Row gap="16" vertical="center">
               <Avatar size="s" src={person.avatar} />
@@ -130,6 +121,8 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
               </Text>
             </Row>
           </Row>
+
+          {/* Imagen destacada */}
           {post.metadata.image && (
             <Media
               src={post.metadata.image}
@@ -144,18 +137,18 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
             />
           )}
 
-          {/* 🆕 Aquí se habilita <Image /> en MDX */}
-          {/* 🆕 MDX con componentes resueltos */}
+          {/* Contenido MDX */}
           <Column as="article" maxWidth="s">
             <CustomMDX source={post.content} />
           </Column>
 
-
-          <ShareSection 
-            title={post.metadata.title} 
-            url={`${baseURL}${blog.path}/${post.slug}`} 
+          {/* Compartir */}
+          <ShareSection
+            title={post.metadata.title}
+            url={`${baseURL}${blog.path}/${post.slug}`}
           />
 
+          {/* Posts recientes */}
           <Column fillWidth gap="40" horizontal="center" marginTop="40">
             <Line maxWidth="40" />
             <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
@@ -163,9 +156,12 @@ export default async function Blog({ params }: { params: Promise<{ slug: string 
             </Heading>
             <Posts exclude={[post.slug]} range={[1, 2]} columns="2" thumbnail direction="column" />
           </Column>
+
           <ScrollToHash />
         </Column>
       </Row>
+
+      {/* Navegación lateral */}
       <Column
         maxWidth={12}
         paddingLeft="40"
