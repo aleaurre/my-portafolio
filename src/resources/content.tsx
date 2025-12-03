@@ -197,16 +197,5 @@ const work: Work = {
   description: `Aplicaciones y trabajos desarrollados por ${person.name}`,
 };
 
-const gallery: Gallery = {
-  path: "/gallery",
-  label: "Galería",
-  title: `Galería – ${person.name}`,
-  description: `Colección de imágenes relacionadas a proyectos y experiencias de ${person.name}`,
-  images: [
-    { src: "/images/gallery/horizontal-1.jpg", alt: "image", orientation: "horizontal" },
-    { src: "/images/gallery/vertical-4.jpg", alt: "image", orientation: "vertical" },
-    { src: "/images/gallery/horizontal-3.jpg", alt: "image", orientation: "horizontal" },
-  ],
-};
 
-export { person, social, newsletter, home, about, blog, work, gallery};
+export { person, social, newsletter, home, about, blog, work};
