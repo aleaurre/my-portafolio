@@ -1,0 +1,205 @@
+---
+title: "El Mapa Oculto del Ladrillo: Identificando Drivers de Precio en el Dataset de Ames."
+publishedAt: "2025-09-15"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica5/portada.jpg"
+---
+
+## Introducción
+
+El dataset **Ames Housing** constituye un caso de estudio clásico para el análisis de calidad en datos tabulares orientados a modelos predictivos de precios inmobiliarios. Esta práctica tuvo como propósito comprender y gestionar **faltantes (missingness)** y **outliers**, dos fenómenos que afectan tanto la inferencia estadística como el desempeño de machine learning.  
+
+La aproximación metodológica adoptada se desarrolló siguiendo el ciclo:
+- **Auditar → Diagnosticar → Imputar → Validar impactos**
+
+Todo ello **sin leakage**, mediante un pipeline reproducible.
+
+---
+
+## Marco teórico: ¿Qué hay detrás de los datos faltantes?
+
+Cuando una columna presenta valores ausentes, la decisión sobre cómo tratarlos depende del **mecanismo subyacente**:
+
+<table>
+  <thead>
+    <tr>
+      <th>Mecanismo</th>
+      <th>Definición</th>
+      <th>Ejemplo en Ames Housing</th>
+      <th>Riesgo al imputar</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MCAR</strong></td>
+      <td>Ausencia completamente aleatoria</td>
+      <td>Pérdidas accidentales en carga manual</td>
+      <td>Introduce ruido pero sin sesgo</td>
+    </tr>
+    <tr>
+      <td><strong>MAR</strong></td>
+      <td>Ausencia depende de otra variable observada</td>
+      <td><code>Garage Area</code> ausente cuando <code>Garage Type</code> = "No Garage"</td>
+      <td>Imputar sin considerar estructura &rarr; sesgo</td>
+    </tr>
+    <tr>
+      <td><strong>MNAR</strong></td>
+      <td>Ausencia depende del valor faltante</td>
+      <td>Vendedores que ocultan precios muy altos o muy bajos</td>
+      <td>Imputar puede ocultar señal crítica</td>
+    </tr>
+  </tbody>
+</table>
+
+En términos económicos: el *missingness* puede reflejar **preferencias, restricciones o estrategias** en la oferta inmobiliaria —y por tanto conviene **analizarlo como señal**, no como defecto.
+
+El estudio detallado del patrón de valores faltantes en Ames revela dimensiones del mercado que usualmente no son visibles en una simple auditoría exploratoria. Por ejemplo, la ausencia de datos en características como BsmtQual o GarageType no es un accidente estadístico, sino un reflejo explícito de viviendas que no poseen sótano o garaje. Estas omisiones, lejos de constituir errores de recolección, describen tipologías habitacionales, lo cual convierte al missingness en una variable informativa por sí misma.
+
+Cuando una columna categórica se vuelve faltante únicamente en un subconjunto con significado económico, esa ausencia pasa a ser un predictor indirecto relevante para el precio. Una vivienda sin garaje, en la mayoría de los contextos urbanos de EE. UU., implica menor comodidad y, en consecuencia, un valor inmobiliario más bajo. De este modo, la ausencia se comporta casi como una categoría adicional, y su tratamiento requiere decisiones finas: eliminar filas borraría segmentos del mercado, mientras que rellenar sin marcar invisibilizaría las diferencias estructurales.
+
+En entornos donde los precios elevados se vuelven más sensibles al escrutinio público, también pueden aparecer patrones MNAR: vendedores que optan por no registrar ciertos atributos cuando podrían perjudicar la percepción de valor. En este sentido, el missingness puede ser una estrategia de ocultamiento o marketing inmobiliario, que debe ser tenida en cuenta para mantener la transparencia del proceso analítico.
+
+---
+
+### 1. Auditoría inicial de la calidad
+
+La exploración comenzó con el análisis del **porcentaje de faltantes por columna**, identificando actores críticos como `Garage Type`, `BsmtQual` y `FireplaceQu`.
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
+  <img src="/practica5/missing_patterns.png" alt="Patrones de datos faltantes por columna" width="800" />
+</div>
+
+Este patrón revela **faltantes estructurados**, típicos de MAR:  
+*no hay sótano → no hay calidad de sótano*.
+
+A nivel de filas:
+- **p95**: 6 columnas faltantes  
+- **p99**: 11 columnas faltantes  
+
+Esto indica que la mayoría de viviendas están **bien completas**, mientras pocos subgrupos requieren tratamiento intensivo.
+
+---
+
+### 2. Outliers como reflejo de la estructura urbana
+
+El mercado inmobiliario contiene casos extremos que **sí existen**: mansiones, terrenos rurales amplios, barrios de alto valor. Por tanto, antes de eliminarlos es necesario interpretarlos.
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
+  <img src="/practica5/outliers_analysis.png" alt="Comparación de outliers por IQR y z-score" width="800" />
+</div>
+
+**Hallazgos principales:**
+
+- **Lot Area**: fuerte cola derecha → *parcelas excepcionalmente grandes*
+- **SalePrice**: outliers que son **señal del lujo** → no eliminar sin criterio
+
+Se adoptó una estrategia **mixta**:
+- Winsorizing mediante **IQR** en vars. con asimetría severa
+- Z-score para control en variables ~normales
+
+El análisis conjunto de outliers por IQR y Z-Score evidenció que las colas largas del dataset están relacionadas con dinámicas socioeconómicas reales: propiedades premium, barrios emergentes y terrenos cuyo uso no es plenamente residencial. Por ello, considerar todo valor extremo como ruido metodológico sería equivalente a negar la heterogeneidad natural del mercado.
+
+Sin embargo, en ciertos casos, los outliers sí pueden deberse a errores operacionales, por ejemplo 
+en mediciones incorrectas, dígitos mal tipeados, fechas intempestivas ancladas en 1900/2200,
+o valores atípicos simultáneamente en múltiples variables inconsistentes.
+
+Esto obliga a una distinción fundamental:
+- Outliers plausibles → representan el dominio y deben preservarse.
+- Outliers imposibles → deben corregirse o descartarse.
+
+El uso combinado de IQR y Z-Score permite identificar superposiciones: valores señalados por ambos métodos suelen ser candidatos más fuertes a inspección. Para el resto, se recomienda winsorizing conservador o etiquetado, sin eliminar su contribución estructural.
+
+Desde la perspectiva de ML, los outliers no son necesariamente perjudiciales:
+muchos modelos —como árboles de decisión, gradient boosting o random forests— se benefician de detectar segmentos premium que generan reglas más finas.
+En definitiva, la decisión no es técnica, es semántica: si un valor puede existir en el mercado, entonces tiene derecho a existir en el dataset.
+
+---
+
+### 3. Imputación informada: preservar la historia económica
+
+Las imputaciones se diseñaron **por tipo y mecanismo**:
+
+- **Numéricas (asimétricas)** → **mediana**  
+- **Numéricas (~normales)** → **media**
+- **Categóricas** → **moda** o `"Unknown"` cuando existe condición semántica
+- **MNAR sospechoso** → indicar con *flag* para modelado
+
+Esto evita que el modelo:
+
+- Aprenda reglas inexistentes (por sesgo)
+- “Castigue” viviendas sin garage como si fuera error de medición
+
+En ciencia de datos aplicada a decisiones económicas, la imputación puede influir directamente en la evaluación de activos, y por ende en el bienestar de personas y comunidades. Documentar claramente las transformaciones es esencial para evitar que el modelo introduzca inequidad o efectos regresivos: un algoritmo que aprenda a penalizar viviendas sin ciertas características podría replicar sesgos socio-espaciales preexistentes.
+La reproducibilidad no es un requisito académico, sino una garantía de justicia algorítmica. Si un modelo afecta tasaciones, tasas hipotecarias o priorización urbana, debe ser posible defender y auditar cada paso ante actores externos.
+Este trabajo avanza en esa dirección: el dataset queda preparado para modelado responsable, sin sacrificar interpretabilidad ni rigor estadístico.
+
+---
+
+### 4. Validación: impacto en distribuciones
+
+La imputación correcta debe **conservar estructura**, no reescribir la realidad del mercado.
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
+  <img src="/practica5/distribution_comparison.png" alt="Distribuciones antes y después de imputación" width="850" />
+</div>
+
+💡 Se observa **mínimo estrechamiento** en `SalePrice` y `YearBuilt`:  
+esperable al reemplazar extremos por valores centrales.
+
+---
+
+### 5. Evaluación del impacto en correlación
+
+Un preprocesamiento irresponsable puede destruir relaciones significativas para el modelo.
+
+<div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
+  <img src="/practica5/correlation_comparison.png" alt="Mapa de correlaciones antes vs después" width="850" />
+</div>
+
+Las correlaciones se mantienen estables → **el pipeline preserva señal predictiva**.  
+La reducción leve de fuerza en `SalePrice` es el **costo aceptable** de imputar robustamente.
+
+---
+
+### 6. Indicadores de calidad y cobertura
+
+<table>
+  <thead>
+    <tr><th>Indicador</th><th>Observación</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Columnas con missingness</td><td>19 (~15%), patrón MAR dominante</td></tr>
+    <tr><td>Outliers IQR</td><td>Lot Area: ~127 casos</td></tr>
+    <tr><td>Outliers Z-score</td><td>SalePrice: ~65 casos</td></tr>
+    <tr><td>Imputación</td><td>Num: mediana/media · Cat: moda/"Unknown"</td></tr>
+    <tr><td>Anti-leakage</td><td>Imputer ajustado solo con <strong>train</strong></td></tr>
+  </tbody>
+</table>
+
+---
+
+## Decisiones documentadas (ADR-lite)
+
+- **Pipeline único**, evitando divergencias entre EDA y producción  
+- **Flags de imputación** para MNAR sospechoso  
+- **Imputación diferenciada** según semántica inmobiliaria  
+- **No eliminar outliers verdaderos** → son comportamiento económico real  
+
+---
+
+## Conclusiones
+
+El análisis demostró que los faltantes en Ames Housing **no son aleatorios**:  
+reflejan **características funcionales de las viviendas** y decisiones en su registro.
+
+Se concluye que:
+
+- La **missingness puede ser señal económica**, no solo ruido
+- **Imputar** implica introducir teoría del dominio
+- **Outliers** representan nichos reales del mercado, no errores
+- La correcta aplicación de **anti-leakage** es diferencial para modelos confiables
+
+Este enfoque prepara la base para la siguiente etapa:  
+**modelos predictivos que respeten la estructura real del mercado inmobiliario**.
+
+
