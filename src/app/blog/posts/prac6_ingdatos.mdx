@@ -1,0 +1,304 @@
+---
+title: "Integridad del Modelo: Cómo el Anti-Leakage y el Escalado Deciden el Éxito Predictivo en Ames Housing."
+publishedAt: "2025-09-20"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica6/portada.jpg"
+---
+
+# Feature Scaling & Anti-Leakage (Ames Housing)
+
+## Introducción
+
+En el **análisis de datos** aplicado específicamente a problemas de **predicción inmobiliaria**, una situación recurrente y desafiante es la de encontrar variables que exhiben **escalas marcadamente distintas** entre sí, presentan **distribuciones fuertemente sesgadas** (asimetría) y contienen **valores atípicos** o *outliers* que, de no tratarse, pueden **influir negativamente** en la solidez y el desempeño predictivo de los modelos de *Machine Learning*. Este escenario se manifestó claramente en el *dataset* **Ames Housing**, el cual recopila una vasta y heterogénea colección de información sobre propiedades residenciales. Estos datos abarcan desde variables de medición continua y discreta, como las **superficies** de los lotes y los pisos, hasta **puntuaciones de calidad** subjetivas asignadas por inspectores, lo que contribuye a la complejidad del preprocesamiento.
+
+La presente práctica se articuló en torno al estudio y la justificación de la necesidad de aplicar el **escalado de características** (*Feature Scaling*). Se abordó mediante la **comparación metódica** de distintos **transformadores** y **escaladores** estadísticos, y se procedió a evaluar de forma empírica cómo las decisiones tomadas en la fase de preprocesamiento de datos podían impactar significativamente en la precisión de la estimación de la variable objetivo, que es el **valor de venta** (`SalePrice`). De igual importancia, se destinó una sección a profundizar en el rol **fundamental** del concepto de **anti-leakage** (anti-filtración de datos). Este principio se implementó asegurando una **separación estricta y rigurosa** entre los conjuntos de entrenamiento y validación, lo cual se materializó mediante el uso estratégico de **pipelines** de procesamiento y la técnica de **validación cruzada** (*Cross-Validation*). 
+
+Este estudio de caso se posiciona como un ejemplo paradigmático para comprender que la robustez y la solidez estadística de un modelo predictivo no dependen únicamente de la sofisticación o el rendimiento del algoritmo de *Machine Learning* elegido, sino, crucialmente, de la **integridad** y la **transparencia** del flujo de procesamiento de datos que antecede y acompaña al entrenamiento.
+
+---
+
+## Marco teórico
+
+### Importancia del escalado
+
+La necesidad del escalado de características radica en el funcionamiento interno de **numerosos algoritmos de *Machine Learning***. Estos algoritmos basan sus decisiones, optimizaciones y cálculos en conceptos de **distancias euclidianas**, **magnitudes de variables** o la dirección de los **gradientes de error**. Si una característica particular exhibe valores intrínsecamente muy grandes (por ejemplo, el área en metros cuadrados, $10^3$) en comparación con otra (por ejemplo, una puntuación de calidad de 1 a 10), esta variable de mayor magnitud tiende a **dominar el proceso de optimización** del modelo. Tal dominio puede conducir a un fenómeno en el que el modelo termine **sobreajustando** características que son, en realidad, irrelevantes o menos importantes para el problema de predicción (Shalev-Shwartz & Ben-David, 2014). Por esta razón, el escalado es un paso **esencial** y a menudo **obligatorio** en las siguientes familias de modelos:
+
+* **Regresión lineal con regularización** (**Ridge**, **Lasso**, *Elastic Net*), donde los términos de penalización dependen de las magnitudes de los coeficientes.
+* **K-Nearest Neighbors (KNN)**, que depende directamente de la distancia entre puntos.
+* **Support Vector Machines (SVM)**, cuyo margen de separación se calcula en el espacio de características.
+* **PCA** y otras técnicas de **reducción de dimensionalidad** basadas en la varianza.
+* **Modelos basados en redes neuronales** (*Deep Learning*), que se benefician de datos centrados y de varianza unitaria para la estabilidad del entrenamiento.
+
+Es importante señalar que, si bien modelos no paramétricos y basados en árboles de decisión, como **Random Forest** o **Gradient Boosting**, no requieren estrictamente el escalado para su funcionamiento lógico (dado que operan con umbrales y no con distancias), el escalado **puede acelerar** marginalmente el entrenamiento.
+
+---
+
+### Transformaciones para corregir sesgos
+
+Las distribuciones de variables con **colas largas** (un indicador de alta **skewness** o asimetría) son problemáticas porque, en el contexto de modelos de regresión lineal, violan el supuesto de **normalidad de los errores** y comprometen la **relación lineal** que se espera establecer entre las características y la variable objetivo. Para mitigar esta asimetría, se emplean **transformaciones matemáticas** que "comprimen" la cola de la distribución. A continuación, se detallan tres de las transformaciones más utilizadas:
+
+<table style={{ width: '100%', borderCollapse: 'collapse' }}>
+  <thead>
+    <tr>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Método</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Fórmula/Base</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Objetivo Principal</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Cuándo usarlo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>`log1p`</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>$\log(1 + x)$</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Comprimir colas extremas → menor influencia de valores extremos</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Variables **estrictamente no negativas** ($\ge 0$) con fuerte asimetría positiva.</td>
+    </tr>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**Yeo-Johnson**</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Transformación de potencia</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Normalizar la distribución incluso ante la presencia de ceros o valores negativos</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Cuando log1p no es viable o suficiente; ofrece una transformación más flexible.</td>
+    </tr>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**QuantileTransformer**</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Mapeo por percentiles</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Transformar la distribución a una distribución Gaussiana (Normal) o Uniforme</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Cuando se busca una **robustez extrema** ante *outliers*, a costa de alterar drásticamente la estructura de los datos originales.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+### Data leakage y pipelines
+
+El **data leakage** (filtración de datos) representa uno de los **errores metodológicos más graves** en la ciencia de datos. Ocurre cuando se introduce, de manera **inadvertida**, información proveniente del conjunto de prueba (los datos que el modelo nunca debería haber visto) en la fase de entrenamiento. Un ejemplo clásico y muy común es:
+
+> **Error de *Leakage***: Calcular la media y la desviación estándar de la variable $X$ **sobre la totalidad del *dataset*** antes de realizar la separación (*train-test split*). Posteriormente, se utiliza esta media global para alimentar el `StandardScaler`. Al hacerlo, se le está proporcionando al modelo información sobre la distribución de los datos de prueba, lo que genera un **sesgo optimista**.
+
+Esto genera **métricas artificialmente optimistas** y puede llevar a decisiones erróneas en entornos reales (Kaufman et al., 2012). La **estrategia de defensa** adecuada y universalmente aceptada es doble:
+
+✔ **Aislamiento en *Pipelines***: Aplicar todas las transformaciones que requieren un cálculo (como `StandardScaler`, `MinMaxScaler`, o imputación de valores faltantes) **estrictamente dentro de un objeto `Pipeline`** de scikit-learn. Este diseño asegura que el método `fit` del transformador se ejecute **solo con los datos de entrenamiento**.
+✔ **Evaluación Honesta con *Cross-Validation***: Evaluar el rendimiento final del *pipeline* mediante **Validación Cruzada** (*k-fold CV*). Esto garantiza que el modelo sea puesto a prueba de manera **transparente** contra múltiples subconjuntos de datos no vistos previamente. 
+
+Este flujo de trabajo no solo combate el *leakage*, sino que también asegura la **reproducibilidad** y la **transparencia metodológica** de todo el proceso.
+
+---
+
+## Metodología
+
+La práctica se focalizó en el preprocesamiento de un subconjunto específico de **cinco variables numéricas** clave del *dataset* Ames Housing, elegidas por sus características de sesgo y escala:
+
+* `Lot Area` (Área del Lote)
+* `Overall Qual` (Calidad General)
+* `Year Built` (Año de Construcción)
+* `1st Flr SF` (Superficie del Primer Piso)
+* `Gr Liv Area` (Superficie Habitable en Planta Baja)
+
+Y la **variable objetivo** a predecir: **`SalePrice`** (Precio de Venta).
+
+El flujo de trabajo metodológico fue riguroso y secuencial:
+
+1.  **Diagnóstico Inicial**: Se realizó un análisis exploratorio para determinar las **escalas originales**, el grado de **sesgo** (asimetría) y la presencia de **valores atípicos** en cada variable.
+2.  **Prueba de Transformaciones**: Se experimentó con diversas **transformaciones avanzadas** (`log1p`, Yeo-Johnson, etc.) para corregir el sesgo y acercar las distribuciones a la normalidad.
+3.  **Comparación de Escaladores**: Se evaluaron las diferencias entre distintos **escaladores** (como `StandardScaler`, `MinMaxScaler`, `MaxAbsScaler`).
+4.  **Evaluación de Leakage**: Este fue un punto central, comparando explícitamente tres modelos (M1, M2, M3) con **distintos grados de *leakage*** para cuantificar su impacto en las métricas.
+5.  **Validación Estadística Final**: Se empleó una validación cruzada de **5 pliegues (5-fold CV)** para obtener una métrica de error promedio más **robusta y confiable**.
+
+El **modelo base** utilizado para todas las comparaciones fue la **Regresión Lineal**. Este modelo fue seleccionado precisamente por su **alta interpretabilidad** y por su **extrema sensibilidad** a las decisiones tomadas durante el preprocesamiento de los datos, lo que lo convierte en un excelente *benchmark*.
+
+---
+
+## Resultados
+
+### Diferencias en escalas
+
+`Lot Area` presentó una escala mucho mayor que el resto, confirmando la necesidad de normalizar o estandarizar antes del modelado.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica6/boxplots.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+El boxplot de las variables numéricas reveló una disparidad extrema en sus rangos. Mientras que características como Overall Qual (calidad) se movían en un rango pequeño de 1 a 10, y Year Built (año) se mantenía en un rango de tres dígitos, la variable Lot Area (área del lote) se extendía a través de cinco o seis dígitos, superando las 200,000 unidades. Esta gran diferencia en magnitud es la razón fundamental por la cual los modelos basados en distancia o gradiente (como la Regresión Lineal o KNN) fallarían sin un preprocesamiento adecuado, ya que la variación en Lot Area dominaría el cálculo del error. La visualización confirmó que el primer paso crítico era la homogeneización de las magnitudes de todas las features.
+
+---
+
+### Sesgo y outliers
+
+El **skew** inicial de `Lot Area` fue de 12.8 → indicativo de cola extremadamente larga.
+
+Tras aplicar `log1p`:
+**skew = –0.49** → distribución casi simétrica
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <div style={{ position: "relative", width: "100%", height: "300px" }}>
+    <Image
+      src="/practica6/comparacionlogs.png"
+      alt="Evolución de la distribución tras log1p"
+      fill
+    />
+  </div>
+</div>
+
+La imagen con los tres histogramas ilustra de manera contundente la efectividad del proceso de transformación. El gráfico de la izquierda (rojo), "Original: Lot Area", muestra una distribución fuertemente concentrada cerca de cero, con una cola larga y delgada que se extiende hacia la derecha (alta asimetría positiva), evidenciando la presencia de outliers de gran magnitud. El gráfico central (naranja), "Log Transform: Lot Area", muestra el resultado inmediato de aplicar la función $\log(1 + x)$ (log1p). La distribución ha sido comprimida y simetrizada, eliminando la cola larga y concentrando los datos en una forma que se asemeja mucho más a una distribución normal. Finalmente, el gráfico de la derecha (verde), "Log + Scaled", muestra la distribución después de aplicar un StandardScaler al resultado logarítmico. Esta estandarización centra la distribución alrededor de la media (aproximadamente cero) y ajusta la varianza a la unidad, lo que la deja perfectamente lista para ser consumida por un modelo basado en gradiente, confirmando que la combinación de $\log(1 + x)$ y StandardScaler es la secuencia de preprocesamiento óptima para esta variable.
+
+---
+
+La identificación de outliers con IQR y Z-score varió según el *split* de datos, lo cual motivó incorporar **validación cruzada sistemática**.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica6/histogramas.png"
+    alt="Comparativa visual de outliers"
+    width={800}
+    height={600}
+  />
+</div>
+
+Aunque la transformación logarítmica es una forma eficaz de mitigar la influencia de los outliers de gran magnitud al "encoger" sus valores, el análisis exploratorio confirmó que el conjunto de datos aún contenía valores extremos que podrían ser considerados anómalos. La decisión de no eliminar estos outliers de forma agresiva antes del split de entrenamiento-prueba es crucial, ya que esto podría inducir leakage. El proceso de validación cruzada se adoptó como el método más honesto para tratar la variabilidad de estos puntos. Al rotar los pliegues, garantizamos que el modelo sea evaluado contra diferentes subconjuntos de outliers, obteniendo un error promedio que refleja el rendimiento real y robusto, en lugar de un error optimista basado en la eliminación sesgada de puntos de datos.
+
+---
+
+### Transformadores evaluados
+
+Se analizaron cinco transformadores presentes en scikit-learn:
+
+<div style={{ display: "flex", flexDirection: "column", gap: "24px", margin: "24px 0" }}>
+  <div style={{ position: "relative", width: "100%", height: "300px" }}>
+    <Image src="/practica6/FunctionTransformer.png" alt="FunctionTransformer log1p" fill />
+  </div>
+  <div style={{ position: "relative", width: "100%", height: "300px" }}>
+    <Image src="/practica6/YeoJohnson.png" alt="Yeo-Johnson" fill />
+  </div>
+  <div style={{ position: "relative", width: "100%", height: "300px" }}>
+    <Image src="/practica6/QuantileTransformer.png" alt="QuantileTransformer" fill />
+  </div>
+  <div style={{ position: "relative", width: "100%", height: "300px" }}>
+    <Image src="/practica6/MaxAbsScaler.png" alt="MaxAbsScaler" fill />
+  </div>
+  <div style={{ position: "relative", width: "100%", height: "300px" }}>
+    <Image src="/practica6/NormalizerL2.png" alt="Normalizer L2" fill />
+  </div>
+</div>
+
+`QuantileTransformer` alcanzó la mejor normalización, pero a costa de perder significado en las distancias originales.
+
+**`log1p`** fue el balance más adecuado entre interpretabilidad y desempeño.
+
+---
+
+### Evaluación del leakage
+
+Se compararon tres escenarios de modelado, demostrando el impacto del rigor metodológico:
+
+<table style={{ width: '100%', borderCollapse: 'collapse' }}>
+  <thead>
+    <tr>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Modelo</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Pipeline</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>CV</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Leakage</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>RMSE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**M1**</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>No</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>No</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Sí</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>32185</td>
+    </tr>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**M2**</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Parcial</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>No</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Reducido</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>32287</td>
+    </tr>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**M3**</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Sí</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>5-fold</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>No</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**30651**</td>
+    </tr>
+  </tbody>
+</table>
+
+**Conclusión**:
+El pipeline **no mejora el modelo** intrínsecamente, sino la **honestidad de la evaluación** de su rendimiento.
+
+---
+
+### Métricas finales consolidadas
+
+Las métricas finales obtenidas con el modelo M3 (con *pipeline* y 5-fold CV) fueron:
+
+<table style={{ width: '100%', borderCollapse: 'collapse' }}>
+  <thead>
+    <tr>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Indicador</th>
+      <th style={{ border: '1px solid #ddd', padding: '8px' }}>Valor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>R² (5-fold CV)</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>**0.776 ± 0.033**</td>
+    </tr>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>RMSE promedio</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>30651</td>
+    </tr>
+    <tr>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>Mejor transformador</td>
+      <td style={{ border: '1px solid #ddd', padding: '8px' }}>log1p + StandardScaler</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Discusión
+
+Los resultados muestran que el escalado es un paso fundamental que:
+
+* **Acelera la convergencia** y reduce los errores en modelos lineales.
+* Normaliza la importancia relativa entre las variables de diferente magnitud.
+* Posibilita una **mejor modelización de patrones** al mitigar la influencia desproporcionada de valores extremos.
+* Sin embargo, se debe aplicar con criterio: algunas variables **ya están normalizadas por diseño** (e.g. `Overall Qual`) y no requieren escalado.
+
+En cuanto al *leakage*, la evaluación inicial con *single split* (M1) parecía indicar un modelo razonable. Sin embargo, al aplicar la **Validación Cruzada con *Pipeline*** (M3), las métricas se hicieron más conservadoras, pero reflejan un error más consistente:
+
+> Lo que se pierde en “optimismo” en las métricas, se gana en **confiabilidad científica** en el entorno real.
+
+---
+
+## Conclusiones
+
+El **pipeline recomendado final** para garantizar la solidez metodológica y el mejor rendimiento fue:
+
+* Transformación **log1p** en variables con fuerte asimetría positiva.
+* Imputación de valores faltantes y One-Hot Encoding dentro del *pipeline*.
+* **`StandardScaler`** como escalador por defecto para estandarizar las características.
+* Regresión lineal como *baseline* interpretable y reproducible.
+
+El principio de **anti-leakage** demostró ser **imprescindible** y no una mera recomendación teórica. Se concluye que:
+
+> Preprocesar correctamente los datos y asegurar la integridad del flujo de trabajo vale más que elegir el algoritmo “más avanzado”.
+
+---
+
+## Referencias
+
+Box, G. E. P., & Cox, D. R. (1964). *An analysis of transformations*. Journal of the Royal Statistical Society: Series B, 26(2), 211-252.
+
+Kaufman, A., Rosset, S., Perlich, C., & Stitelman, O. (2012). Leakage in data mining: Formulation, detection, and avoidance. *ACM SIGKDD*, 556-563.
+
+Shalev-Shwartz, S., & Ben-David, S. (2014). *Understanding Machine Learning: From Theory to Algorithms*. Cambridge University Press.

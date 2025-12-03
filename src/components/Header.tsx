@@ -147,6 +147,9 @@ export const Header = () => {
                   </Row>
                 </>
               )}
+
+              <Line background="neutral-alpha-medium" vert maxHeight="24" />
+              <ThemeToggle />
               {display.themeSwitcher && (
                 <>
                   <Line background="neutral-alpha-medium" vert maxHeight="24" />
