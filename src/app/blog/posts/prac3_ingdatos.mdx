@@ -1,0 +1,163 @@
+---
+title: "Radiografía del Catálogo de Netflix"
+publishedAt: "2025-09-07"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica3/portada.jpg"
+---
+
+## **Análisis Integral del Dataset**
+
+El estudio del catálogo de Netflix constituye un caso representativo para aplicar el enfoque metodológico del *Exploratory Data Analysis* (EDA), definido originalmente por Tukey como el conjunto de técnicas que permiten **comprender la estructura de los datos antes de modelar**. El dataset analizado contiene metadatos de títulos históricos de Netflix extraídos del repositorio Kaggle (*Netflix Movies and TV Shows*), considerado una de las fuentes públicas más completas sobre el modelo de contenidos de la plataforma.
+
+---
+
+### 1. **Calidad, completitud y estructura informacional**
+
+Antes de inferir patrones, el análisis se centró en medir la **plausibilidad y estructura del registro**. La matriz de datos faltantes exhibe que variables críticas para la identificación (`show_id`, `type`, `rating`, `release_year`) se encuentran casi completas, mientras que dimensiones ligadas a **contexto de producción** (`director`, `cast`, `country`) presentan ausencias estructurales que reflejan limitaciones sistémicas del metadato y no errores aislados.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+<Image src="/practica3/patrondatosfaltantes.png" width={1000} height={450} alt="Patrón de datos faltantes" />
+</div>
+
+La decisión metodológica fue no imputar dichas ausencias, sino tratarlas como **información censurada** asociada al modelo de indexación de Netflix.
+
+---
+
+### 2. **Arquitectura del catálogo: predominio del contenido unitario**
+
+La primera caracterización general indica que **las películas representan el 68% del catálogo**, frente a un **31.6% de series**. Esta relación cuantitativa revela el origen del servicio como **repositorio de cine licenciado**, mientras que la expansión de series, impulsada por contenido original, emerge como fenómeno reciente.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+<Image src="/practica3/proporcionmoviestvshows.png" width={1000} height={480} alt="Distribución Movies vs TV Shows" />
+</div>
+
+Desde la teoría de retención de usuarios, este cambio implica una evolución desde un consumo **transaccional** (películas) hacia una estrategia **relacional y seriada** (TV Shows).
+
+---
+
+### 3. **Geopolítica de la producción audiovisual**
+
+El análisis geográfico permite entender cómo opera la **economía global del entretenimiento digital**. La evidencia muestra una concentración geográfica extrema, donde:
+
+- Estados Unidos domina el  catálogo con holgura
+- India emerge como **segundo polo industrial** relacionado al volumen del mercado Bollywood
+- Europa (Reino Unido, Francia, España y Alemania) participa, pero con menor contribución televisiva
+- Corea del Sur y Japón destacan por su **alto volumen seriado** en géneros específicos como anime y K-dramas
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+<Image src="/practica3/bubblechartstop10paises.png" width={1000} height={480} alt="Producción por país" />
+</div>
+
+Esto evidencia dos fenómenos complementarios:
+
+1. **Hegemonía cultural del contenido anglófono**
+2. **Regionalización de nichos audiovisuales** para diversificar la base global de usuarios
+
+La matriz de co-producción indica redes de colaboración internacional, donde el intercambio creativo se vuelve clave en el diseño de oferta transnacional.
+
+---
+
+### 4. **Transformación temporal del catálogo: la era del contenido original**
+
+Desde una perspectiva de ingeniería temporal del dato, la distribución por año respalda un hito claro: **a partir de 2015** se acelera abruptamente la cantidad de lanzamientos agregados al catálogo.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+<Image src="/practica3/lanzamientosporaño.png" width={1000} height={480} alt="Lanzamientos anuales" />
+</div>
+
+Este crecimiento no es aleatorio: coincide con la inversión estratégica de Netflix en **producción original** basada en métricas de demanda personalizadas.
+
+La pandemia de COVID-19 provoca un descenso visible en 2020-2021, reflejando la fragilidad de la cadena de producción global.
+
+Netflix pasó así de ser **distribuidor** a convertirse en **estudio líder del mundo**.
+
+---
+
+### 5. **Taxonomía generacional y segmentación por público objetivo**
+
+La visualización de ratings revela una predominancia de **TV-MA (adulto)** y **TV-14 (juvenil-adulto)**, reflejando un enfoque editorial centrado en **audiencias con mayor ticket de suscripción**.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+<Image src="/practica3/distintosratings.png" width={1000} height={480} alt="Ratings por contenido" />
+</div>
+
+La baja representación infantil indica una **oportunidad de mercado** cuya explotación quedó concentrada en otros competidores como Disney+.
+
+Netflix optimiza narrativas de alto engagement: crimen y drama adulto, historias psicológicas, humor ácido, temáticas explícitas o disruptivas
+
+El rating, por tanto, no sólo clasifica: **define la estrategia de retención**.
+
+---
+
+### 6. **Detección de anomalías: ruido que informa**
+
+El análisis técnico detectó algunos valores imposibles o extremos en `release_year` (años negativos o muy antiguos), atribuibles a:
+
+- Registros heredados pre-digitales
+- Reincorporaciones periódicas al catálogo
+- Limitaciones en la estandarización de metadatos
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+<Image src="/practica3/distribucionesañosdelanzamiento.png" width={1000} height={480} alt="Distribución años y outliers" />
+</div>
+
+Estos outliers se retienen para evitar sesgo de limpieza excesiva: **la rareza también comunica historia industrial**.
+
+---
+
+## **Síntesis Interpretativa**
+
+El análisis permite identificar una serie de **leyes empíricas del catálogo global de Netflix**:
+
+<table>
+  <thead>
+    <tr>
+      <th>Dimensión</th>
+      <th>Observación técnica</th>
+      <th>Implicancia estratégica</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mix de contenido</td>
+      <td>Predominio histórico de películas</td>
+      <td>La TV crece como herramienta de retención</td>
+    </tr>
+    <tr>
+      <td>Origen geográfico</td>
+      <td>Alta concentración en EE.UU. y Asia</td>
+      <td>Globalización pero no equitativa</td>
+    </tr>
+    <tr>
+      <td>Ratings</td>
+      <td>Foco adulto/juvenil</td>
+      <td>Contenidos de engagement sostenido</td>
+    </tr>
+    <tr>
+      <td>Tendencias temporales</td>
+      <td>Aceleración post-2015</td>
+      <td>Viraje a producción original</td>
+    </tr>
+    <tr>
+      <td>Calidad de datos</td>
+      <td>Faltantes estructurales</td>
+      <td>Requiere modelos de enriquecimiento</td>
+    </tr>
+  </tbody>
+</table>
+
+
+---
+
+## **Conclusión General**
+
+Este EDA demuestra que Netflix no opera como un archivo neutral de entretenimiento, sino como **un motor algorítmico de producción cultural**, donde:
+
+- Los datos moldean qué historias se financian
+- Las visualizaciones permiten inferir **inteligencia de programación**
+- Las tendencias globales responden a **economía, política y tecnología**
+
+El catálogo es un espejo del **capitalismo digital**, donde los contenidos se diseñan para optimizar métricas de permanencia más que para representar diversidad artística.
+
+Netflix es, en última instancia, una plataforma **data-driven**, y su catálogo es una **huella cuantitativa del presente audiovisual**.
+
