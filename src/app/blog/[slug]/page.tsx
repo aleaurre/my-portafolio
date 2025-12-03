@@ -9,8 +9,7 @@ import {
   Row,
   Text,
   SmartLink,
-  Media,
-  Line,
+  Media
 } from "@once-ui-system/core";
 import { baseURL, about, work, person } from "@/resources";
 import { getPosts } from "@/utils/utils";
@@ -21,8 +20,8 @@ import { formatDate } from "@/utils/formatDate";
 //  GENERATE STATIC PARAMS
 // ─────────────────────────────
 export async function generateStaticParams() {
-  const works = getWorks(["src", "app", "work", "posts"]);
-  return works.map((work) => ({ slug: work.slug }));
+  const works = getPosts(["src", "app", "work", "posts"]);
+  return works.map((item) => ({ slug: item.slug }));
 }
 
 // ─────────────────────────────
@@ -35,21 +34,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  const works = getWorks(["src", "app", "work", "posts"]);
-  const workItem = works.find((w) => w.slug === slug);
+  const works = getPosts(["src", "app", "work", "posts"]);
+  const item = works.find((i) => i.slug === slug);
 
-  if (!workItem) return {};
+  if (!item) return {};
 
   return Meta.generate({
-    title: workItem.metadata.title,
-    description: workItem.metadata.summary,
+    title: item.metadata.title,
+    description: item.metadata.summary,
     baseURL,
     image:
-      workItem.metadata.image ||
-      `/api/og/generate?title=${encodeURIComponent(
-        workItem.metadata.title
-      )}`,
-    path: `${work.path}/${workItem.slug}`,
+      item.metadata.image ||
+      `/api/og/generate?title=${encodeURIComponent(item.metadata.title)}`,
+    path: `${work.path}/${item.slug}`,
   });
 }
 
@@ -63,10 +60,10 @@ export default async function WorkPage({
 }) {
   const { slug } = await params;
 
-  const works = getWorks(["src", "app", "work", "posts"]);
-  const workItem = works.find((w) => w.slug === slug);
+  const works = getPosts(["src", "app", "work", "posts"]);
+  const item = works.find((i) => i.slug === slug);
 
-  if (!workItem) return notFound();
+  if (!item) return notFound();
 
   return (
     <Row fillWidth>
@@ -82,16 +79,14 @@ export default async function WorkPage({
           <Schema
             as="creativeWork"
             baseURL={baseURL}
-            path={`${work.path}/${workItem.slug}`}
-            title={workItem.metadata.title}
-            description={workItem.metadata.summary}
-            datePublished={workItem.metadata.publishedAt}
-            dateModified={workItem.metadata.publishedAt}
+            path={`${work.path}/${item.slug}`}
+            title={item.metadata.title}
+            description={item.metadata.summary}
+            datePublished={item.metadata.publishedAt}
+            dateModified={item.metadata.publishedAt}
             image={
-              workItem.metadata.image ||
-              `/api/og/generate?title=${encodeURIComponent(
-                workItem.metadata.title
-              )}`
+              item.metadata.image ||
+              `/api/og/generate?title=${encodeURIComponent(item.metadata.title)}`
             }
             author={{
               name: person.name,
@@ -101,36 +96,31 @@ export default async function WorkPage({
           />
 
           {/* Header */}
-          <Column
-            maxWidth="s"
-            gap="16"
-            horizontal="center"
-            align="center"
-          >
+          <Column maxWidth="s" gap="16" horizontal="center" align="center">
             <SmartLink href="/work">
               <Text variant="label-strong-m">Work</Text>
             </SmartLink>
 
-            {workItem.metadata.publishedAt && (
+            {item.metadata.publishedAt && (
               <Text
                 variant="body-default-xs"
                 onBackground="neutral-weak"
                 marginBottom="12"
               >
-                {formatDate(workItem.metadata.publishedAt)}
+                {formatDate(item.metadata.publishedAt)}
               </Text>
             )}
 
             <Heading variant="display-strong-m">
-              {workItem.metadata.title}
+              {item.metadata.title}
             </Heading>
           </Column>
 
           {/* Featured Image */}
-          {workItem.metadata.image && (
+          {item.metadata.image && (
             <Media
-              src={workItem.metadata.image}
-              alt={workItem.metadata.title}
+              src={item.metadata.image}
+              alt={item.metadata.title}
               aspectRatio="16/9"
               priority
               sizes="(min-width: 768px) 100vw, 768px"
@@ -143,7 +133,7 @@ export default async function WorkPage({
 
           {/* Content */}
           <Column as="article" maxWidth="s">
-            <CustomMDX source={workItem.content} />
+            <CustomMDX source={item.content} />
           </Column>
 
           <ScrollToHash />
