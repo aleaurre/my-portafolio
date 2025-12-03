@@ -1,0 +1,485 @@
+---
+title: "Decodificando la Ciudad: Joins a Gran Escala para un Análisis Exploratorio de Yellow Taxis y Zonas de NYC"
+publishedAt: "2025-09-14"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica4/portada.jpg"
+---
+
+import { Heading, Text, InlineCode, Row, Line, CodeBlock } from "@once-ui-system/core";
+import { SmartLink } from "@once-ui-system/core";
+
+
+# EDA Multifuentes y Joins en Gran Escala
+
+**NYC Yellow Taxi + Taxi Zones + Calendar (2023-01)**
+*(Versión ampliada y contextualizada — +2500 palabras aprox.)*
+
+## 1. Introducción y Problema Analítico
+
+La ciudad de Nueva York constituye uno de los sistemas de **movilidad urbana más complejos del mundo**, combinando infraestructura 
+densa, diversidad socioespacial y un volumen de desplazamientos sin pausa. Dentro de ese ecosistema, el **servicio de Yellow Taxi**
+ mantiene un rol histórico como **indicador de la vitalidad económica** y de las **relaciones centro-periferia** en la ciudad.
+El objetivo del presente estudio es desarrollar un **Análisis Exploratorio de Datos multifuente**, integrando tres fuentes con 
+estructuras, formatos y granularidad diferenciadas:
+
+<table>
+  <thead>
+    <tr>
+      <th>Fuente</th>
+      <th>Formato</th>
+      <th>Naturaleza</th>
+      <th>Cardinalidad</th>
+      <th>Rol en el análisis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Yellow Trip Data 2023-01</td>
+      <td>Parquet</td>
+      <td>Registros transaccionales</td>
+      <td>3,066,766 viajes</td>
+      <td>Núcleo del análisis (movilidad real)</td>
+    </tr>
+    <tr>
+      <td>Taxi Zone Lookup</td>
+      <td>CSV</td>
+      <td>Base geoespacial categórica</td>
+      <td>265 zonas</td>
+      <td>Mapeo &rarr; Borough</td>
+    </tr>
+    <tr>
+      <td>NYC Events Calendar</td>
+      <td>JSON</td>
+      <td>Eventos extraordinarios</td>
+      <td>31 días</td>
+      <td>Señal exógena</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Esta integración permite responder preguntas que **una sola fuente no podría contestar**, entre ellas:
+
+- ¿Cómo se distribuye la movilidad **espacialmente** en la ciudad?
+- ¿Qué patrones **temporales** estructuran la demanda?
+- ¿Existen factores **externos** (eventos) que impactan los viajes?
+- ¿Cuáles son los **puntos críticos operativos** del sistema?
+- ¿Cuál es la **calidad y completitud** real de los datos oficiales?
+
+Más allá de describir la movilidad, el enfoque metodológico persigue **producir evidencia para decisiones públicas**: tarifas, disponibilidades, rutas preferenciales, planificación de transporte multimodal y gestión del tránsito en zonas críticas.
+
+---
+
+## 2. Marco Teórico y Conceptos Relevantes
+
+### 2.1 Movilidad Urbana Basada en Datos
+
+Los registros de taxi capturan señales indirectas sobre:
+
+- **actividad económica** (picos en centros comerciales/financieros)
+- **turismo** (conexiones con aeropuertos y hoteles)
+- **variaciones horarias en la fuerza laboral**
+- **desigualdades territoriales** en accesibilidad
+
+En estudios previos, la movilidad actúa como **proxy robusto del pulso urbano**.
+
+### 2.2 Integración heterogénea de datos
+
+Este caso materializa un pipeline ETL académico, pero con **condiciones reales de producción**:
+formatos distintos → necesidades de tipificación → normalización semántica → reselección de claves → 
+control de integridad referencial
+
+En ingeniería de datos, esto se liga directamente al **lineaje de datos**, la **detección temprana de anomalías**,
+y la **mantenibilidad y versionado**. Trabajo idealmente **orquestable** con Prefect o Airflow → ver sección 8.
+
+### 2.3 Joins geográficos
+
+La unión entre viajes y zonas no solo agrega una columna — habilita una **interpretación territorial**, donde la movilidad se piensa por **borough**:
+
+<table>
+  <thead>
+    <tr>
+      <th>Borough</th>
+      <th>Característica socioespacial dominante</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Manhattan</td>
+      <td>Hiperconcentración de actividad económica</td>
+    </tr>
+    <tr>
+      <td>Queens</td>
+      <td>Transporte interborough y aeropuertos</td>
+    </tr>
+    <tr>
+      <td>Brooklyn</td>
+      <td>Residencia y ocio en crecimiento</td>
+    </tr>
+    <tr>
+      <td>Bronx</td>
+      <td>Viajes más largos hacia Manhattan</td>
+    </tr>
+    <tr>
+      <td>Staten Island</td>
+      <td>Baja densidad, uso marginal del taxi</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Con ello, los viajes dejan de ser “puntos aislados” y se convierten en **trayectorias urbanas significativas**.
+
+---
+
+## 3. Diseño Metodológico
+
+1. **Lectura e inspección** de cada fuente
+2. **Normalización estructural**: `snake_case`, categoricidad, tipificación
+3. Derivación de **tiempo interpretable**: `pickup_date`, hora y día de la semana
+4. **Join espacial**: `pulocationid ⟶ locationid`
+5. **Join temporal**: `pickup_date ⟶ date` en calendario
+6. Auditoría de **match rate** y **zone coverage**
+7. **KPIs y agregados multi-nivel**: por borough, por hora
+8. Estrategias de **performance** para millones de registros
+9. Síntesis analítica y reflexiones
+
+Todo el pipeline fue diseñado de forma **determinística y reproducible**.
+
+---
+
+## 4. Calidad y validación de la integración
+
+La primera validación clave fue medir la proporción de viajes correctamente mapeados:
+
+<table>
+  <thead>
+    <tr>
+      <th>Métrica</th>
+      <th>Valor</th>
+      <th>Interpretación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Viajes totales</td>
+      <td>3,066,766</td>
+      <td>Universo de análisis</td>
+    </tr>
+    <tr>
+      <td>Coincidencias con zonas</td>
+      <td>3,055,808</td>
+      <td>Join exitoso</td>
+    </tr>
+    <tr>
+      <td><strong>Match rate</strong></td>
+      <td><strong>99.6%</strong></td>
+      <td>Excelente integridad de claves</td>
+    </tr>
+    <tr>
+      <td>Zonas utilizadas</td>
+      <td>259 / 265</td>
+      <td><strong>97.7%</strong> cobertura espacial</td>
+    </tr>
+    <tr>
+      <td>Eventos en calendario</td>
+      <td>Enero sin eventos registrados</td>
+      <td>Mes baseline sin estacionalidad festiva</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Esto evidencia que **los datos son confiables**, algo nada menor en transporte urbano.
+
+Las 6 zonas nunca utilizadas corresponden a regiones limítrofes o administrativas → señal de **actividad concentrada**, 
+no de error de datos. En cuanto al calendario:
+- enero de 2023 no contiene eventos registrados
+- el mes funciona como **baseline sin estacionalidad festiva**
+Esto resultará clave en análisis futuros → comparación contra meses con feriados (Ej: Thanksgiving, Año Nuevo).
+
+---
+
+## 5. Resultados Descriptivos y Señales Urbanas
+
+### 5.1 Volumen urbano
+
+La magnitud del sistema es contundente:
+
+- más de 3 millones de viajes en 31 días
+- aproximadamente 100.000 viajes diarios
+- al rededor de 4.000 viajes por hora en picos
+
+El taxi continúa siendo una **infraestructura estratégica** dentro de NYC.
+
+---
+
+### 5.2 Distancia y tarifas
+
+<table>
+  <thead>
+    <tr>
+      <th>Métrica global</th>
+      <th>Valor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Distancia media</td>
+      <td>3.85 millas</td>
+    </tr>
+    <tr>
+      <td>Tarifa promedio</td>
+      <td>USD 27.02</td>
+    </tr>
+  </tbody>
+</table>
+
+Esto refleja la estructura tarifaria basada en tarifa base, distancia, peajes y recargos metropolitano-turísticos
+Diferencias por borough:
+- *Manhattan* → viajes cortos y frecuentes
+- *Queens* → viajes largos y caros, conectando aeropuertos
+
+---
+
+### 5.3 Dominio geográfico del borough
+
+Distribución por origen del viaje:
+
+<table>
+  <thead>
+    <tr>
+      <th>Borough</th>
+      <th>Viajes</th>
+      <th>Participación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Manhattan</strong></td>
+      <td>2,715,369</td>
+      <td><strong>88.6%</strong></td>
+    </tr>
+    <tr>
+      <td>Queens</td>
+      <td>286,645</td>
+      <td>9.3%</td>
+    </tr>
+    <tr>
+      <td>Unknown</td>
+      <td>40,116</td>
+      <td>1.3%</td>
+    </tr>
+    <tr>
+      <td>Bronx, Brooklyn, Staten Island</td>
+      <td>Valores marginales</td>
+      <td>&lt; 1%</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Conclusión: el taxi amarillo es principalmente un **servicio manhattan-céntrico**
+Un patrón asociado a destinos turísticos, centralidad laboral e infraestructura de calles y disponibilidad de taxis.
+Este sesgo territorial debe ser considerado en políticas de accesibilidad urbana.
+
+---
+
+### 5.4 Dinámica del tiempo: la ciudad que nunca duerme
+
+Se observaron **picos horarios claros** de **18:00 → 17:00 → 15:00**
+
+La curva difiere del transporte tradicional:
+
+<table>
+  <thead>
+    <tr>
+      <th>Hora crítica</th>
+      <th>Causa estructural</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>15:00</td>
+      <td>Turismo y ocio temprano (check-in, paseos, compras)</td>
+    </tr>
+    <tr>
+      <td>17:00</td>
+      <td>Commuting laboral (salidas de oficinas y trasbordos intermodales)</td>
+    </tr>
+    <tr>
+      <td>18:00</td>
+      <td>Cenas, espectáculos y transición hacia ocio nocturno</td>
+    </tr>
+  </tbody>
+</table>
+
+
+El patrón confirma que **la movilidad nocturna es motor del sistema económico de Manhattan**.
+
+---
+
+## 6. Perspectiva de negocios y política pública
+
+Cada hallazgo puede traducirse en una **acción**:
+
+<table>
+  <thead>
+    <tr>
+      <th>Hallazgo</th>
+      <th>Decisión habilitada</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Picos horarios entre 15 y 18 h</td>
+      <td>Definir refuerzo de flota y potenciales tarifas dinámicas en ese rango</td>
+    </tr>
+    <tr>
+      <td>Queens concentra viajes más largos y costosos</td>
+      <td>Evaluar políticas de accesibilidad y alternativas de transporte complementario</td>
+    </tr>
+    <tr>
+      <td>Cobertura espacial del 97.7%</td>
+      <td>Usar estos datos como base para métricas oficiales de movilidad urbana</td>
+    </tr>
+    <tr>
+      <td>1.3% de viajes con borough desconocido</td>
+      <td>Mejorar captura de ubicación (GPS / sistemas de reporte) y auditorías</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Vincular datos a decisiones públicas **cierra el ciclo analítico**.
+
+---
+
+## 7. Performance y escalabilidad
+
+Dado el tamaño del dataset, se aplicaron optimizaciones: **Downcast** en columnas enteras (IDs), 
+**Muestreo estratificado** del 0.3% para gráficos y Eficiencia Parquet: columnas comprimidas y lectura paralela.
+Esto reduce costos computacionales y prepara la base para escalar de 1 mes → **12 meses → >40 millones de viajes/año**
+
+El aprendizaje técnico aquí es tan importante como la analítica en sí.
+
+---
+
+## 8. Arquitectura para automatización (Prefect / DataOps)
+
+Esta práctica desemboca naturalmente en un **pipeline orquestado**.
+
+¿Por qué usar `@task`?
+
+* permite **reintentos automáticos**
+* captura **logs y métricas**
+* habilita **observabilidad en tiempo real**
+* aisla errores en pasos específicos
+
+¿Qué aporta `@flow`?
+
+Administra el **flujo lógico completo**, asegurando ejecución en orden y permitiendo correr tareas **en paralelo** cuando no tienen dependencia directa.
+
+Casos aplicados al dataset: carga incremental mensual, refresco de dashboards, modelos para pronóstico de demanda horaria y
+monitoreo operativo en Smart City. Por lo tanto, la práctica no solo enseña EDA — introduce **pensamiento de producción**.
+
+---
+
+## 9. Síntesis Ejecutiva (Insights de alto valor)
+
+<table>
+  <thead>
+    <tr>
+      <th>Dimensión</th>
+      <th>Observación técnica</th>
+      <th>Implicancia estratégica</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mix de contenido (viajes)</td>
+      <td>Altísima densidad en Manhattan</td>
+      <td>Priorizar regulación de tránsito en el core urbano</td>
+    </tr>
+    <tr>
+      <td>Accesibilidad territorial</td>
+      <td>Queens presenta viajes más largos y con mayor importe medio</td>
+      <td>Riesgo de desigualdad en transporte; analizar conectividad y tarifas</td>
+    </tr>
+    <tr>
+      <td>Ritmo urbano</td>
+      <td>Picos de demanda entre las 15:00 y las 18:00</td>
+      <td>Optimizar asignación de flota y políticas de pricing en esa franja</td>
+    </tr>
+    <tr>
+      <td>Calidad de datos</td>
+      <td>Match rate 99.6% y cobertura espacial 97.7%</td>
+      <td>Base robusta para modelos de predicción y monitoreo en tiempo real</td>
+    </tr>
+    <tr>
+      <td>Estacionalidad de eventos</td>
+      <td>Enero funciona como mes baseline sin festividades mayores</td>
+      <td>Útil como referencia para comparar con meses de alta estacionalidad</td>
+    </tr>
+  </tbody>
+</table>
+
+
+---
+
+## 10. Limitaciones del estudio
+
+- No se analiza origen-destino completo (solo pickup location)
+- Ausencia de señal meteorológica
+- Eventos culturales no incluidos pueden existir fuera de API oficial
+- Falta la visión multimodal (metro, buses, ridesharing)
+Estas limitaciones guían el roadmap evolutivo.
+
+---
+
+## 11. Líneas de trabajo futuro
+
+<table>
+  <thead>
+    <tr>
+      <th>Propuesta</th>
+      <th>Impacto esperado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Incorporar variables meteorológicas</td>
+      <td>Cuantificar el efecto de lluvia, nieve y extremo frío sobre la demanda</td>
+    </tr>
+    <tr>
+      <td>Analizar origen-destino completo</td>
+      <td>Modelar flujos urbanos en red y detectar corredores estructurales</td>
+    </tr>
+    <tr>
+      <td>Comparar meses festivos vs. baseline</td>
+      <td>Medir impacto turístico y de feriados en la movilidad</td>
+    </tr>
+    <tr>
+      <td>Construir modelos de forecasting horario</td>
+      <td>Planificar capacidad de flota y gestionar congestión por anticipado</td>
+    </tr>
+    <tr>
+      <td>Desarrollar visualización geoespacial avanzada</td>
+      <td>Monitorear en mapas de calor la distribución dinámica de viajes</td>
+    </tr>
+  </tbody>
+</table>
+
+
+---
+
+## 12. Conclusión General
+
+El estudio demuestra que el análisis multifuente y los joins **no son una etapa secundaria**, sino la condición habilitante para transformar datos fragmentados en **conocimiento urbano estructural**.
+
+Los resultados cuantitativos validan el buen estado de los registros, mientras que los análisis espaciales y horarios evidencian patrones coherentes con los usos reales de la ciudad. El sistema de taxis se confirma como:
+**termómetro económico**, **sensor distribuido de movilidad** e **indicador de desigualdad territorial**.
+
+Finalmente, el enfoque metodológico utilizado prepara la base para **automatizar y escalar** todo el pipeline a largo plazo, alineado con principios modernos de ingeniería de datos (**CI/CD**, **DataOps**, **observabilidad**, **trazabilidad**).
+
+Este trabajo, aunque exploratorio, se posiciona a medio camino entre **analítica urbana** y **sistemas productivos de transporte inteligente**, demostrando cómo la ingeniería de datos se integra con la planificación urbana basada en evidencia.
