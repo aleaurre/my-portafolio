@@ -77,7 +77,7 @@ export default async function WorkPage({
           paddingTop="24"
         >
           <Schema
-            as="creativeWork"
+            as="article"
             baseURL={baseURL}
             path={`${work.path}/${item.slug}`}
             title={item.metadata.title}
