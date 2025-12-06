@@ -20,7 +20,7 @@ import { formatDate } from "@/utils/formatDate";
 //  GENERATE STATIC PARAMS
 // ─────────────────────────────
 export async function generateStaticParams() {
-  const works = getPosts(["src", "app", "work", "posts"]);
+  const works = getPosts(["src", "app", "blog", "posts"]);
   return works.map((item) => ({ slug: item.slug }));
 }
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  const works = getPosts(["src", "app", "work", "posts"]);
+  const works = getPosts(["src", "app", "blog", "posts"]);
   const item = works.find((i) => i.slug === slug);
 
   if (!item) return {};
@@ -60,7 +60,7 @@ export default async function WorkPage({
 }) {
   const { slug } = await params;
 
-  const works = getPosts(["src", "app", "work", "posts"]);
+  const works = getPosts(["src", "app", "blog", "posts"]);
   const item = works.find((i) => i.slug === slug);
 
   if (!item) return notFound();
