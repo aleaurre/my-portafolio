@@ -1,0 +1,140 @@
+---
+title: "El ADN del Precio Inmobiliario: Un Recorrido por PCA, RFE, Lasso y MI."
+publishedAt: "2025-10-24"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica10/portada.jpg"
+---
+
+
+## Reducción Dimensional y Selección de Variables en Ames Housing
+
+### Una narrativa integrada sobre PCA y Feature Selection
+
+La práctica desarrollada se orienta a comprender la interacción entre técnicas de reducción dimensional y métodos de selección de variables aplicadas al dataset Ames Housing, cuyo objetivo es predecir el precio final de una vivienda a partir de múltiples atributos estructurales y contextuales. La complejidad del dataset, con 81 variables originales, requiere aplicar enfoques que permitan simplificar el modelo sin sacrificar rendimiento predictivo ni interpretabilidad, dos dimensiones esenciales en contextos de negocio donde las decisiones deben justificarse de forma clara y transparente.
+
+En esta narrativa se integran métodos clásicos como PCA, F-test, Mutual Information, RFE, Lasso y Random Forest, no solo como herramientas estadísticas aisladas, sino como piezas complementarias que permiten comprender tanto la estructura interna del dataset como la importancia real de cada atributo en la predicción.
+
+---
+
+### Exploración mediante PCA
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/LoadingsPlot.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={1000}
+    height={700}
+  />
+</div>
+
+La figura correspondiente al gráfico de loadings del PCA es fundamental para interpretar la lógica interna detrás de los primeros componentes principales. En este caso, los vectores asociados a las variables muestran su dirección y magnitud dentro del espacio definido por PC1 y PC2, permitiendo visualizar qué atributos contribuyen de manera dominante a explicar la variabilidad del dataset.
+
+La representación revela un patrón estructural: variables como *OverallQual*, *GrLivArea*, *GarageCars*, *YearBuilt* y *TotalBsmtSF* aparecen alineadas con PC1, lo que sugiere que esta componente resume características relacionadas con la calidad global y la robustez estructural de la vivienda. Este hallazgo es coherente con el comportamiento real del mercado, donde estas características suelen influir fuertemente en el precio final.
+
+Por su parte, PC2 agrupa variables asociadas a la distribución interna del hogar, como *BedroomAbvGr*, *TotRmsAbvGrd*, *2ndFlrSF* y *KitchenAbvGr*. Esto indica que existe un eje secundario que distingue viviendas según la manera en que se distribuyen los ambientes y las superficies interiores. La disposición visual de los vectores también permite identificar colinealidades, ya que variables próximas en el plano tienden a compartir estructura informativa. Esta interpretación es clave para comprender la eficacia posterior de los métodos basados en selección directa de variables.
+
+---
+
+### Comparación de rendimiento entre métodos
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/results_table.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La tabla comparativa sintetiza los valores de RMSE, R², tiempo computacional y número de características retenidas por cada método. Este resumen visual facilita una lectura integral del comportamiento del pipeline: muestra claramente que el PCA, pese a su capacidad de compresión, no logra un rendimiento competitivo cuando se utilizan directamente las componentes transformadas; que RFE logra un buen desempeño pero a un costo computacional mucho más alto; y que Mutual Information emerge como la estrategia más equilibrada entre precisión e interpretabilidad.
+
+La tabla funciona como una evidencia cuantitativa que refuerza la narrativa conceptual: reducir variables no es simplemente eliminar columnas, sino seleccionar aquellas que mejor capturan la estructura subyacente que explica el precio. En este sentido, la tabla destaca cómo algunos métodos que preservan variables originales (como MI) mantienen la trazabilidad semántica, mientras que otros que transforman el espacio (como PCA) pierden legibilidad aunque mantengan parte de la varianza explicada.
+
+---
+
+### Evaluación mediante Wrapper Methods
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/RFEFeatureRanking.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+El gráfico de ranking generado por RFE muestra el orden en el que las variables fueron seleccionadas o descartadas durante el proceso iterativo. Cada barra representa un criterio relativo de eliminación: valores más altos indican que la variable fue eliminada tempranamente, lo que sugiere escasa relevancia en el modelo entrenado.
+
+La visualización expone un fenómeno interesante: muchas variables categóricas relacionadas con la localización o detalles menores de la vivienda tienden a ser eliminadas, mientras que atributos estructurales se preservan hasta las últimas iteraciones. Esto refuerza la idea de que el precio no depende tanto de elementos secundarios, sino de características arquitectónicas clave. Sin embargo, el gráfico también evidencia que RFE puede verse afectado por correlación entre predictores: algunas variables relevantes son eliminadas no por falta de información, sino porque su aporte está parcialmente duplicado por otros atributos muy similares.
+
+La interpretación del ranking permite comprender cómo un modelo supervisado procesa y jerarquiza la información, algo que los métodos *filter* no pueden capturar al estudiar variables de manera individual.
+
+---
+
+### Importancia según PCA y Mutual Information
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/Top20Features.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La figura correspondiente a las 20 variables con mayor importancia acumulada según los loadings del PCA muestra qué atributos originales poseen un mayor peso total sobre las primeras componentes. Esto es relevante porque, si bien PCA no se usa directamente como técnica de selección, permite identificar variables que sostienen la estructura informacional del dataset.
+
+Se observa que características asociadas a materiales, funcionalidad, superficies abiertas y elementos de calidad constructiva aparecen como las más influyentes en términos globales. La interpretación de este ranking sugiere que el mercado inmobiliario no se define solamente por superficie y antigüedad, sino también por elementos más sutiles vinculados al estado general, eficiencia funcional y estilo arquitectónico.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/Top30Features.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+El histograma de importancias y la línea de corte aplicada para seleccionar las variables más relevantes permiten visualizar cómo se distribuye la relevancia dentro del conjunto completo de atributos. La línea vertical roja marca el umbral que separa las variables que serán conservadas de aquellas descartadas. Este gráfico facilita entender por qué se seleccionaron exactamente las 39 variables finales durante el proceso.
+
+La interpretación detallada muestra que la distribución de importancia no es uniforme: existe un pequeño conjunto de variables altamente influyentes, seguido por una larga cola de atributos con aportes marginales. Este patrón típico de datasets complejos sugiere que la redundancia es frecuente y que la selección es necesaria para evitar modelos sobredimensionados que aporten poca mejora real.
+
+---
+
+### Métodos Embedded
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/TopCoeficienteLasso.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+El gráfico de coeficientes ordenados del modelo Lasso permite observar qué variables conservaron un coeficiente distinto de cero una vez aplicada la penalización L1. La magnitud de cada coeficiente expresa la relevancia estimada por el modelo, mientras que la propia eliminación de algunos predictores indica que su información es redundante o poco útil.
+
+Este gráfico aporta una visión clara sobre cómo el Lasso prioriza predictores con relaciones robustas y elimina aquellos cuya influencia queda opacada por otros más fuertes. La tendencia del método a retener solo un subconjunto compacto de variables resulta útil para modelos interpretables, aunque también puede descartar información valiosa cuando existen correlaciones altas. Aun así, la figura confirma nuevamente la presencia dominante de variables estructurales y de calidad como motores principales del precio inmobiliario.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/TopRandomForest.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+El ranking de importancia generado por el Random Forest ofrece una perspectiva rica y complementaria. A diferencia del Lasso, que se basa en relaciones lineales penalizadas, el Random Forest considera interacciones no lineales y múltiples particionamientos del espacio. La figura muestra cómo *GrLivArea*, *OverallQual*, *TotalBsmtSF*, *1stFlrSF*, *YearBuilt* y otras variables estructurales emergen de manera consistente como las más importantes.
+
+Esta representación permite observar una jerarquización más suave que la del Lasso, ya que el bosque de árboles distribuye la importancia en un número mayor de variables. La lectura de este gráfico evidencia que el precio de una vivienda depende de relaciones complejas entre múltiples atributos, pero que aun así existe un núcleo duro de predictores dominantes que aparecen una y otra vez en todos los métodos analizados.
+
+---
+
+## Conclusión
+
+La incorporación de todas estas imágenes y sus interpretaciones detalladas confirma una conclusión central: aunque diferentes enfoques cuantifican la importancia de manera distinta, todos coinciden en que el precio final de una vivienda está determinado por un conjunto relativamente pequeño de variables altamente informativas, vinculadas a superficie, calidad constructiva y características estructurales.
+
+La narrativa completa evidencia también que la reducción dimensional pura (PCA) cumple un rol exploratorio y diagnóstico, pero que la selección de variables —especialmente mediante Mutual Information y Random Forest— ofrece mejores resultados cuando se busca equilibrar interpretabilidad y rendimiento. La lectura conjunta de los gráficos permite percibir patrones que un método individual no podría mostrar, como la coherencia entre la estructura latente del dataset y la contribución real de los predictores al modelo final.
+
+
