@@ -1,0 +1,246 @@
+---
+title: "De Datos Crudos a Conocimiento: Ingeniería de Features para un Mercado Inmobiliario Inteligente"
+publishedAt: "2025-10-13"
+summary: "Modelo temporal multicliente con ingeniería de series de tiempo, detección dinámica de anomalías y evaluación comparativa de enfoques con lags y ventanas móviles."
+tag: "Curso: Ingeniería de Datos"
+image: "/practica8/portada.jpeg"
+---
+
+# Feature Engineering Inmobiliario: Análisis, Transformaciones y Evidencias
+
+## Marco teórico
+
+El *feature engineering* constituye una de las etapas más influyentes en la construcción de modelos predictivos. Su objetivo es transformar datos crudos en representaciones más ricas que capturen patrones y relaciones relevantes del fenómeno estudiado. En el contexto inmobiliario, esta práctica resulta especialmente valiosa debido a la complejidad inherente al valor de una vivienda, donde interactúan variables estructurales, socioeconómicas, temporales y geográficas.
+
+En términos metodológicos, esta disciplina combina técnicas estadísticas, conocimiento del dominio y creatividad analítica. La correcta selección y transformación de variables puede mejorar significativamente la precisión de modelos y su interpretabilidad, pilares fundamentales en aplicaciones reales donde las decisiones afectan precios, inversiones o políticas urbanas.
+
+**Referencias conceptuales:**  
+- Géron, A. (2019). *Hands-On Machine Learning*.  
+- Kuhn, M. & Johnson, K. (2013). *Applied Predictive Modeling*.  
+- Raschka, S. (2018). *Python Machine Learning*.  
+
+---
+
+## Resumen ejecutivo
+
+La práctica se enfocó en diseñar y evaluar un conjunto robusto de variables derivadas que permitieran capturar relaciones no evidentes en datos inmobiliarios. A través de técnicas como transformaciones matemáticas, creación de ratios, puntajes compuestos y análisis estadístico, se construyó un pipeline replicable aplicable tanto a datos sintéticos como reales.
+
+Este enfoque permitió evidenciar la importancia del *feature engineering* como elemento diferenciador entre modelos mediocres y modelos altamente predictivos. Las variables creadas no solo enriquecieron la estructura del dataset, sino que permitieron capturar interacciones complejas y patrones urbanos que no emergían en las variables originales.
+
+---
+
+## Objetivos
+
+Además de los objetivos operativos, esta práctica buscó desarrollar una comprensión más profunda sobre cómo las transformaciones impactan semántica y estadísticamente en el modelado. Se reforzó el razonamiento crítico en torno a la pertinencia de cada feature y su relevancia según el contexto inmobiliario.
+
+El análisis permitió concluir que la calidad del dataset mejora sustancialmente cuando se agregan variables que reflejan fenómenos reales como uso del suelo, envejecimiento de la propiedad, accesibilidad o condiciones del entorno.
+
+---
+
+## Parte 1 — Setup y Generación del Dataset Sintético
+
+La construcción de un dataset sintético permitió garantizar control total sobre distribuciones, relaciones entre variables y nivel de ruido. Esto facilita la experimentación libre y el análisis de efectos específicos sin la interferencia de anomalías propias de datos reales.
+
+El diseño del dataset replica condiciones típicas del mercado inmobiliario: superficie, habitaciones, distancia al centro, calidad educativa, criminalidad, entre otros. La combinación de estas variables generó un marco adecuado para simular el comportamiento del precio y explorar cómo diferentes *features* pueden contribuir a su predicción.
+
+---
+
+## Parte 2 — Creación de Features Derivadas
+
+La creación de nuevas features permitió enriquecer la información disponible y capturar patrones no triviales. Variables como *price_per_sqft* o *space_efficiency* destacan por su utilidad en mercados donde el costo por unidad de espacio es un indicador clave de valor. Asimismo, las transformaciones logarítmicas ayudaron a corregir asimetrías y facilitar el aprendizaje de modelos.
+
+Las categorías definidas garantizan un enfoque sistemático: ratios, temporales, transformaciones matemáticas y scores compuestos. Cada una aporta una perspectiva diferente sobre el comportamiento de la vivienda y permite que el modelo interprete relaciones más complejas entre superficie, ubicación y calidad estructural.
+
+<table>
+  <thead>
+    <tr>
+      <th>Categoría</th>
+      <th>Features</th>
+      <th>Propósito</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ratios y proporciones</td>
+      <td>price_per_sqft, sqft_per_bedroom, build_density, price_per_bedroom</td>
+      <td>Medir eficiencia del espacio y relación costo/superficie.</td>
+    </tr>
+    <tr>
+      <td>Temporales</td>
+      <td>property_age, age_category, is_new_property</td>
+      <td>Capturar antigüedad y vigencia.</td>
+    </tr>
+    <tr>
+      <td>Transformaciones matemáticas</td>
+      <td>log_price, sqrt_sqft, sqft_squared</td>
+      <td>Normalizar valores y reducir sesgo.</td>
+    </tr>
+    <tr>
+      <td>Compuestas</td>
+      <td>luxury_score, location_score</td>
+      <td>Integrar múltiples dimensiones urbanas y de confort.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Parte 3 — Análisis de Distribución y Outliers
+
+El análisis de distribución permitió verificar la estabilidad de las variables creadas y su resistencia a valores atípicos. Se observó que transformaciones como el logaritmo del precio suavizan la presencia de colas largas, facilitando el aprendizaje de modelos lineales y no lineales.
+
+Estas exploraciones también ayudan a validar supuestos del dominio: por ejemplo, que la edad de las propiedades sigue una distribución uniforme o que el precio por metro cuadrado varía significativamente según características del lote y ubicación.
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Media</th>
+      <th>Desv. Est.</th>
+      <th>Outliers</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>price_per_sqft</td>
+      <td>1776.4</td>
+      <td>726.7</td>
+      <td>3.7%</td>
+    </tr>
+    <tr>
+      <td>sqft_per_bedroom</td>
+      <td>57.15</td>
+      <td>39.58</td>
+      <td>4.5%</td>
+    </tr>
+    <tr>
+      <td>property_age</td>
+      <td>22.33</td>
+      <td>12.48</td>
+      <td>0.0%</td>
+    </tr>
+  </tbody>
+</table>
+
+
+## Parte 4 — Evaluación de Importancia de Features
+
+La evaluación mediante Mutual Information y Random Forest reveló la complejidad del fenómeno inmobiliario: a diferencia de otros dominios, la relación entre variables y precio no es estrictamente lineal. Factores como criminalidad o tamaño del lote emergieron como determinantes clave del valor, mostrando cómo el entorno socioambiental influye directamente en la percepción económica de las propiedades.
+
+Esta sección refuerza la importancia de combinar múltiples enfoques —estadísticos, semánticos y algorítmicos— para identificar el verdadero aporte de cada feature dentro del modelo.
+
+---
+
+Parte 5 — Investigación Libre
+
+Las nuevas features propuestas incorporan criterios propios del conocimiento del dominio, como eficiencia espacial, densidad habitacional o interacción entre distancia y calidad educativa. Aunque sus correlaciones lineales fueron bajas, esto no implica falta de utilidad: muchas relaciones inmobiliarias son no lineales y solo emergen en modelos más complejos o en escenarios de clusterización.
+
+<table>
+  <thead>
+    <tr>
+      <th>Nueva Feature</th>
+      <th>Descripción</th>
+      <th>Tipo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>space_efficiency</td>
+      <td>Superficie construida / tamaño del lote</td>
+      <td>Ratio</td>
+    </tr>
+    <tr>
+      <td>crowded_property</td>
+      <td>Habitaciones por superficie</td>
+      <td>Densidad</td>
+    </tr>
+    <tr>
+      <td>custom_location_score</td>
+      <td>Combinación de distancia, educación y crimen</td>
+      <td>Score</td>
+    </tr>
+    <tr>
+      <td>price_age_interaction</td>
+      <td>Precio/m² × antigüedad</td>
+      <td>Interacción</td>
+    </tr>
+    <tr>
+      <td>new_large_property</td>
+      <td>Propiedades nuevas y grandes</td>
+      <td>Binaria</td>
+    </tr>
+    <tr>
+      <td>distance_school_interaction</td>
+      <td>Distancia × rating escolar</td>
+      <td>Interacción</td>
+    </tr>
+  </tbody>
+</table>
+
+
+---
+
+## Parte 6 — Aplicación en Datos Reales (Ames Housing)
+
+Al aplicar las transformaciones en datos reales, se corroboró la utilidad de variables como price_per_sqft y property_age, ampliamente utilizadas en estudios inmobiliarios reales. Sin embargo, también se evidenciaron desafíos propios de datos del mundo real: ruido, variabilidad extrema y relaciones espaciales complejas.
+
+Esta sección subraya que el feature engineering no es un proceso universal, sino contextual. Lo que funciona en datos sintéticos no siempre se transfiere directamente, y es necesario recalibrar supuestos y transformaciones según el comportamiento empírico del dataset real.
+
+---
+
+## Resultados
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica8/output.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+Los histogramas ilustran el comportamiento estadístico de tres nuevas features diseñadas durante la práctica. En **space_efficiency**, la concentración de valores bajos indica que la mayoría de viviendas no ocupan una proporción elevada del lote, lo cual coincide con patrones urbanos donde prevalecen espacios exteriores amplios. Por el contrario, los valores extremos sugieren propiedades de alta densidad arquitectónica, posiblemente asociadas a zonas urbanas densas.
+
+En **crowded_property**, la navegación de la distribución hacia la izquierda revela viviendas con baja densidad de ocupación por habitación, lo cual puede asociarse a mayor calidad de vida o niveles socioeconómicos más altos. Finalmente, la distribución de **location_score** se acerca a una forma ligeramente normal, reflejando un balance entre factores positivos (cercanía, educación) y negativos (criminalidad), propios de áreas suburbanas o semiurbanas.
+
+---
+
+## Reflexión ética y técnica
+
+La manipulación de atributos sensibles como criminalidad o ubicación debe manejarse con responsabilidad para evitar conclusiones sesgadas o discriminatorias. Además, el diseño de features debe ser transparente y trazable, permitiendo que los modelos sean auditables y comprensibles por usuarios finales.
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset</th>
+      <th>Features Creadas</th>
+      <th>Técnica</th>
+      <th>Relevancia Top</th>
+      <th>Conclusión</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sintético</td>
+      <td>12</td>
+      <td>MI + RF Importance</td>
+      <td>crime_rate, lot_size, school_rating</td>
+      <td>Relaciones no lineales dominantes.</td>
+    </tr>
+    <tr>
+      <td>Ames Housing</td>
+      <td>3</td>
+      <td>Análisis exploratorio</td>
+      <td>price_per_sqft, property_age</td>
+      <td>Coherencia con tendencias reales.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+## Conclusiones
+
+El desarrollo de esta práctica permitió comprender en profundidad cómo la ingeniería de características transforma la capacidad interpretativa y predictiva de los modelos. Se validó que variables cuidadosamente diseñadas pueden capturar aspectos estructurales, temporales y socioambientales que no emergen en los datos originales.
+Además, se evidenció que los datos reales exigen mayor cautela, pues presentan ruido, interacciones espaciales complejas y patrones no controlables.
+
+En conjunto, el proceso demostró que el feature engineering no es solo una etapa técnica, sino una herramienta estratégica que integra conocimiento del dominio, estadística y comprensión del fenómeno inmobiliario para producir modelos más robustos y útiles.
