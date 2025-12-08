@@ -1,0 +1,150 @@
+---
+title: "Cartografiar la Ciudad Viva: Un Viaje Geoespacial por las Capas Invisibles de Buenos Aires."
+publishedAt: "2025-11-10"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica12/portada.png"
+---
+
+# Análisis Geoespacial Integral de la Ciudad Autónoma de Buenos Aires mediante GeoPandas
+
+## Introducción
+
+El análisis geoespacial se ha convertido en una disciplina imprescindible para comprender la complejidad de las ciudades contemporáneas. En territorios densos y altamente estructurados como la Ciudad Autónoma de Buenos Aires, las interacciones entre población, infraestructura, movilidad y servicios públicos adquieren formas espaciales específicas que solo pueden examinarse correctamente mediante herramientas geográficas de análisis. A diferencia de los estudios puramente tabulares, trabajar con geometrías permite contextualizar patrones, revelar inequidades territoriales y establecer relaciones directas entre fenómenos sociales y configuraciones urbanas.
+
+La presente práctica constituye un recorrido exhaustivo por las etapas esenciales de un pipeline geoespacial moderno, desde la carga y validación de datos hasta la construcción de indicadores complejos y la integración de capas de infraestructura urbana. A lo largo del proceso se emplean herramientas del ecosistema Python, principalmente **GeoPandas**, **Shapely**, **PyProj**, **Contextily** y **Folium**, que permiten manipular geometrías, ejecutar transformaciones espaciales, generar joins entre capas y producir visualizaciones tanto estáticas como interactivas. Este documento amplía ampliamente los contenidos originales del material provisto, desarrollándolos en un relato explicativo más profundo y detallado, adecuado para comprender no sólo el *cómo* sino fundamentalmente el *por qué* de cada paso.
+
+---
+
+## Marco Teórico Ampliado
+
+El análisis geoespacial se sostiene sobre un conjunto de principios teóricos que determinan cómo se representan, transforman y analizan los datos espaciales. Comprender estos principios es requisito indispensable para interpretar correctamente los resultados.
+
+La noción central para cualquier análisis territorial es el **Sistema de Referencia de Coordenadas (CRS)**. Toda geometría existe dentro de un marco de referencia que define cómo se ubica sobre la superficie terrestre. Los CRS geográficos, como WGS84, representan posiciones mediante latitudes y longitudes. Si bien son universales, interoperables y adecuados para la recolección de datos, no son apropiados para cálculos métricos debido a que un grado de longitud o latitud no tiene un valor constante en metros: su tamaño varía según la latitud. Por tanto, medir áreas o distancias en grados conduciría a resultados inconsistentes. Para superar esta limitación, se recurre a CRS proyectados, como EPSG:3857 o sistemas UTM, que traducen coordenadas angulares en coordenadas planas expresadas en metros. Esta conversión, aunque introduce deformaciones cartográficas inevitables, habilita mediciones fiables de superficie y distancia.
+
+A nivel geométrico, los objetos espaciales se representan mediante puntos, líneas y polígonos. Herramientas como Shapely permiten ejecutar operaciones fundamentales como intersecciones, uniones, diferencias, disoluciones y cálculos de centroides. Estas operaciones constituyen el lenguaje básico del análisis territorial. La posibilidad de determinar si un punto pertenece o no a un polígono, o de identificar cuál es la estación de transporte más cercana a un área de estudio, depende de la capacidad de manipular estas geometrías con precisión.
+
+Las **normalizaciones** son otro concepto clave. Un valor absoluto, como la población de un barrio o la cantidad total de solicitudes de atención ciudadana, suele ser insuficiente para permitir comparaciones entre territorios. Las densidades por superficie, las tasas per cápita y otros indicadores relativos expresan la intensidad de un fenómeno ajustada por una variable base, ya sea superficie, población o distancia. Estas normalizaciones eliminan sesgos y devuelven representaciones más justas y analíticamente consistentes.
+
+Finalmente, las **visualizaciones geográficas** cierran el ciclo de análisis. Los mapas no solo ilustran datos; funcionan como herramientas cognitivas que permiten identificar patrones, contrastar hipótesis y comunicar hallazgos complejos de manera accesible y significativa.
+
+---
+
+## Carga de datos y validación inicial
+
+El pipeline comienza con la carga del archivo GeoJSON que contiene los radios censales de CABA. Se verifican las geometrías para asegurar que no existan figuras vacías ni valores nulos que comprometan el análisis posterior. Dado que los radios censales son unidades poligonales relativamente pequeñas, su integridad geométrica es crucial, ya que cualquier error podría amplificarse al momento de calcular densidades, superficies o proyecciones.
+
+---
+
+## Proyección a CRS métrico y construcción de indicadores de densidad
+
+El siguiente paso consiste en reproyectar los radios censales a un CRS apropiado para cálculos métricos. La transformación a EPSG:3857 habilita el cálculo de superficies en metros cuadrados y permite derivar la densidad poblacional en habitantes por kilómetro cuadrado. Esta medida sintetiza la intensidad de ocupación territorial, capturando cómo se distribuyen las personas dentro del espacio urbano.
+
+La práctica genera inicialmente una representación visual que muestra la silueta completa de los radios censales.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/mapa1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+Esta imagen permite reconocer las particularidades geométricas de la ciudad. La trama de radios refleja tanto el crecimiento histórico como las decisiones administrativas que han delineado sus fronteras. Las variaciones en el tamaño y la forma de los radios anticipan gradientes demográficos y funcionales.
+
+Posteriormente se genera una coropleta de densidad poblacional, en la que se observa la concentración marcada de habitantes en los sectores centrales.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/densidadpoblacion.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+Las tonalidades más intensas se distribuyen a lo largo de un corredor que coincide con la mezcla urbana altamente desarrollada del centro porteño. En contraste, los tonos más suaves se extienden hacia la periferia sur y sectores costeros asociados a usos no residenciales o a grandes superficies verdes.
+
+Al incorporar un basemap de Contextily, la lectura se profundiza.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/densparticular.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+El mapa base permite superponer los radios sobre el trazado urbano, revelando cómo la densidad se alinea con avenidas, centros de actividad, redes de movilidad y áreas históricas. Esta integración enriquece la interpretación al situar la información dentro de la estructura real de la ciudad.
+
+---
+
+## Uniones por atributos y métricas per cápita de interacción ciudadana
+
+La incorporación de datos provenientes de SUACI añade una dimensión nueva al análisis. Estas interacciones, que expresan demandas o consultas ciudadanas, reflejan las tensiones y necesidades del territorio. Sin embargo, los valores absolutos pueden inducir a errores interpretativos, ya que un barrio con muchos habitantes naturalmente producirá más solicitudes.
+
+Al unirse la tabla SUACI con la geometría disuelta por barrio, se calcula un indicador per cápita que ajusta la demanda de acuerdo con la población residente.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/contactos.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+Este mapa revela que los barrios centrales concentran no solo densidad sino también actividad administrativa. La elevada tasa per cápita sugiere que estos barrios son polos de circulación y trámite, utilizados no solo por sus habitantes sino también por trabajadores, visitantes y usuarios del transporte público. Esto genera un retrato dinámico del centro urbano como un espacio donde convergen múltiples flujos humanos que intensifican la carga administrativa y la interacción con servicios públicos.
+
+---
+
+## Integración con infraestructura de transporte: análisis de SUBTE
+
+La infraestructura de transporte constituye uno de los factores más determinantes en la calidad urbana. Por ello, integrar las líneas y estaciones de subte con la capa de barrios permite evaluar su distribución territorial.
+
+El conteo de estaciones por barrio, normalizado por superficie, genera una coropleta que ilustra la densidad de infraestructura de movilidad.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/porbarrio.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+La lectura del mapa deja en claro que el transporte subterráneo reproduce de manera notable el patrón histórico de centralidad. Los barrios de mayor densidad y actividad económica cuentan con múltiples estaciones en una superficie reducida, mientras que las zonas más alejadas carecen de esta infraestructura o la presentan de manera muy escasa.
+
+Para extender el análisis más allá del conteo, se calcula la distancia del centroide de cada barrio hasta la estación más cercana.
+
+Este indicador de accesibilidad permite comprender de forma más afinada la cobertura territorial del transporte. Un barrio con relativamente pocas estaciones podría, no obstante, acceder fácilmente al sistema si una de ellas se encuentra próxima a su centro geográfico. En cambio, barrios amplios o periféricos pueden presentar distancias notables incluso cuando no están completamente desconectados. Esta medida de proximidad subraya la desigualdad histórica entre el núcleo urbano y la periferia en términos de movilidad.
+
+---
+
+## Representación interactiva: Folium y lectura exploratoria
+
+La culminación del pipeline consiste en la construcción de un mapa interactivo que combina la coropleta de SUACI per cápita con la ubicación puntual de las estaciones de subte.
+
+Este mapa permite explorar con mayor riqueza la relación entre infraestructura, población y demanda ciudadana. El usuario puede activar o desactivar capas, examinar estaciones individualmente y recorrer visualmente el territorio en busca de patrones emergentes. El carácter interactivo facilita la formulación de hipótesis nuevas y alienta una lectura dinámica del espacio urbano.
+
+---
+
+### Conclusiones
+
+El pipeline geoespacial desarrollado permite apreciar cómo se entrelazan densidad, infraestructura y actividad ciudadana dentro de la Ciudad Autónoma de Buenos Aires. La combinación de indicadores per cápita, densidades por superficie y distancias mínimas revela un patrón urbano complejo donde la centralidad funciona como un imán de actividad y recursos, mientras que la periferia manifiesta déficits estructurales persistentes.
+
+El uso de CRS proyectados demuestra ser indispensable para garantizar cálculos precisos, especialmente cuando se analizan áreas, distancias y tasas espaciales. Asimismo, las uniones espaciales y la construcción de indicadores normalizados se consolidan como herramientas fundamentales para evitar interpretaciones erróneas basadas en valores absolutos.
+
+La convergencia entre datos demográficos, administrativos y de movilidad ofrece una visión integral del funcionamiento urbano y permite detectar áreas críticas donde la infraestructura podría reforzarse. Las visualizaciones, tanto estáticas como interactivas, potencian la interpretación y facilitan la comunicación de los hallazgos.
+
+---
+
+## Referencias
+- GeoPandas User Guide
+- Shapely Documentation
+- PyProj
+- Contextily
+- Folium
+- Kaggle – Geospatial Analysis.
+
