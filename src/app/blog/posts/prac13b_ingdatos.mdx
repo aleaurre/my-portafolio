@@ -1,0 +1,221 @@
+---
+title: "Más Allá del Preprocesamiento y Extracción de Features: Un Pipeline Integrado para Evaluación de Calidad en Imágenes."
+publishedAt: "2025-11-17"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica13/portada.jpg"
+---
+
+
+# Robustez geométrica y comparación ORB vs SIFT
+
+## Introducción
+
+Este bonus extiende la práctica original incorporando un análisis específico de **robustez geométrica** de los descriptores locales ORB y SIFT frente a transformaciones controladas de la imagen. El objetivo es responder una pregunta clave en visión por computador aplicada: ¿hasta qué punto un detector–descriptor de puntos clave mantiene su capacidad de “reconocer” la misma escena cuando la imagen sufre rotaciones, cambios de escala o deformaciones de perspectiva?
+
+Para ello se parte de la misma imagen de trabajo que en la práctica base, sobre la cual se aplican dos variantes de preprocesamiento coherentes con los mejores resultados previos: una versión en escala de grises directamente derivada de la imagen original y una versión mejorada mediante **CLAHE**, que había demostrado mejorar el contraste y la definición de bordes. A partir de estas dos versiones se generan imágenes transformadas y se evalúa, para cada combinación de preprocesamiento, transformación geométrica y descriptor (ORB o SIFT), cuántos matches válidos se obtienen entre la imagen base y la imagen transformada, así como la calidad promedio de esos emparejamientos.
+
+El resultado es un mini–dashboard de robustez que no solo cuantifica el comportamiento de ORB y SIFT, sino que permite interpretar de forma visual cómo reaccionan frente a rotaciones moderadas (15° y 45°), escalados (0.8 y 1.2) y una deformación en perspectiva. A partir de los scores agregados se derivan también indicadores de QA global que pueden usarse como “semáforo” de robustez para futuros pipelines de visión.
+
+---
+
+## Marco teórico
+
+Los descriptores locales se basan en la idea de identificar, alrededor de ciertos puntos clave de la imagen, patrones de intensidad que sean relativamente invariables ante cambios de vista. Cuando una imagen se rota o se escala, el contenido global cambia, pero ciertos puntos —esquinas, intersecciones, texturas distintivas— se mantienen reconocibles si el descriptor es suficientemente robusto.
+
+**ORB (Oriented FAST and Rotated BRIEF)** es un descriptor binario diseñado para ser eficiente en tiempo de cómputo y adecuado para aplicaciones en tiempo real. Se apoya en el detector FAST para localizar puntos clave y utiliza BRIEF rotado para describir el entorno local mediante comparaciones binarias de intensidad. Esto lo vuelve muy veloz, con descriptores compactos que se comparan mediante distancias Hamming.
+
+**SIFT (Scale-Invariant Feature Transform)**, por su parte, fue concebido para lograr invariancia robusta a escala y rotación, utilizando pirámides de escala, aproximación de LoG (Difference of Gaussians) y descriptores basados en histogramas de gradientes. Sus descriptores son más largos y se comparan mediante distancias L2, lo que implica mayor costo computacional pero también una gran estabilidad en escenarios complejos.
+
+La **robustez geométrica** se evalúa aquí mediante dos ideas centrales:
+
+* El número de matches obtenidos entre la imagen base y la transformada.
+* El **ratio de matches** (`matches_ratio`), definido como el número de matches dividido por el mínimo entre el número de keypoints de cada imagen. Este ratio resume cuán consistente es el descriptor para “reencontrar” los puntos clave bajo transformaciones.
+
+Además, se construye un **score global de robustez** (`robust_score`) calculado como el promedio del `matches_ratio` sobre todas las transformaciones evaluadas para cada combinación de preprocesamiento y descriptor. De esta forma se puede clasificar la robustez como baja, media o alta según umbrales sugeridos (`<0.3`, `0.3–0.6`, `>0.6` respectivamente). 
+
+---
+
+## Preprocesamiento y visualización inicial
+
+Antes de aplicar las transformaciones geométricas se preparan dos variantes de la imagen:
+
+1. **Imagen original en escala de grises**, obtenida tras convertir la imagen RGB a `img_gray`.
+2. **Imagen mejorada con CLAHE**, donde se aplica ecualización adaptativa de histograma sobre el canal L del espacio LAB y luego se vuelve a convertir a RGB y a escala de grises (`img_clahe_gray`). 
+
+Estas dos versiones se visualizan lado a lado para comprobar que la aplicación de CLAHE incrementa el contraste local y la definición de detalles sin introducir artefactos visibles.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/bonus1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={280}
+  />
+</div>
+
+En la imagen de control se aprecia que la versión CLAHE realza contornos y texturas, especialmente en zonas de baja iluminación o bajo contraste, lo que en principio debería facilitar la detección de puntos clave y mejorar la repetibilidad de los descriptores ante pequeñas variaciones geométricas.
+
+---
+
+## Diseño del experimento de robustez
+
+El núcleo del bonus consiste en aplicar una serie de **transformaciones geométricas controladas** a cada versión de la imagen (original y CLAHE) y medir la capacidad de ORB y SIFT para encontrar correspondencias:
+
+* `rot15`: rotación de 15 grados alrededor del centro.
+* `rot45`: rotación de 45 grados.
+* `scale0.8`: escalado isotrópico al 80 % del tamaño original.
+* `scale1.2`: escalado al 120 %.
+* `persp`: deformación en perspectiva mediante cuatro puntos desplazados en los extremos. 
+
+Para cada combinación de preprocesamiento, transformación y descriptor se ejecuta una función `benchmark_descriptors` que:
+
+1. Detecta keypoints y calcula descriptores en la imagen base y en la transformada.
+2. Realiza matching utilizando un `BFMatcher` apropiado para cada tipo de descriptor (Hamming para ORB, L2 para SIFT).
+3. Ordena los matches por distancia y calcula:
+
+   * tiempos de detección y matching,
+   * número de keypoints en cada imagen,
+   * número de matches,
+   * distancia promedio,
+   * ratio de matches (`matches_ratio`).
+
+Los resultados se almacenan en un `DataFrame` que sintetiza todo el experimento para su análisis posterior. 
+
+---
+
+## Resultados numéricos detallados
+
+La primera tabla resume, para cada combinación de preprocesamiento, transformación y descriptor, el ratio de matches obtenido y la distancia promedio de los emparejamientos. (Los tiempos de detección y matching también están disponibles, pero aquí se prioriza la calidad geométrica.)
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Prep</th>
+      <th>Transformación</th>
+      <th>Descriptor</th>
+      <th>matches_ratio</th>
+      <th>avg_distance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>orig</td><td>rot15</td><td>ORB</td><td>0.664</td><td>20.63</td></tr>
+    <tr><td>orig</td><td>rot15</td><td>SIFT</td><td>0.679</td><td>65.25</td></tr>
+
+    <tr><td>orig</td><td>rot45</td><td>ORB</td><td>0.441</td><td>25.70</td></tr>
+    <tr><td>orig</td><td>rot45</td><td>SIFT</td><td>0.647</td><td>78.32</td></tr>
+
+    <tr><td>orig</td><td>scale0.8</td><td>ORB</td><td>0.652</td><td>19.71</td></tr>
+    <tr><td>orig</td><td>scale0.8</td><td>SIFT</td><td>0.739</td><td>58.67</td></tr>
+
+    <tr><td>orig</td><td>scale1.2</td><td>ORB</td><td>0.758</td><td>5.45</td></tr>
+    <tr><td>orig</td><td>scale1.2</td><td>SIFT</td><td>0.744</td><td>63.50</td></tr>
+
+    <tr><td>orig</td><td>persp</td><td>ORB</td><td>0.528</td><td>23.42</td></tr>
+    <tr><td>orig</td><td>persp</td><td>SIFT</td><td>0.662</td><td>81.69</td></tr>
+
+    <tr><td>clahe</td><td>rot15</td><td>ORB</td><td>0.662</td><td>21.49</td></tr>
+    <tr><td>clahe</td><td>rot15</td><td>SIFT</td><td>0.684</td><td>69.25</td></tr>
+
+    <tr><td>clahe</td><td>rot45</td><td>ORB</td><td>0.494</td><td>24.77</td></tr>
+    <tr><td>clahe</td><td>rot45</td><td>SIFT</td><td>0.637</td><td>80.21</td></tr>
+
+    <tr><td>clahe</td><td>scale0.8</td><td>ORB</td><td>0.640</td><td>21.76</td></tr>
+    <tr><td>clahe</td><td>scale0.8</td><td>SIFT</td><td>0.700</td><td>58.61</td></tr>
+
+    <tr><td>clahe</td><td>scale1.2</td><td>ORB</td><td>0.744</td><td>6.28</td></tr>
+    <tr><td>clahe</td><td>scale1.2</td><td>SIFT</td><td>0.739</td><td>61.06</td></tr>
+
+    <tr><td>clahe</td><td>persp</td><td>ORB</td><td>0.470</td><td>25.08</td></tr>
+    <tr><td>clahe</td><td>persp</td><td>SIFT</td><td>0.642</td><td>81.91</td></tr>
+  </tbody>
+</table>
+
+La tabla muestra un patrón consistente: para cada transformación, **SIFT** tiende a obtener un `matches_ratio` ligeramente superior al de ORB, lo que indica mayor estabilidad ante cambios geométricos. Sin embargo, ORB obtiene distancias promedio más bajas en algunos casos, lo que sugiere que, aunque halle menos correspondencias, estas son en promedio más “cercanas” en el espacio del descriptor. Además, las transformaciones de rotación fuerte (rot45) y perspectiva son las que más degradan el ratio de matches, especialmente para ORB, lo que confirma que son escenarios más desafiantes.
+
+---
+
+## Mini-dashboard de robustez y comparación visual
+
+Para sintetizar el comportamiento de ORB y SIFT se construye un **mini-dashboard** con dos gráficos de barras: uno para la imagen original y otro para la versión CLAHE, donde se grafican los `matches_ratio` de ORB y SIFT para cada transformación. 
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/bonus2.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+En estos gráficos se aprecia claramente que SIFT domina la mayor parte de los escenarios, especialmente en rotaciones fuertes y en la deformación en perspectiva. ORB, en cambio, se comporta muy bien en escalados suaves (especialmente `scale1.2`), donde alcanza ratios cercanos o superiores a 0.75. La diferencia entre usar la imagen original o la versión CLAHE no es dramática: los promedios cambian poco, pero se observa una ligera mejora en algunos casos para SIFT y un comportamiento más estable en los escalados.
+
+Para completar el análisis se generan imágenes que muestran, de forma explícita, los matches de ORB y SIFT bajo una transformación representativa, en este caso la rotación de 45 grados:
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/bonus3.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+En la visualización se observa que SIFT consigue una malla de correspondencias más densa y mejor distribuida a lo largo de la imagen, mientras que ORB presenta un número menor de líneas de emparejamiento, aunque muchas de ellas son precisas. Esta diferencia visual respalda los resultados numéricos de la tabla y del mini-dashboard.
+
+---
+
+## Scores agregados de robustez
+
+A partir del `DataFrame` completo se calculan scores agregados promediando `matches_ratio` sobre todas las transformaciones, para cada combinación de preprocesamiento y descriptor. El resultado se presenta en la siguiente tabla:
+
+<table>
+  <thead>
+    <tr>
+      <th>Preprocesamiento</th>
+      <th>Descriptor</th>
+      <th>robust_score</th>
+      <th>Nivel de robustez</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>clahe</td>
+      <td>ORB</td>
+      <td>0.602</td>
+      <td>ALTA</td>
+    </tr>
+    <tr>
+      <td>clahe</td>
+      <td>SIFT</td>
+      <td>0.680</td>
+      <td>ALTA</td>
+    </tr>
+    <tr>
+      <td>orig</td>
+      <td>ORB</td>
+      <td>0.609</td>
+      <td>ALTA</td>
+    </tr>
+    <tr>
+      <td>orig</td>
+      <td>SIFT</td>
+      <td>0.694</td>
+      <td>ALTA</td>
+    </tr>
+  </tbody>
+</table>
+
+Todos los `robust_score` se encuentran por encima de 0.6, lo que los coloca en la categoría de **robustez alta** frente a las transformaciones consideradas. La diferencia principal es que SIFT presenta los valores más altos, tanto en la imagen original como en la versión CLAHE, confirmando su superioridad en términos de invariancia geométrica. ORB, no obstante, mantiene scores muy respetables, lo que lo convierte en una alternativa atractiva cuando el tiempo de cómputo o las restricciones de memoria son factores críticos.
+
+---
+
+## Conclusiones del bonus
+
+El bonus de robustez geométrica complementa la práctica original mostrando que la elección del descriptor local tiene un impacto directo en la capacidad del sistema de visión para operar en escenarios realistas donde la cámara puede rotar, cambiar de escala o sufrir pequeñas deformaciones de perspectiva. Los resultados indican que:
+
+* **SIFT** ofrece la mayor robustez global, con los `robust_score` más altos y una malla de correspondencias más densa y estable en las visualizaciones.
+* **ORB** es competitivo, especialmente en escalados, y logra una combinación atractiva de rapidez y razonable invariancia, aunque sufre más en rotaciones fuertes y perspectiva.
+* El preprocesamiento con **CLAHE** mejora ligeramente algunos casos, pero no altera radicalmente el ranking entre descriptores; su contribución principal es homogeneizar el contraste y facilitar la detección consistente de puntos clave.
+
+En conjunto, el pipeline de evaluación desarrollado en este bonus proporciona una herramienta robusta para **auditar la invariancia geométrica** de distintos descriptores bajo condiciones controladas, y sienta las bases para incorporar estos indicadores como parte de una estrategia de QA sistemática en proyectos de visión por computador.
