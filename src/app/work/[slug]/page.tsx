@@ -69,9 +69,10 @@ export default async function Project({
   }
 
   const avatars =
-    post.metadata.team?.map((person) => ({
-      src: person.avatar,
+    post.metadata.team?.map((member: { avatar: string }) => ({
+      src: member.avatar,
     })) || [];
+
 
   return (
     <Column as="section" maxWidth="m" horizontal="center" gap="l">
