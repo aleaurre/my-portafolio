@@ -1,0 +1,194 @@
+---
+title: "La Arquitectura Oculta del Pixel: Cómo Emergen Bordes, Texturas y Puntos Clave desde el Caos Lumínico."
+publishedAt: "2025-11-17"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica13/portada.jpg"
+---
+
+# Preprocesamiento y Extracción de Features: Un Pipeline Integrado para Evaluación de Calidad en Imágenes
+
+### Introducción
+
+El procesamiento digital de imágenes constituye uno de los pilares fundamentales de la visión por computador. A través de una cadena de transformaciones cuidadosamente estructurada —representación, conversión a escala de grises, suavizado, detección de bordes y extracción de features— una imagen deja de ser un mero conjunto de valores luminosos para convertirse en un objeto analítico susceptible de medición, interpretación y comparación.
+
+En este documento se desarrolla un pipeline completo y articulado en prosa, acompañado por la colocación precisa de todas las imágenes proporcionadas. Cada representación visual forma parte indispensable de la narrativa técnica, ya que permite observar la evolución progresiva de la imagen a medida que se modulan sus propiedades.
+
+---
+
+### Marco Teórico
+
+Las imágenes digitales pueden entenderse como funciones bidimensionales que asignan a cada coordenada espacial un valor de intensidad. Cuando la imagen es en color, esta función se expande a tres dimensiones al incorporar los canales rojo, verde y azul. Todas las operaciones de preprocesamiento buscan modificar esa función para resaltar aspectos particulares de la escena: eliminar ruido, mejorar contraste, acentuar bordes o identificar regiones distintivas.
+
+La conversión a escala de grises reduce la dimensionalidad cromática preservando la información de luminancia, lo cual concentra la atención en la estructura general de la imagen. Por otra parte, el suavizado disminuye fluctuaciones abruptas no representativas, permitiendo que los algoritmos posteriores operen sobre un entorno más estable.
+
+La detección de bordes surge como una respuesta al desafío fundamental de identificar transiciones repentinas en intensidad, asociadas a contornos de objetos reales. Finalmente, los features o puntos característicos sirven como unidades mínimas de descripción, capaces de condensar información local que puede emplearse para reconocimiento, reconstrucción o seguimiento.
+
+Este conjunto de transformaciones no es arbitrario: constituye un andamiaje lógico mediante el cual la imagen va evolucionando desde su versión más cruda hasta una representación compleja y abstracta.
+
+---
+
+## Representación Digital de la Imagen
+
+El análisis comienza con la visualización de la imagen en color tal como fue adquirida. En ella se aprecia la estructura cromática original, la distribución espacial de tonos y la relación entre las diferentes intensidades que conforman la escena.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/2.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={500}
+  />
+</div>
+
+Esta primera representación cumple una función doble. Por un lado, permite inspeccionar visualmente el contenido de la imagen; por otro, establece la referencia a partir de la cual se evaluarán los efectos de cada transformación posterior. La imagen RGB inicial, con sus matices completos, permite reconocer de inmediato aquellas regiones donde podría ser necesario potenciar contornos, reducir ruido o identificar patrones.
+
+---
+
+## Conversión a Escala de Grises
+
+A partir de la imagen original, se genera la versión en escala de grises. El resultado muestra un gradiente continuo de intensidades que preserva la estructura luminosa pero elimina la dimensión cromática.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/3.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={1000}
+    height={300}
+  />
+</div>
+
+La conversión a gris no es una pérdida, sino una depuración intencional. Los algoritmos de detección de bordes y de features suelen operar sobre esta representación ya que la luminancia contiene la mayor parte de la información relevante sobre cambios estructurales. En la versión en gris los volúmenes, sombras y transiciones se perciben con más claridad, y se hace evidente la geometría implícita de la escena.
+
+---
+
+## Filtrado y Suavizado
+
+Una vez que se dispone de la imagen monocromática, se aplica un proceso de suavizado que permite atenuar variaciones abruptas asociadas a ruido o microtexturas no significativas. En la imagen correspondiente al filtrado se observa cómo los contornos se vuelven ligeramente más suaves y cómo las zonas homogéneas se unifican.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/4.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={900}
+    height={300}
+  />
+</div>
+
+El suavizado tiene una función profundamente estratégica dentro del pipeline. Los bordes detectados en una imagen ruidosa tienden a multiplicarse y fragmentarse; en cambio, una imagen suavizada presenta transiciones más limpias y progresivas, facilitando la robustez de las etapas subsiguientes. Visualmente, este paso se percibe como un “calmado” de la imagen: las fluctuaciones de un pixel a otro se amortiguan y el gradiente se vuelve más estable.
+
+Así mismo, la detección de bordes constituye uno de los momentos más reveladores del proceso. En la imagen dedicada a esta etapa se aprecia la transformación radical que se produce cuando la información pasa de ser un continuo gris a convertirse en una red de líneas que marcan las transiciones más significativas.
+
+Desde un punto de vista conceptual, los bordes representan máximos locales en la derivada espacial. Por eso, detectarlos consiste en aplicar operadores que captan cambios abruptos de intensidad. La operación es sensible y requiere equilibrio: demasiada suavidad puede borrar detalles importantes; demasiada rigidez puede introducir ruido.
+
+---
+
+## Detección de Features
+
+Al avanzar hacia la detección de features se ingresa en el terreno de los puntos distintivos, aquellos que poseen propiedades únicas capaces de ser identificadas incluso bajo transformaciones de la imagen. En la figura correspondiente a esta etapa se observan puntos superpuestos sobre la imagen procesada, cada uno marcando una región particularmente informativa.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/5.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/6.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={600}
+    height={300}
+  />
+</div>
+
+
+Estos puntos funcionan como marcadores en un mapa. Allí donde aparece un feature, existe una combinación local de intensidades y orientaciones que lo vuelve excepcionalmente reconocible. Parte del poder de los features radica en su capacidad de mantener consistencia aun cuando la imagen sufra modificaciones tales como rotaciones, cambios de escala o variaciones leves de iluminación.
+
+En términos analíticos, la detección de features permite construir una representación dispersa pero altamente significativa de la imagen. En lugar de almacenar la totalidad de los valores pixel a pixel, se obtienen nodos informativos capaces de resumir patrones visuales complejos.
+
+---
+
+## La Curva Sensibilidad–Ruido en la Detección de Bordes
+
+La detección de bordes es un proceso que depende de manera crítica del equilibrio entre sensibilidad y ruido. En cualquier imagen real, la información luminosa se encuentra acompañada de pequeñas fluctuaciones aleatorias que no corresponden a la estructura auténtica de los objetos. Estas variaciones —producto del sensor, de la iluminación o de la textura misma de las superficies— constituyen el ruido. Cuando un algoritmo intenta detectar bordes, debe discriminar entre las transiciones verdaderamente significativas en la escena y esas oscilaciones espurias.
+
+El problema puede describirse mediante la curva sensibilidad–ruido, que expresa cómo la capacidad para detectar bordes sutiles se contrapone, inevitablemente, con la probabilidad de detectar ruido como si fuera borde. A medida que se incrementa la sensibilidad del detector, también aumenta su predisposición a activar respuestas ante fluctuaciones que no representan contornos reales. Por el contrario, cuando la sensibilidad se reduce para minimizar respuestas indeseadas, el algoritmo corre el riesgo de pasar por alto bordes genuinos que poseen contrastes más suaves.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/7.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+Este fenómeno puede visualizarse conceptualmente como una curva donde el eje horizontal representa el nivel de sensibilidad y el vertical recoge el número de detecciones espurias. En la zona de baja sensibilidad, el algoritmo es demasiado rígido: solo detecta bordes intensos, omitiendo transiciones que podrían ser relevantes para la interpretación de la imagen. Conforme la sensibilidad aumenta, el número de bordes verdaderos detectados también crece, pero llega un punto en el que este crecimiento se acompaña de una pendiente cada vez más pronunciada de falsas detecciones. La curva ilustra así la región crítica donde un pequeño incremento en sensibilidad provoca una explosión de ruido percibido.
+
+En términos prácticos, esto significa que la detección de bordes está gobernada por un compromiso que no puede resolverse simplemente ajustando un umbral. La clave está en comprender la textura, escala y nivel de detalle de la imagen original. En imágenes con alto nivel de ruido, un detector demasiado sensible devolverá resultados saturados de líneas discontinuas y artefactos. En imágenes limpias o de alto contraste, aumentar la sensibilidad puede ser beneficioso para capturar bordes finos o estructuras que de otro modo pasarían desapercibidas.
+
+El suavizado previo mediante filtros, especialmente el gaussiano, funciona como un modo de “preparar” la curva sensibilidad–ruido antes de aplicar un detector. Al reducir la variabilidad de alta frecuencia asociada al ruido, el suavizado desplaza la curva hacia una zona más estable, permitiendo utilizar mayor sensibilidad sin que el número de falsos positivos crezca descontroladamente. En otras palabras, el filtrado aumenta el margen operativo en el que la detección de bordes resulta confiable.
+
+Comprender esta interacción entre sensibilidad y ruido esclarece por qué distintos algoritmos —como Sobel, Canny o Laplaciano— exhiben comportamientos dispares. Cada uno define una relación diferente con la curva sensibilidad–ruido: algunos son más conservadores; otros, más reactivos; algunos incorporan mecanismos de supresión no máxima o doble umbral que suavizan la curva en zonas críticas. Saber leer esta relación permite elegir el método adecuado según la naturaleza de la imagen y el objetivo del análisis.
+
+En síntesis, la curva sensibilidad–ruido revela el corazón del desafío de detectar bordes: cualquier intento de captar más detalles implica el riesgo de capturar más ruido. El trabajo del analista consiste en ajustar el pipeline de forma que la imagen se sitúe en el punto óptimo de ese equilibrio dinámico, donde la estructura real emerge con nitidez sin ser eclipsada por artefactos ni perderse entre suavidades excesivas.
+
+---
+
+## Interpretación Global del Pipeline
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/8.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+Cuando se observan todas las imágenes en secuencia —la original en color, la versión en gris, la suavizada, la detección de bordes y finalmente la identificación de features— se advierte que el pipeline constituye un viaje desde lo concreto hacia lo abstracto. Cada etapa depura, enfatiza o transforma aspectos particulares de la señal visual.
+
+La imagen RGB inicial muestra la escena tal como es capturada por un sensor: rica, redundante y llena de matices. La escala de grises depura esta riqueza para quedarse con la estructura luminosa esencial. El suavizado elimina irregularidades que podrían confundir algoritmos más sensibles. La detección de bordes abstrae aún más, preservando únicamente cambios abruptos de intensidad. Y finalmente, la detección de features selecciona puntos de altísima relevancia informativa, condensando la esencia de la imagen en un conjunto de nodos.
+
+Este proceso permite comprender la imagen desde múltiples perspectivas: como un campo continuo, como una superficie suavizada, como un mapa de contornos o como un conjunto de puntos de interés. Cada representación abre una ventana distinta hacia el análisis visual.
+
+---
+
+## Conclusiones
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica13/9.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+El pipeline de preprocesamiento y extracción de features expuesto demuestra cómo una imagen puede transformarse en una representación significativamente más útil para el análisis computacional. La evolución desde la imagen original hacia las estructuras abstractas revela la lógica interna de los algoritmos de visión por computador, que requieren eliminar redundancias, mitigar ruido, resaltar contornos y finalmente identificar elementos distintivos.
+
+El proceso muestra que cada etapa es necesaria y complementaria: sin la conversión a gris, muchos algoritmos se volverían inestables; sin el suavizado, aparecerían bordes espurios; sin los bordes, la estructura interna pasaría desapercibida; sin los features, no habría puntos robustos para tareas avanzadas.
+
+El conjunto final de imágenes permite observar cómo la información se reorganiza progresivamente, convirtiendo la imagen en un objeto analíticamente inteligente, preparado para aplicaciones más complejas como el emparejamiento, la clasificación o la reconstrucción tridimensional.
+
+---
+
+## Referencias
+
+— Gonzalez & Woods, *Digital Image Processing*
+— Szeliski, *Computer Vision: Algorithms and Applications*
+— Documentación de OpenCV
+— Notas de curso de Visión por Computador
+
