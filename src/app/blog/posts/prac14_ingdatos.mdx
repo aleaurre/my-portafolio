@@ -1,0 +1,264 @@
+---
+title: "Lo Que el Oído No Ve: Descubriendo la Arquitectura Secreta del Sonido a Través de Espectrogramas y Transformaciones Acústicas."
+publishedAt: "2025-11-25"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica14/portada.jpg"
+---
+
+# Análisis Tiempo–Frecuencia y Transformaciones Avanzadas para Preprocesamiento y Evaluación de Señales Acústicas.
+
+### Resumen Ejecutivo
+
+El presente trabajo desarrolla un pipeline completo de procesamiento de audio orientado a la visualización, transformación y posterior extracción de métricas. El sonido es tratado como un objeto cuantificable cuya estructura interna se hace visible mediante espectrogramas, permitiendo analizar frecuencia, energía, ruido, filtrado y variaciones producidas por técnicas de augmentación.
+
+A lo largo del documento se observa cómo el audio se convierte en una secuencia de imágenes que revelan su arquitectura interna. El espectrograma original muestra la distribución natural de energía; el estandarizado normaliza esa estructura; la versión ruidosa expone los efectos de la sensibilidad sobre el ruido; el filtrado elimina componentes irrelevantes; las augmentaciones modifican la geometría tiempo–frecuencia; y finalmente, los features numéricos traducen esa información visual en descriptores analíticos.
+
+La interpretación combinada de todas estas imágenes pone de relieve la tensión entre detalle y ruido, la forma en que el sonido cambia cuando se altera su pitch o su duración, y la importancia del filtrado para mejorar la inteligibilidad de la representación. El pipeline completo demuestra cómo un fenómeno auditivo puede convertirse en un mapa estructurado apto para análisis acústico, clasificación o evaluación de calidad.
+
+---
+
+## Introducción
+
+El sonido, aunque intangible en su forma original, puede representarse a través de estructuras visuales que revelan su esencia física. Convertido en imagen, el audio muestra patrones temporales, resonancias, armónicos y texturas que de otro modo quedarían ocultos en la señal temporal. Este trabajo presenta un pipeline completo que transforma audio en imágenes espectrales, las manipula mediante filtros y ruido, y finalmente extrae descriptores cuantitativos capaces de resumir la estructura del sonido.
+
+La narrativa se desarrolla en torno a las imágenes producidas por cada transformación, integrándolas directamente en el flujo del texto. Cada sección explica no solo la operación técnica realizada, sino también cómo leer las imágenes, cómo interpretarlas y qué información relevante aportan al análisis acústico.
+
+---
+
+## Marco Teórico Ampliado
+
+La representación del audio mediante un espectrograma utiliza la Transformada de Fourier de Corto Plazo (STFT), que descompone la señal en ventanas temporales. Cada ventana genera un espectro, y la combinación de todos ellos forma una matriz tiempo–frecuencia. El resultado es una imagen donde: el eje horizontal representa el tiempo, el eje vertical representa la frecuencia, el color indica la energía.
+
+La naturaleza visual del espectrograma lo vuelve una herramienta poderosa: armónicos de voz aparecen como líneas paralelas; ruido aparece como un tapiz aleatorio; golpes o transitorios se muestran como columnas verticales; variaciones tonales como desplazamientos ascendentes o descendentes.
+
+El ruido se define como cualquier componente aleatorio que no aporta estructura significativa. Su relación con la sensibilidad del análisis es crítica: aumentar la sensibilidad permite ver detalles, pero también incrementa la cantidad de artefactos. La curva sensibilidad–ruido expresa esta tensión fundamental: ningún detector o transformación opera aislado de sus consecuencias en la percepción del ruido.
+
+El filtrado, por otro lado, actúa como cirujano del espectro: elimina bandas irrelevantes, mejora la legibilidad visual y ayuda a resaltar las porciones energéticas de interés. Los filtros pasa altos extirpan la “gravedad excesiva” del espectro, revelando la estructura útil que reside en las frecuencias medias y altas.
+
+Finalmente, los MFCC (coeficientes cepstrales en Mel) permiten capturar el timbre, es decir, la cualidad que diferencia dos sonidos aún cuando compartan la misma frecuencia fundamental. Estos coeficientes condensan la envolvente espectral en un conjunto de valores capaces de distinguir estilos vocales, tipos de instrumentos o calidad de grabación.
+
+---
+
+###  WaveForm y Espectrograma Original
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/Waveform(mono)_1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+El waveform original representa la forma más cruda y directa de la señal acústica: una función temporal que muestra cómo varía la amplitud del sonido a lo largo del tiempo. En esta representación, pueden observarse con claridad los contrastes dinámicos entre segmentos intensos y momentos de baja energía, así como la presencia de posibles artefactos de grabación, ruido de fondo o variaciones abruptas que reflejan el comportamiento natural de la fuente sonora. Su lectura permite identificar transitorios, pausas y patrones rítmicos, pero también expone la señal a la variabilidad propia de su captura, lo que puede afectar análisis posteriores. Desde un punto de vista teórico, el waveform refleja la superposición de todas las frecuencias presentes en la señal mediante el principio de Fourier; por ello, aunque visualmente simple, encierra toda la complejidad espectral en un único eje.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/espectograma(mono)_1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+La imagen del espectrograma original constituye la representación tiempo–frecuencia fundamental de la señal. Desde el punto de vista teórico, el espectrograma surge de aplicar la Transformada de Fourier de Corto Plazo (STFT), proceso que consiste en dividir el audio en ventanas solapadas y calcular, para cada una, la distribución de energía por frecuencia. Esta operación genera una matriz tridimensional, donde la energía se proyecta en un plano mediante un mapa de colores.
+
+La presencia de tonos amarillos revela regiones de alta energía, típicamente asociadas a fenómenos acústicos marcados como consonantes explosivas, golpes, transitorios o armónicos dominantes. Los tonos púrpura indican energía moderada, característica de resonancias sostenidas o partes “suaves” del timbre, mientras que el negro indica silencio o ausencia de actividad.
+
+El espectrograma original, en su estado puro, es comparable a una fotografía sin editar: contiene tanto información útil como ruido inherente, variaciones ambientales de grabación y posibles irregularidades. Por eso, antes de cualquier análisis cuantitativo, se necesita estabilizar, normalizar y filtrar. Su lectura permite observar rasgos generales del sonido: si es tonal o ruidoso, si presenta picos súbitos o estructuras continuas, si su contenido armónico se concentra en frecuencias bajas o altas. En síntesis, esta imagen revela el “ADN acústico” de la señal.
+
+---
+
+### WaveForm y Espectrograma Estandarizado
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/Waveform(monoyestandarizada)_1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+El waveform estandarizado surge de un proceso de normalización temporal y/o de amplitud que busca convertir la señal en una versión más estable, comparables entre muestras o apta para procesamiento posterior. Al ajustar la amplitud a un rango acotado, se reduce la influencia de picos extremos y se asegura una distribución energética más uniforme; al estandarizar la duración, se eliminan variaciones temporales que podrían introducir sesgos en modelos o algoritmos de extracción de features. Teóricamente, esta estandarización puede interpretarse como un mapeo afín del espacio de la señal que preserva la forma general pero comprime o expande su escala, permitiendo que segmentos que antes eran dominantes o insignificantes se mantengan dentro de un rango operativo óptimo. El resultado es un waveform más coherente, homogéneo y preparado para análisis robustos como la STFT, el cálculo de MFCC o evaluaciones comparativas entre distintas transformaciones acústicas.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/espectograma(estandarizado)_1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+El proceso de estandarización modifica la señal para que su representación sea comparable con otras versiones o con un conjunto de muestras. Matemáticamente, implica normalizar amplitudes, ajustar la densidad espectral y, en algunos casos, realizar resampling para homogenizar la resolución temporal y frecuencial.
+
+La imagen estandarizada muestra una reducción del rango dinámico: los puntos de energía intensa se mantienen, pero adquieren un contraste controlado. Este proceso se apoya en teorías psicoacústicas que señalan que el oído humano es más sensible a ciertas bandas de frecuencia —particularmente medias— y menos a extremos. La estandarización refleja esto: elimina la predominancia extrema de ciertas bandas y produce una imagen más “equilibrada”, donde la estructura esencial resalta de manera uniforme.
+
+A nivel conceptual, este espectrograma permite observar la envolvente espectral, que funciona como un resumen de cómo el sonido distribuye su energía globalmente. La estructura de la envolvente es lo que luego se capturará mediante MFCC u otros features.
+
+---
+
+### Espectrograma con Ruido Blanco
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/espectograma(ruidoblanco)_1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+El ruido blanco posee una característica fundamental: distribuye energía por igual en todas las frecuencias. En términos físicos, el ruido blanco es una señal estocástica cuya potencia espectral es constante, y en el espectrograma se manifiesta como un tapiz homogéneo de puntos de energía.
+
+El espectrograma ruidoso exhibe un fenómeno clave: cuando la energía aleatoria cubre todo el rango espectral, se vuelve más difícil distinguir patrones estructurales. Las zonas que antes eran huecos ahora están llenas de grano; los trazos que antes eran nítidos ahora están parcialmente ocultos. El ruido destruye la correlación entre muestras temporales, lo que se traduce en pérdida de continuidad visual en el espectrograma.
+
+Este comportamiento pone de manifiesto la curva sensibilidad–ruido. Los algoritmos de análisis tiempo–frecuencia responden a cambios en intensidad: si la sensibilidad es baja, muchos detalles desaparecen; si es alta, el ruido domina. Las zonas amarillas persistentes en el espectrograma ruidoso indican que, aun bajo interferencia severa, ciertos eventos poseen suficiente energía para sobresalir del ruido. Esto es principio básico en acústica: eventos de alto SNR (Signal-to-Noise Ratio) siguen siendo detectables aun en condiciones adversas.
+
+El ruido blanco también altera la percepción psicoacústica: con ruido, las transiciones armónicas se vuelven opacas y los transitorios se pierden. En un espectrograma, esa pérdida de nitidez se convierte en una expansión de la textura aleatoria —una forma visual de entropía sonora.
+
+---
+
+### Espectrograma Filtrado con High-Pass
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/espectograma(ruidoblanco,highpass)_1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+El filtro pasa altos (high-pass) remueve la energía de baja frecuencia, generalmente asociada a ruidos de vibración, viento, pops de micrófono o resonancias no deseadas. Desde la teoría de sistemas, un filtro pasa altos atenúa componentes lentas (baja frecuencia) y preserva o resalta componentes rápidas (alta frecuencia).
+
+En la imagen filtrada, la desaparición total de actividad por debajo de 80 Hz genera un espectrograma más transparente. Esta limpieza permite distinguir detalles de nivel medio que antes estaban opacados por la energía grave dominante. En términos visuales, es como despejar neblina que ocultaba los contornos reales de la escena.
+
+La filtración modifica la percepción y el análisis: al eliminar frecuencias graves, se vuelve más evidente el comportamiento de los formantes, las resonancias medias y las estructuras transitorias. Se observa con mayor claridad la organización rítmica del sonido, ya que las bajas frecuencias suelen contener ruido estacionario que contamina la lectura.
+
+Conceptualmente, este espectrograma filtrado se aproxima a la "firma espectral útil" del audio: aquello que realmente define su timbre, su inteligibilidad y su identidad acústica.
+
+---
+
+### Augmentación de Pitch y Time Stretch
+
+#### Pitch +2 semitonos
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/pitchshifts_dossemitonos.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+Elevar el pitch equivale a multiplicar la frecuencia de toda la señal por un factor. Esto
+tiene una interpretación directa en el espectrograma: todas las estructuras se elevan verticalmente. Los armónicos se reposicionan en bandas más altas, y la señal adquiere un carácter más “agudo”.
+
+Desde la teoría acústica, cambiar el pitch modifica la frecuencia fundamental y, con ella, toda la distribución armónica. El espectrograma lo muestra con precisión matemática: la relación entre armónicos se conserva, pero la base sobre la cual se organizan se desplaza.
+
+Psicoacústicamente, esto corresponde a la percepción de un sonido más tenso o más brillante. Visualmente, es el equivalente espectral de “levantar” la imagen hacia arriba.
+
+#### Time Stretch 0.9x
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/timestrech0.9x.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+El time stretch modifica la duración del audio sin alterar su contenido frecuencial. Matemáticamente, consiste en realizar una interpolación temporal que dilata la señal. En el espectrograma, esto se traduce en que los patrones se expanden horizontalmente: los eventos duran más, los pulsos se espacian, y la señal adquiere una cadencia más lenta.
+
+Este efecto es coherente con la percepción humana: un sonido reproducido más lentamente suena más relajado, más amplio, sin perder su identidad tonal. El espectrograma conserva su forma vertical, pero se deforma lateralmente.
+
+---
+
+#### Interpretación de Features Numéricos
+
+##### Gráfico de MFCC 1
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/mfcc_1_porversion.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+Los MFCC representan una aproximación a cómo el oído humano percibe la envolvente espectral. Se inspiran en la escala Mel, que comprime frecuencias altas para ajustar la percepción humana. El MFCC_1_mean refleja la inclinación global de la envolvente: valores más negativos suelen indicar una predominancia de bajas frecuencias; valores menos negativos, una distribución más equilibrada.
+
+El gráfico evidencia cómo el pitch incrementa la energía en frecuencias altas, y cómo el time stretch, aunque no modifica las frecuencias, altera la distribución temporal, lo que afecta la envolvente en ventana móvil.
+
+#### Histogramas de RMS, ZCR y duración
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/t_RMS_ZCR.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+El RMS expresa la potencia percibida del sonido. Un RMS alto indica una señal intensa; uno bajo, suavidad. El ZCR (zero-crossing rate) está directamente asociado a la aspereza del sonido: señales ruidosas cruzan más veces por cero; señales tonales lo hacen menos. Esto permite distinguir entre fricación (ruido) y periodicidad (tono).
+
+La duración constante confirma la estandarización temporal del dataset.
+
+#### Métricas espectrales dinámicas
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/metricasespec.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+El gráfico de métricas espectrales dinámicas permite visualizar cómo evoluciona el comportamiento acústico de la señal a lo largo del tiempo a partir de parámetros que capturan distintos aspectos de su estructura espectral. Cada métrica proporciona una ventana distinta hacia la identidad del sonido: el RMS revela fluctuaciones de energía, mostrando dónde la señal se intensifica o se atenúa; el ZCR marca cambios rápidos de signo en la onda, asociados a niveles de aspereza o fricción acústica; el centroides espectral indica el “centro de gravedad” frecuencial, desplazándose hacia arriba cuando el sonido se vuelve más brillante; el roll-off define el límite donde se concentra la mayor parte de la energía; y la bandwidth refleja la amplitud del rango frecuencial activo en cada instante. Observadas en conjunto, estas curvas forman una especie de “electrocardiograma” del timbre y la dinámica: permiten identificar segmentos estables, transitorios abruptos, zonas ruidosas o momentos tonalmente intensos. Además, evidencian la relación entre tiempo y espectro, mostrando cómo modificaciones en el waveform (aumento de energía, aparición de consonantes, golpes, transiciones) se traducen en patrones dinámicos coherentes en las métricas. Esta representación, por tanto, no solo caracteriza la señal en su totalidad, sino que también permite localizar precisa y temporalmente los eventos acústicos más relevantes.
+
+---
+
+### Semáforo de Calidad
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/semaforo_t.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={500}
+  />
+</div>
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/semaforo_rms.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={500}
+  />
+</div>
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/semaforo_zcr.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={500}
+  />
+</div>
+
+
+El semáforo resume características complejas en juicios simples. Desde la teoría de clasificación, esto equivale a mapear un espacio multidimensional (MFCC, RMS, ZCR, duración) a categorías discretas. El color verde indica señales estables, con bajo ruido y estructura clara. El amarillo refleja señales ambiguas o limítrofes según umbrales. El rojo indica señales distorsionadas, ruidosas o mal capturadas.
+
+El semáforo convierte análisis avanzado en una evaluación accesible para el usuario final.
+
+## Conclusión Global
+
+El pipeline transforma el audio en una secuencia de imágenes que revelan su estructura interna. Cada transformación —ruido, filtrado, pitch, elongación temporal— altera la geometría tiempo–frecuencia, y cada alteración proporciona información útil sobre la naturaleza del sonido. La combinación de espectrogramas y features numéricos ofrece una visión holística: visual, matemática y conceptual. El sonido se vuelve un objeto riguroso y examinable, ideal para análisis de calidad, clasificación o investigación acústica.
