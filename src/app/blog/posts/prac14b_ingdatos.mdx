@@ -4,3 +4,239 @@ publishedAt: "2025-11-25"
 tag: "Curso: Ingeniería de Datos"
 image: "/practica14/portadab.jpg"
 ---
+
+# Análisis avanzado de eventos, tono y robustez de MFCC en UrbanSound8K
+
+## Introducción
+
+En este bonus se extiende la práctica de audio original para explorar con mayor detalle el comportamiento temporal y espectral de señales reales del dataset **UrbanSound8K**. El punto de partida es la carga masiva de los audios del corpus, de donde se seleccionan dos ejemplos concretos, `101415-3-0-2.wav` y `101415-3-0-3.wav`, ambos normalizados a **4 segundos de duración** y una frecuencia de muestreo de **48 kHz**, lo que produce vectores de 192000 muestras por archivo.
+
+Sobre estos audios se aplican las mismas funciones de preprocesamiento de la práctica 14 (carga, forzado a mono y padding o recorte a duración fija) para garantizar que cualquier comparación posterior no esté sesgada por diferencias triviales en longitud o configuración de canales. Una vez estandarizados, se avanza hacia cuatro líneas de análisis: detección de eventos transitorios, caracterización tonal mediante cromagrama y tonnetz, estudio de la energía temporal a través de RMS y evaluación de la sensibilidad de los **MFCC** frente a la adición de ruido blanco. Finalmente, se entrena un clasificador lineal muy simple sobre MFCC para ilustrar cómo estos descriptores pueden alimentar un modelo supervisado, aún en un escenario mínimo con solo dos clases de ejemplo.
+
+---
+
+## Marco teórico
+
+El diseño del bonus se apoya en tres bloques conceptuales. En primer lugar, la **detección de onsets** u onsets temporales busca localizar instantes en los que se produce un cambio abrupto en la envolvente de energía o en el espectro; estos puntos suelen corresponder a golpes, transitorios o eventos acústicos bien definidos. Librosa implementa este procedimiento a partir de un *onset envelope* y de umbrales adaptativos, devolviendo una secuencia de tiempos donde se detectan dichos eventos.
+
+En segundo lugar, el análisis tonal se articula mediante el **cromagrama** y el **tonnetz**. El cromagrama proyecta el contenido espectral sobre las doce clases de pitch de la escala occidental, permitiendo visualizar qué notas o regiones tonales dominan en cada momento. El tonnetz, por su parte, utiliza una representación geométrica de las relaciones de intervalo para analizar la cercanía armónica entre acordes y centros tonales; resulta especialmente útil cuando la señal contiene patrones musicales o pseudo-musicales, incluso en entornos de ruido urbano.
+
+El tercer bloque está formado por dos componentes complementarios. Por un lado, la **energía RMS por frame** describe cómo se reparte la intensidad del sonido a lo largo del tiempo y es clave para identificar secciones más activas o silencios relativos. Por otro, los **coeficientes MFCC** (Mel-Frequency Cepstral Coefficients) encapsulan la envolvente espectral filtrada en escala Mel, lo que los convierte en descriptores de timbre muy eficaces. Evaluar su sensibilidad al ruido blanco, introduciendo un SNR controlado, permite estimar hasta qué punto estos descriptores se mantienen estables ante degradaciones de la señal. Finalmente, aplicar un clasificador como una **SVM lineal** sobre los MFCC ilustra el paso desde la descripción de la señal hacia la toma de decisiones supervisada, aunque en este bonus ello se haga en una escala mínima con etiquetas dummy.
+
+---
+
+## Selección de audios y preprocesamiento
+
+El script recorre el árbol de directorios de UrbanSound8K y localiza **8732 archivos .wav**, una cifra que se muestra como verificación del correcto acceso al dataset. A continuación selecciona los dos primeros archivos encontrados, `101415-3-0-2.wav` y `101415-3-0-3.wav`, y los pasa por la función `preprocess_audio`, que a su vez utiliza `load_audio` y `pad_or_trim` para garantizar una duración fija de 4 segundos y formato mono. Ambas señales resultantes comparten forma `(192000,)` y frecuencia de muestreo 48000 Hz, lo que garantiza un punto de partida homogéneo para el análisis posterior.
+
+<table>
+  <thead>
+    <tr>
+      <th>Audio</th>
+      <th>Nombre de archivo</th>
+      <th>Duración fija</th>
+      <th>Forma del vector</th>
+      <th>Sample rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Audio 1</td>
+      <td>101415-3-0-2.wav</td>
+      <td>4.0 s</td>
+      <td>(192000,)</td>
+      <td>48000 Hz</td>
+    </tr>
+    <tr>
+      <td>Audio 2</td>
+      <td>101415-3-0-3.wav</td>
+      <td>4.0 s</td>
+      <td>(192000,)</td>
+      <td>48000 Hz</td>
+    </tr>
+  </tbody>
+</table>
+
+La tabla resume las propiedades estructurales fundamentales de los dos audios seleccionados y confirma que ambos han pasado por un proceso idéntico de estandarización. Esto elimina cualquier fuente de variabilidad no deseada derivada de diferencias en formato, duración o frecuencia de muestreo, asegurando que las comparaciones posteriores —onsets, tonalidad, energía y sensibilidad de MFCC— reflejen únicamente diferencias intrínsecas de la señal y no artefactos del procesamiento. Que ambos vectores posean exactamente 192000 muestras implica que cada análisis opera sobre ventanas temporales análogas, garantizando una correspondencia temporal estricta entre los distintos indicadores calculados.
+
+---
+
+## Detección de eventos transitorios (onsets)
+
+Sobre el segundo audio preprocesado se construye un eje temporal lineal y se calcula la envolvente de onsets mediante `librosa.onset.onset_strength`. Con esa envolvente se obtienen los frames donde se detectan eventos y, finalmente, se convierten en tiempos en segundos. El resultado es una secuencia de **25 onsets** distribuidos principalmente entre los 0.6 y los 3.5 segundos de la señal, lo que revela una estructura rica en eventos intermedios y una relativa calma al inicio y al final.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/bonus1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+
+En la figura se observa el waveform del audio 2, superpuesto con líneas verticales rojas discontinuas en los tiempos de onset. Visualmente se aprecia cómo estas líneas suelen coincidir con picos pronunciados de amplitud, indicando que el algoritmo es capaz de capturar golpes o transiciones energéticas relevantes. La concentración de onsets en la región central refuerza la idea de que la señal posee una parte media muy activa, rodeada por zonas de menor densidad de eventos al principio y al final. Esta distribución tiene implicaciones directas en tareas como segmentación, sincronización o detección de patrones rítmicos.
+
+---
+
+## Análisis tonal: cromagrama y tonnetz
+
+El bonus continúa con la extracción de un **cromagrama** a partir de la STFT del audio 2, representando la energía de las doce clases de pitch en función del tiempo. El resultado es una matriz de tamaño (12, 376) que se visualiza mediante `librosa.display.specshow`. En paralelo, se calcula el **tonnetz** sobre la componente armónica de la señal, obteniendo una matriz de tamaño (6, 376) que captura relaciones de intervalo y estabilidad armónica.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/bonus2.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/bonus3.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+En el panel superior del gráfico se distinguen bandas horizontales más intensas en ciertas clases de pitch, lo que sugiere la presencia de componentes tonales recurrentes, incluso si el contexto sonoro es urbano y no estrictamente musical. Estas bandas se activan y desactivan a lo largo del tiempo, delineando una especie de firma tonal del entorno. En el panel inferior, el tonnetz muestra trayectorias suaves y zonas donde algunas dimensiones se intensifican más que otras, lo que indica relaciones armónicas relativamente estables. Aunque UrbanSound8K no está diseñado como corpus musical, la presencia de patrones tonales es relevante para tareas como clasificación de ambientes, detección de sirenas o identificación de señales acústicas estructuradas.
+
+<table>
+  <thead>
+    <tr>
+      <th>Representación</th>
+      <th>Shape</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Cromagrama</td>
+      <td>(12, 376)</td>
+      <td>12 clases de pitch a lo largo de 376 frames temporales</td>
+    </tr>
+    <tr>
+      <td>Tonnetz</td>
+      <td>(6, 376)</td>
+      <td>6 dimensiones armónicas sobre los mismos 376 frames</td>
+    </tr>
+  </tbody>
+</table>
+
+El contraste entre las dimensiones del cromagrama y las del tonnetz revela la diferencia de granularidad entre ambas representaciones. Mientras el cromagrama distribuye la energía espectral en doce clases de pitch, capturando así la actividad tonal directa en cada frame, el tonnetz reconfigura esos mismos datos en un espacio de seis dimensiones que codifica relaciones armónicas internas. Esta reducción estructurada permite identificar coherencias musicales o pseudo-musicales incluso en señales urbanas, donde la tonalidad no es explícita. La coincidencia en el número de frames entre ambas matrices indica que sus dinámicas temporales pueden compararse de forma directa, facilitando interpretaciones complementarias entre tono y armonía.
+
+---
+
+## Energía temporal (RMS)
+
+Para caracterizar la dinámica global de la señal se calcula la energía RMS por frame mediante `librosa.feature.rms`. Con los tiempos asociados producidos por `librosa.times_like`, se grafica la curva de energía a lo largo de los 4 segundos de audio.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/bonus4.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={200}
+  />
+</div>
+
+La figura muestra una serie de picos de energía que coinciden con la distribución de onsets detectados previamente: la energía se mantiene baja en los primeros instantes, aumenta abruptamente con una secuencia de pulsos pronunciados en la región central y desciende de manera progresiva hacia el final. Esta lectura confirma que el audio contiene una sucesión de eventos bien definidos, separados por intervalos de menor intensidad, lo que puede ser interpretado como golpes, ruidos intermitentes o elementos de una textura urbana rítmicamente estructurada. La coherencia entre el RMS y los onsets refuerza la validez del análisis temporal realizado.
+
+---
+
+## Sensibilidad de MFCC al ruido blanco
+
+El siguiente paso consiste en evaluar cómo reaccionan los **MFCC** frente a la introducción de ruido blanco con **SNR = 10 dB**, una relación señal–ruido relativamente agresiva. Para ello se genera una versión ruidosa del audio 2 (`y2_noisy`) utilizando la función `add_white_noise`, que ajusta la amplitud del ruido en función del RMS de la señal original. Luego se extraen los MFCC de la señal limpia y de la ruidosa, y se calcula la diferencia absoluta entre cada par de coeficientes, construyendo un `DataFrame` con estas diferencias.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica14/bonus5.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+El gráfico de barras resultante ordena los coeficientes por su variación absoluta y permite observar que algunos MFCC —sobre todo los primeros, asociados a la forma global de la envolvente espectral— son mucho más sensibles al ruido que otros, mientras que los coeficientes de orden mayor muestran cambios más moderados. Esto sugiere que, bajo condiciones de fuerte ruido blanco, la parte más gruesa del timbre se ve significativamente afectada, pero ciertas sutilezas espectrales se mantienen relativamente estables. Este tipo de análisis es crucial a la hora de diseñar sistemas robustos: permite decidir si conviene descartar los coeficientes más volátiles, aplicar técnicas de denoising o ajustar el pipeline de extracción para entornos ruidosos.
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspecto</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ruido añadido</td>
+      <td>Ruido blanco con SNR = 10 dB respecto de la señal original</td>
+    </tr>
+    <tr>
+      <td>Comparación</td>
+      <td>MFCC extraídos de señal limpia vs. señal ruidosa</td>
+    </tr>
+    <tr>
+      <td>Métrica</td>
+      <td>Diferencia absoluta por coeficiente y estadística agregada en un DataFrame</td>
+    </tr>
+    <tr>
+      <td>Hallazgo principal</td>
+      <td>Los primeros MFCC son notablemente más sensibles al ruido que los coeficientes de orden alto</td>
+    </tr>
+  </tbody>
+</table>
+
+La tabla destaca cómo el ruido blanco afecta diferencialmente a los coeficientes cepstrales: mientras los primeros MFCC —vinculados a la envolvente global del espectro— muestran una susceptibilidad marcada, los de orden superior mantienen variaciones más acotadas. Esta observación tiene implicaciones prácticas profundas: sugiere que, bajo condiciones de grabación adversas, los descriptores más representativos del timbre general pueden degradarse con facilidad, lo que impactaría en tareas de clasificación o reconocimiento. En cambio, la estabilidad relativa de los MFCC superiores puede aprovecharse para mejorar la robustez del sistema, ya sea ponderando coeficientes, filtrando ruido o eligiendo subconjuntos más resistentes de features.
+
+---
+
+## Clasificador básico basado en MFCC
+
+Como cierre del bonus, se construye un pequeño experimento supervisado. A partir de los audios 1 y 2, ya preprocesados, se extraen sus MFCC y se arma un `DataFrame` de entrenamiento con ambas observaciones. Se definen etiquetas dummy `{0: "clase_A", 1: "clase_B"}`, que no pretenden representar categorías semánticas reales del dataset, sino simplemente habilitar la existencia de un modelo de clasificación.
+
+Los features se escalan con `StandardScaler`, y a continuación se entrena una **SVM lineal** (`SVC(kernel="linear", probability=True)`) sobre este conjunto mínimo. El objetivo no es evaluar desempeño (dado que solo hay dos muestras), sino ilustrar cómo los MFCC pueden conectarse a un modelo que genera probabilidades y predicciones de clase. Como ejercicio final, se vuelve a extraer el vector MFCC del audio 2, se transforma con el mismo `scaler` y se pasa por el clasificador, que devuelve la etiqueta `"clase_B"` para ese archivo.
+
+<table>
+  <thead>
+    <tr>
+      <th>Componente</th>
+      <th>Rol en el pipeline</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>MFCC</td>
+      <td>Vector de características base para cada audio</td>
+    </tr>
+    <tr>
+      <td>StandardScaler</td>
+      <td>Normaliza cada dimensión de los MFCC antes de entrenar</td>
+    </tr>
+    <tr>
+      <td>SVM lineal</td>
+      <td>Clasificador supervisado con kernel lineal y salida probabilística</td>
+    </tr>
+    <tr>
+      <td>Etiquetas dummy</td>
+      <td>Asignan “clase_A” al audio 1 y “clase_B” al audio 2</td>
+    </tr>
+    <tr>
+      <td>Predicción de ejemplo</td>
+      <td>El modelo clasifica 101415-3-0-3.wav como “clase_B”</td>
+    </tr>
+  </tbody>
+</table>
+
+Aunque el experimento emplea únicamente dos ejemplos, la tabla ilustra con claridad el flujo completo de un pipeline supervisado: extracción de features, normalización, modelado y predicción. La SVM lineal actúa aquí como una prueba conceptual de que los MFCC contienen suficiente información discriminativa para que un modelo, aun con muy pocos datos, logre separar las observaciones en un espacio de características. La asignación consistente de la clase "clase_B" al segundo audio confirma que el modelo captura diferencias reales en la estructura espectral entre ambas señales. Esta demostración, aunque mínima, valida la idea central del bonus: los MFCC funcionan como puente entre el análisis de señal y las tareas de decisión automática.
+
+---
+
+## Conclusiones del bonus
+
+El bonus de la práctica 14 muestra cómo, a partir de dos audios concretos de UrbanSound8K, es posible construir un mini laboratorio de análisis temporal, tonal y espectral que va más allá de la mera visualización del espectrograma. La detección de onsets revela una estructura temporal rica en eventos, el cromagrama y el tonnetz evidencian la presencia de patrones tonales significativos incluso en señales urbanas, y la curva RMS aporta una visión clara de cómo se distribuye la energía a lo largo de los 4 segundos de duración.
+
+La evaluación de la sensibilidad de los MFCC frente a ruido blanco con SNR bajo demuestra que no todos los coeficientes se comportan igual: algunos son extremadamente vulnerables a la degradación, mientras otros se mantienen relativamente estables. Este hallazgo invita a pensar en estrategias de selección o ponderación de características cuando se diseñan sistemas robustos para entornos ruidosos. Finalmente, el pequeño experimento con SVM ilustra que, incluso en condiciones mínimas, los MFCC constituyen una base razonable para modelos supervisados, ofreciendo un puente natural entre análisis de señal y tareas de clasificación.
+
+En conjunto, este bonus consolida la idea de que un buen pipeline de audio no se limita a calcular features, sino que los somete a pruebas de comportamiento —ruido, estructura temporal, contenido tonal— y los sitúa dentro de una arquitectura que va desde la onda cruda hasta la decisión de un clasificador.
