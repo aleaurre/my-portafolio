@@ -1,4 +1,54 @@
-# Magic Portfolio
+# Portafolio de Ingeniería en IA y Ciencia de Datos
+
+Este portafolio documenta mi recorrido académico y profesional como estudiante de **Ingeniería en Inteligencia Artificial y Ciencia de Datos**. Aquí encontrarás una selección creciente de proyectos técnicos, prácticas integrales y desarrollos aplicados, con foco en:
+
+* Ingeniería de datos y construcción de pipelines reproducibles
+* Modelado predictivo, machine learning y análisis estadístico
+* Visualización y comunicación efectiva de resultados
+* Desarrollo de software y buenas prácticas de ingeniería
+* Computación embebida y procesamiento de señales
+* Ética y responsabilidad en Inteligencia Artificial
+
+El objetivo principal es presentar **trabajos completos**, con código estructurado, análisis detallado y resultados interpretables que reflejan mi formación y evolución.
+
+---
+
+## Organización del portafolio
+
+Cada proyecto/documento incluye:
+
+* Contexto del problema
+* Herramientas y tecnologías utilizadas
+* Proceso de desarrollo (ETL / feature engineering / modelado / pruebas)
+* Evaluación de resultados y conclusiones
+* Archivos reproducibles (notebooks, dashboards, datasets de referencia)
+
+Los proyectos están organizados según cursos, temáticas y entregables académicos, y se irán **actualizando y ampliando periódicamente** a medida que avance en la carrera.
+
+---
+
+## Tecnologías destacadas
+
+* Lenguajes: **Python**, SQL, C/ASM para sistemas embebidos
+* ML/DS: pandas, scikit-learn, XGBoost, CatBoost, Fairlearn
+* Visualización: Power BI, matplotlib, seaborn
+* Infraestructura: Docker, GitHub, pipelines automatizados
+* Geodatos, audio e imagen: geopandas, librosa, OpenCV
+* Otros: DAX, APIs, Next.js/MDX para documentación técnica
+
+---
+
+## Contacto
+
+Si te interesa conocer más sobre mi trabajo, colaborar en proyectos o realizar una consulta profesional:
+
+* GitHub: [github.com/aleaurre](https://github.com/aleaurre)
+* Email: [alexiaurrecochea@gmail.com](mailto:alexiaurrecochea@gmail.com)
+* Ubicación: Montevideo, Uruguay
+  
+---
+
+# La plantilla utilizada fue Magic Portfolio
 
 Magic Portfolio is a simple, clean, beginner-friendly portfolio template. It supports an MDX-based content system for projects and blog posts, an about / CV page and a gallery.
 
@@ -87,5 +137,6 @@ Distributed under the CC BY-NC 4.0 License.
 See `LICENSE.txt` for more information.
 
 ## Deploy with Vercel
+
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonce-ui-system%2Fmagic-portfolio&project-name=portfolio&repository-name=portfolio&redirect-url=https%3A%2F%2Fgithub.com%2Fonce-ui-system%2Fmagic-portfolio&demo-title=Magic%20Portfolio&demo-description=Showcase%20your%20designers%20or%20developer%20portfolio&demo-url=https%3A%2F%2Fdemo.magic-portfolio.com&demo-image=%2F%2Fraw.githubusercontent.com%2Fonce-ui-system%2Fmagic-portfolio%2Fmain%2Fpublic%2Fimages%2Fog%2Fhome.jpg)
