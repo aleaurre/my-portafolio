@@ -1,0 +1,184 @@
+---
+title: "Ingeniería Temporal en E-Commerce: Revelando la Dinámica Secreta del Comportamiento del Cliente."
+publishedAt: "2025-11-03"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica11/portada.png"
+---
+
+# Temporal Feature Engineering en E-commerce: Construcción de Señales Temporales y Dinámicas de Compra de Clientes.
+
+## Resumen ejecutivo
+
+El análisis realizado se centró en la aplicación de técnicas de ingeniería temporal de features sobre un dataset real de transacciones de e-commerce. El objetivo principal fue comprender la dinámica de compra de los clientes, empleando herramientas como lags, rolling windows, expanding windows, métricas RFM, diversidad de productos y codificaciones de calendario. El enfoque permitió enriquecer las secuencias temporales individuales con información relevante acerca de la frecuencia de recompra, tendencias recientes, comportamiento histórico y estacionalidad. Al mismo tiempo, se cuidó rigurosamente evitar todo tipo de data leakage mediante ordenamientos correctos y desplazamientos controlados por usuario. Los resultados obtenidos revelaron patrones claros de comportamiento, como ciclos de compra mensuales, variaciones en el tamaño del carrito y diferencias marcadas entre clientes regulares y esporádicos.
+
+---
+
+## Contexto general
+
+Esta práctica corresponde a la Unidad 3 del curso Inteligencia de Datos, específicamente al módulo dedicado a Temporal Feature Engineering. El dataset Online Retail, proveniente de Kaggle, contiene más de quinientas mil transacciones entre diciembre de 2010 y diciembre de 2011, permitiendo estudiar el comportamiento de compra a nivel individual. Cada fila representa un producto dentro de una orden, lo que proporciona un nivel de detalle ideal para analizar fluctuaciones temporales, intervalos entre compras, estacionalidad del consumo y diversidad de los productos adquiridos. El propósito es convertir una colección de registros transaccionales en una serie de features que reflejen la evolución del comportamiento del cliente a lo largo del tiempo.
+
+---
+
+## Preparación del dataset
+
+El procesamiento inicial consistió en la descarga del dataset, la eliminación de facturas canceladas, valores negativos y clientes sin identificador, y la organización cronológica de las transacciones por usuario. Luego de la limpieza, el dataset quedó compuesto por 397.884 filas correspondientes a 4.338 clientes únicos. El rango temporal abarca desde el 1 de diciembre de 2010 hasta el 9 de diciembre de 2011, con un total de ventas que supera los ocho millones de dólares. Esta estructura temporal permitió analizar cómo se comportan los clientes frente a intervalos irregulares entre compras y una frecuencia promedio de poco más de cuatro órdenes por cliente. En esta etapa inicial resulta fundamental entender la varianza temporal del dataset.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/distribucion_ordenes.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La imagen correspondiente a las órdenes semanales muestra con claridad el comportamiento estacional del sistema, con picos notorios hacia fin de año y fluctuaciones que revelan una dinámica comercial marcada. La distribución de días entre órdenes indica una mediana cercana a un mes, lo que sugiere un patrón de compra relativamente esporádico, aunque con una dispersión considerable: algunos clientes compran con frecuencia semanal, mientras que otros reaparecen después de varios meses, generando una heterogeneidad clave para el modelado posterior.
+
+---
+
+## Lags – Comportamiento reciente
+
+El cálculo de lags mediante groupby y shift permitió registrar la distancia temporal respecto de compras pasadas sin contaminar usuarios entre sí. El lag_1 representa el intervalo entre las dos compras más recientes y resulta fundamental para distinguir clientes que mantienen un hábito de compra estable de aquellos con comportamiento imprevisible. Los lags más prolongados ofrecen una visión más amplia del ritmo de interacción del usuario con la plataforma, aportando información esencial para modelos que dependen de la predicción de recurrencia.
+
+---
+
+## Rolling Windows – Tendencias recientes
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/rollingmean_vs_cartsize.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La imagen que compara el rolling mean del tamaño del carrito con los valores reales ayuda a visualizar cómo estas ventanas móviles suavizan la variabilidad de las compras individuales. El rolling mean capta la tendencia inmediata del usuario, revelando si está aumentando su volumen de compra o si experimenta oscilaciones pronunciadas. La zona sombreada correspondiente a una desviación estándar alrededor del rolling mean evidencia qué tan errático o estable es un cliente: aquellos cuyas compras se mantienen dentro de la banda de variación muestran patrones consistentes, mientras que quienes exhiben picos o caídas abruptas sugieren comportamientos impulsivos o episódicos.
+
+---
+
+## Expanding Windows – Comportamiento histórico
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/rolling_expandingmean.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={900}
+    height={400}
+  />
+</div>
+
+La figura asociada a las expanding windows muestra cómo los promedios y tendencias acumuladas evolutivas reflejan la “memoria” del comportamiento de cada cliente. A diferencia de las rolling windows, estas acumulaciones no olvidan el pasado, sino que integran toda la historia del usuario. La curva resultante revela si con el tiempo el cliente tiende a estabilizarse en un nivel de compra determinado o si, por el contrario, presenta una evolución irregular en la que cada nueva orden puede alterar significativemente el promedio histórico. Es una medida ideal para caracterizar la fidelidad y la estabilidad del comportamiento de compra.
+
+---
+
+## RFM Aggregations – Recency, Frequency, Monetary
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/distributions.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={1000}
+    height={400}
+  />
+</div>
+
+Las distribuciones RFM permiten analizar tres dimensiones esenciales del comportamiento del cliente. La recency evidencia qué tan reciente ha sido la última interacción del usuario con la tienda, mostrando una gran proporción de clientes inactivos durante largos períodos. La frecuencia exhibe el típico patrón de cola larga donde pocos usuarios acumulan muchas órdenes y la mayoría mantiene una interacción mínima. El aspecto monetario presenta igualmente una dispersión significativa, indicando la coexistencia de clientes de ticket alto y otros de ticket bajo. Estas medidas, utilizadas en conjunto, permiten segmentar a los clientes y anticipar su propensión a una recompra futura.
+
+---
+
+## Time Windows (7d, 30d, 90d)
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/ventas_temporal.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={900}
+    height={400}
+  />
+</div>
+
+La visualización de ventanas temporales evidencia cómo la actividad creciente en períodos más amplios contrasta con la baja frecuencia en ventanas reducidas. Los valores de siete días muestran una actividad casi marginal, lo que refuerza el carácter esporádico de las compras, mientras que las ventanas de treinta y noventa días capturan la mayor parte de la recurrencia. El scatter que compara órdenes en noventa días con órdenes en siete días revela dos perfiles muy marcados: clientes con alta actividad histórica pero poca actividad reciente, que representan un riesgo potencial de churn, y clientes reactivados cuya actividad reciente muestra señales de retorno.
+
+---
+
+## Product Diversity
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/productdiversitydelivery.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La imagen que explora la diversidad de productos combina un scatter plot entre total de ítems y productos únicos y un histograma del índice de diversidad. El scatter muestra que muchos clientes realizan compras repetitivas con pocos productos distintos, mientras que un conjunto importante presenta una diversidad notable. El histograma confirma que la mayoría mantiene un ratio elevado, lo que implica un comportamiento exploratorio considerable. Los valores bajos de diversidad, en cambio, indican clientes que retornan con patrones muy definidos, ideales para estrategias de fidelización y recomendaciones específicas.
+
+---
+
+## Calendar Features – Encoding cíclico
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/encoding.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={900}
+    height={400}
+  />
+</div>
+
+La representación gráfica del encoding cíclico ilustra cómo variables originalmente discretas como la hora o el día de la semana se transforman en coordenadas sinusoidales que preservan su continuidad natural. En la figura se observan patrones circulares que señalan la proximidad entre horas consecutivas y la equivalencia entre domingo y lunes o entre las horas 23 y 0. La comparación entre días de semana y fin de semana en términos de tamaño de carrito muestra un incremento claro durante los fines de semana, lo que respalda su inclusión como variable auxiliar en modelos de predicción.
+
+---
+
+## External Features – Indicadores económicos simulados
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/monthly_orders.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+El gráfico que combina órdenes mensuales con el crecimiento del PBI y la confianza del consumidor destaca cómo indicadores externos pueden influir en la demanda. Las variaciones económicas se correlacionan parcialmente con las fluctuaciones en el volumen de órdenes, y el scatter entre confianza del consumidor y número de órdenes sugiere una relación positiva moderada: en contextos de mayor optimismo económico, los usuarios tienden a gastar más o a comprar con mayor frecuencia. Aunque estas características no son determinantes por sí solas, enriquecen el modelo contextualizando la estacionalidad económica.
+
+---
+
+## Feature Importance en modelos predictivos
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/feature_importance.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+El gráfico de importancia de features revela el peso que cada variable aporta al modelo final. Se observa que las variables temporales —incluyendo recency, diversidad de productos, rolling windows y ventanas temporales de mediano plazo— dominan la relevancia. Las características basadas en calendario y los indicadores económicos aportan información adicional pero con un peso comparativamente menor. La interpretación de esta figura reafirma que el comportamiento temporal es el componente fundamental para predecir recurrencia o compra futura en entornos de e-commerce.
+
+---
+
+## Evaluación del desempeño del modelo
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica11/model_performance.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La comparación entre el modelo base y el modelo enriquecido muestra un incremento notable del desempeño. El AUC del modelo sin features temporales es significativamente inferior al del modelo con lags, ventanas móviles, expanding windows y variables externas. Este aumento confirma que la incorporación de temporalidad no es opcional, sino esencial para capturar la dinámica real del comportamiento del usuario y mejorar la capacidad predictiva del sistema.
+
+---
+
+## Conclusiones generales
+
+El trabajo realizado demuestra que la dimensión temporal es indispensable para comprender y modelar el comportamiento de los clientes en plataformas de e-commerce. Las técnicas de ingeniería temporal permiten transformar datos transaccionales aparentemente estáticos en secuencias ricas en información dinámica. Los lags brindan señales inmediatas sobre el ritmo de compra; las rolling windows capturan tendencias recientes; las expanding windows revelan la estabilidad histórica; las métricas RFM ofrecen una visión integral del ciclo de vida del cliente; la diversidad de productos caracteriza su comportamiento exploratorio o repetitivo; y el calendario junto con variables externas contextualiza las fluctuaciones del consumo. La conjunción de todas estas señales permite construir modelos con mayor precisión y capacidad explicativa, facilitando estrategias de retención, recomendaciones personalizadas y estimaciones más fiables de la recurrencia futura.
+
+
