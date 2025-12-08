@@ -35,23 +35,6 @@ Por su parte, PC2 agrupa variables asociadas a la distribución interna del hoga
 
 ---
 
-### Comparación de rendimiento entre métodos
-
-<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
-  <Image
-    src="/practica10/results_table.png"
-    alt="Boxplots mostrando diferencias de escala"
-    width={800}
-    height={400}
-  />
-</div>
-
-La tabla comparativa sintetiza los valores de RMSE, R², tiempo computacional y número de características retenidas por cada método. Este resumen visual facilita una lectura integral del comportamiento del pipeline: muestra claramente que el PCA, pese a su capacidad de compresión, no logra un rendimiento competitivo cuando se utilizan directamente las componentes transformadas; que RFE logra un buen desempeño pero a un costo computacional mucho más alto; y que Mutual Information emerge como la estrategia más equilibrada entre precisión e interpretabilidad.
-
-La tabla funciona como una evidencia cuantitativa que refuerza la narrativa conceptual: reducir variables no es simplemente eliminar columnas, sino seleccionar aquellas que mejor capturan la estructura subyacente que explica el precio. En este sentido, la tabla destaca cómo algunos métodos que preservan variables originales (como MI) mantienen la trazabilidad semántica, mientras que otros que transforman el espacio (como PCA) pierden legibilidad aunque mantengan parte de la varianza explicada.
-
----
-
 ### Evaluación mediante Wrapper Methods
 
 <div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>

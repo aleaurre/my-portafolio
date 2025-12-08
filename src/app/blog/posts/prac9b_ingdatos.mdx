@@ -121,68 +121,19 @@ La primera tabla resume el rendimiento de todas las combinaciones entre esquemas
 <table>
   <thead>
     <tr>
-      <th>Clase</th>
-      <th>Precision</th>
-      <th>Recall</th>
-      <th>F1-score</th>
-      <th>Support</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>0</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>146</td>
-    </tr>
-    <tr>
-      <td>1</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>146</td>
-    </tr>
-    <tr>
-      <td><strong>Accuracy</strong></td>
-      <td colspan="3">1.0000</td>
-      <td>292</td>
-    </tr>
-    <tr>
-      <td>Macro avg</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>292</td>
-    </tr>
-    <tr>
-      <td>Weighted avg</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>1.0000</td>
-      <td>292</td>
-    </tr>
-  </tbody>
-</table>
-
-El reporte de clasificación del mejor modelo —un pipeline branched con CatBoost Encoding y HGB— expone un desempeño perfecto en todos los indicadores: precisión, recall y F1 alcanzan el valor máximo para ambas clases. Esto significa que el modelo no solo clasifica correctamente todos los casos, sino que lo hace sin incurrir en falsos positivos ni falsos negativos. En términos prácticos, logra identificar de manera exacta qué propiedades superan la mediana de precio y cuáles no, incluso en presencia de variables categóricas complejas. La simetría entre clases indica que el modelo no depende de un desequilibrio en la distribución de la variable objetivo, mientras que los promedios macro y weighted confirman una estabilidad generalizada del rendimiento. Este tipo de resultado es poco frecuente en datos reales y sugiere que la combinación adecuada de encoding supervisado y modelos basados en gradientes logra capturar patrones muy refinados del dataset Ames Housing.
-
-<table>
-  <thead>
-    <tr>
       <th>PSI(prob_train vs prob_test)</th>
       <th>Interpretación</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>0.0000</td>
+      <td>0.0829</td>
       <td>&lt;=0.1 estable — no hay drift entre train y test</td>
     </tr>
   </tbody>
 </table>
 
-La tabla del PSI muestra un valor de 0.0000 al comparar las distribuciones de probabilidades del conjunto de entrenamiento y prueba. Este indicador evalúa si el modelo ha experimentado drift, es decir, cambios significativos en la distribución de las variables o de las predicciones entre fases del proceso. Un PSI igual a cero implica estabilidad total: las predicciones generadas en test siguen la misma dinámica que en entrenamiento. Esto refuerza la idea de que el pipeline fue correctamente regularizado y que las estrategias de encoding (especialmente el CatBoost Encoding con smoothing) evitaron fugas de información o overfitting supervisado. En términos de MLOps, un PSI tan bajo indica que el modelo está listo para ser monitoreado en producción, pues no presenta señales de deterioro o cambios no esperados en su comportamiento.
+La tabla del PSI muestra un valor de 0.0829 al comparar las distribuciones de probabilidades del conjunto de entrenamiento y prueba. Este indicador evalúa si el modelo ha experimentado drift, es decir, cambios significativos en la distribución de las variables o de las predicciones entre fases del proceso. Un PSI igual a cero implica estabilidad total: las predicciones generadas en test siguen la misma dinámica que en entrenamiento. Esto refuerza la idea de que el pipeline fue correctamente regularizado y que las estrategias de encoding (especialmente el CatBoost Encoding con smoothing) evitaron fugas de información o overfitting supervisado. En términos de MLOps, un PSI tan bajo indica que el modelo está listo para ser monitoreado en producción, pues no presenta señales de deterioro o cambios no esperados en su comportamiento.
 
 ## Conclusiones
 

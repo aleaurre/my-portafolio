@@ -1,0 +1,47 @@
+---
+title: "Más allá de la Reducción Dimensional y Selección de Variables en Ames Housing"
+publishedAt: "2025-10-24"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica10/portada.jpg"
+---
+
+
+## Evaluación de un Pipeline Híbrido de Selección de Características mediante PCA, Información Mutua, RFE, Lasso y Validación Cruzada
+
+La extensión propuesta se centró en construir y evaluar un pipeline híbrido de selección de características que integrara técnicas clásicas, estadísticas y model-based con el fin de capturar, de forma más robusta, la estructura subyacente del dataset de Ames Housing. A diferencia de los enfoques unidimensionales que suelen depender exclusivamente de PCA o de métodos supervisados, la idea fue diseñar un sistema capaz de combinar múltiples criterios: reducción de dimensionalidad, relevancia estadística, importancia supervisada y regularización. El objetivo consistió en evaluar si esta composición podía lograr un equilibrio superior entre rendimiento, estabilidad y explicabilidad, especialmente en un contexto inmobiliario donde las relaciones entre variables suelen ser no lineales, multicolineales y parcialmente ruidosas.
+
+El pipeline inició con una estandarización global mediante *StandardScaler*, necesaria para evitar que variables con escalas disímiles dominaran las componentes principales o influyeran desproporcionadamente en la regularización. Luego se aplicó un paso de PCA configurado para retener el 80 % de la varianza acumulada, actuando como un filtro inicial que atenúa colinealidades profundas mientras conserva señales relevantes para el predictor. Paralelamente, se calculó la información mutua sobre las variables originales, seleccionando las 30 más relevantes en términos de dependencia estadística con el precio de venta; esta estrategia permitió mantener trazabilidad interpretativa y preservar atributos con significado semántico en el contexto inmobiliario.
+
+Luego, el conjunto temporal de features pasó por un proceso de *Recursive Feature Elimination* utilizando un RandomForestRegressor como estimador base. Este paso introdujo una capa de selección supervisada, capaz de ponderar la importancia de cada variable según su contribución real al desempeño. El refinamiento final consistió en aplicar *LassoCV*, que eliminó características redundantes mediante regularización L1, generando así un subconjunto compacto y menos propenso al sobreajuste. Finalmente, el modelo resultante fue evaluado mediante un RandomForestRegressor con validación cruzada (cv=5), permitiendo obtener un estimador fiable del rendimiento medio y del comportamiento generalizado del pipeline compuesto.
+
+---
+
+## Interpretación de los Resultados Observados
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica10/results_table.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+La tabla de resultados sintetiza el desempeño de cada método individual —Mutual Information, RFE, PCA y LassoCV— junto con el del pipeline híbrido que los combina de forma articulada. Cada fila representa una metodología de selección y muestra sus valores de RMSE, R², interpretabilidad y tiempo de ejecución. La primera observación notable es que **Mutual Information**, con 30 features, presenta un RMSE relativamente bajo (26,573) y un R² de 0.912, lo cual indica que la relación estadística entre variables y objetivo contiene información sustancial sobre la estructura del problema. Este enfoque destaca por su alta interpretabilidad, dado que retiene atributos originales, fácilmente rastreables al dominio.
+
+El método **RFE (RF)** reduce el conjunto a 20 variables y consigue un R² de 0.905. Aunque su desempeño es ligeramente inferior al de MI, su carácter supervisado le permite detectar patrones que dependen directamente del comportamiento del modelo, más allá de la correlación o la dependencia estadística pura. El costo computacional es considerablemente más alto —62 segundos— evidenciando que la selección iterativa con Random Forest es intensiva cuando se busca un subconjunto óptimo.
+
+Por otro lado, **PCA** reduce las características a solo 18 componentes, pero al precio de una interpretabilidad baja. Su R² de 0.89 confirma que, aunque es efectivo en capturar varianza global, su naturaleza no supervisada limita su capacidad predictiva. En este caso, el modelo pierde acceso a la semántica original de las variables, lo que es especialmente crítico en análisis inmobiliarios donde la interpretabilidad influye en el valor del análisis.
+
+**LassoCV**, con 38 variables retenidas, exhibe el desempeño más débil (R² = 0.837). Esto sugiere que la regularización L1 elimina parámetros de manera efectiva, pero la estructura no lineal del problema dificulta que un enfoque puramente lineal capture toda la complejidad de Ames.
+
+Finalmente, la fila correspondiente al **pipeline híbrido (PCA + MI + RFE + Lasso)** muestra que, aunque combina múltiples técnicas, no busca maximizar únicamente el R², sino encontrar un equilibrio entre generalización, estabilidad, tamaño de feature space y interpretabilidad. Con 18 variables retenidas y un tiempo razonable, el pipeline logra un R² de 0.821, inferior al de los métodos individuales, pero con la ventaja de ofrecer una arquitectura más compacta, robusta y metodológicamente equilibrada. El mensaje clave es que su fortaleza no reside en superar cada método aislado, sino en proporcionar un enfoque versátil y reproducible, ideal para etapas avanzadas de MLOps y despliegue productivo.
+
+---
+
+## Conclusión
+
+El análisis global del experimento demuestra que ningún método de selección de características es universalmente superior. Mutual Information sobresale en interpretabilidad y desempeño estadístico; RFE destaca por captar relevancia supervisada; PCA es eficiente para condensar la estructura de correlación; LassoCV contribuye a la eliminación automática de ruido; y Random Forest aporta estabilidad predictiva y capacidad para manejar no linealidades. Sin embargo, la verdadera potencia emerge cuando estos enfoques se integran en un pipeline híbrido que respeta la complejidad del dominio y combina fortalezas de técnicas complementarias.
+
+Esta extensión confirma que procesos de selección multifase permiten construir modelos más compactos, menos propensos al sobreajuste y mejor adaptados a un ciclo de vida reproducible. La combinación de métodos estadísticos, model-based y regularizados responde a un paradigma moderno de ingeniería de características donde el objetivo ya no es solo mejorar métricas de precisión, sino asegurar transparencia, consistencia y trazabilidad. En este sentido, el pipeline híbrido refleja prácticas alineadas con CRISP-DM y con enfoques educativos de MLOps, promoviendo no solo modelos eficaces sino también confiables y auditables.
+
