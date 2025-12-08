@@ -148,7 +148,7 @@ const about: About = {
     title: "Habilidades Técnicas",
     skills: [
       {
-        title: "Python & Machine Learning",
+        title: "Machine Learning",
         description: <>Entrenamiento de modelos, análisis de datos y automatización de flujos.</>,
         tags: [
           { name: "Python", icon: "python" },
