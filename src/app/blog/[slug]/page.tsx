@@ -11,7 +11,8 @@ import {
   SmartLink,
   Media
 } from "@once-ui-system/core";
-import { baseURL, about, work, person } from "@/resources";
+
+import { baseURL, about, blog, person } from "@/resources";
 import { getPosts } from "@/utils/utils";
 import { Metadata } from "next";
 import { formatDate } from "@/utils/formatDate";
@@ -20,8 +21,8 @@ import { formatDate } from "@/utils/formatDate";
 //  GENERATE STATIC PARAMS
 // ─────────────────────────────
 export async function generateStaticParams() {
-  const works = getPosts(["src", "app", "blog", "posts"]);
-  return works.map((item) => ({ slug: item.slug }));
+  const posts = getPosts(["src", "app", "blog", "posts"]);
+  return posts.map((item) => ({ slug: item.slug }));
 }
 
 // ─────────────────────────────
@@ -34,8 +35,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  const works = getPosts(["src", "app", "blog", "posts"]);
-  const item = works.find((i) => i.slug === slug);
+  const posts = getPosts(["src", "app", "blog", "posts"]);
+  const item = posts.find((i) => i.slug === slug);
 
   if (!item) return {};
 
@@ -46,22 +47,22 @@ export async function generateMetadata({
     image:
       item.metadata.image ||
       `/api/og/generate?title=${encodeURIComponent(item.metadata.title)}`,
-    path: `${work.path}/${item.slug}`,
+    path: `${blog.path}/${item.slug}`,
   });
 }
 
 // ─────────────────────────────
-//  WORK PAGE
+//  PORTFOLIO PAGE
 // ─────────────────────────────
-export default async function WorkPage({
+export default async function PortfolioPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
 
-  const works = getPosts(["src", "app", "blog", "posts"]);
-  const item = works.find((i) => i.slug === slug);
+  const posts = getPosts(["src", "app", "blog", "posts"]);
+  const item = posts.find((i) => i.slug === slug);
 
   if (!item) return notFound();
 
@@ -79,7 +80,7 @@ export default async function WorkPage({
           <Schema
             as="article"
             baseURL={baseURL}
-            path={`${work.path}/${item.slug}`}
+            path={`${blog.path}/${item.slug}`}
             title={item.metadata.title}
             description={item.metadata.summary}
             datePublished={item.metadata.publishedAt}
@@ -97,8 +98,8 @@ export default async function WorkPage({
 
           {/* Header */}
           <Column maxWidth="s" gap="16" horizontal="center" align="center">
-            <SmartLink href="/work">
-              <Text variant="label-strong-m">Work</Text>
+            <SmartLink href={blog.path}>
+              <Text variant="label-strong-m">Portafolio</Text>
             </SmartLink>
 
             {item.metadata.publishedAt && (

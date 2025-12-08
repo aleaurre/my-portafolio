@@ -1,0 +1,113 @@
+---
+title: "Brechas Invisibles: Cómo la Amplitud de los Precios Revela Sesgos Estructurales en Modelos Inmobiliarios"
+publishedAt: "2025-09-28"
+summary: "Modelo temporal multicliente con ingeniería de series de tiempo, detección dinámica de anomalías y evaluación comparativa de enfoques con lags y ventanas móviles."
+tag: "Curso: Ingeniería de Datos"
+image: "/practica7/la-moral.jpg"
+---
+
+## Resumen Ejecutivo
+
+- Se realizó un análisis profundo de **sesgo en amplitud** en modelos de predicción inmobiliaria, evaluando cómo la dispersión, varianza y rango de precios difieren entre grupos sensibles, especialmente en contextos racializados.  
+- Las visualizaciones mostraron que los barrios con **mayor proporción afroamericana** presentan distribuciones de precios más estrechas y con menor acceso a valores altos, evidenciando inequidades estructurales que pueden ser aprendidas y amplificadas por modelos de Machine Learning.  
+- El estudio integra este análisis con tres datasets de referencia (Boston Housing, Titanic y Ames Housing), donde se aplicaron métricas de equidad, métodos de mitigación y una evaluación crítica del impacto ético de los modelos.  
+- Se enfatizó que la amplitud distribucional es un indicador clave para detectar injusticias algorítmicas, más allá de las diferencias en promedio o tasas.  
+- Se propone un marco profesional para decidir **cuándo detectar, cuándo corregir y cuándo rechazar un modelo**, priorizando siempre transparencia, responsabilidad técnica y sensibilidad al contexto socioeconómico.  
+- En aplicaciones sensibles como tasaciones, hipotecas o precios de vivienda, se concluye que los modelos deben auditarse exhaustivamente para evitar la reproducción de desigualdades históricas.
+
+---
+
+##  Marco Teórico
+
+La detección de sesgo en amplitud constituye un enfoque necesario cuando se analizan problemas de regresión asociados a variables socioeconómicas, especialmente en contextos donde existen diferencias históricas entre grupos sensibles. A diferencia del sesgo en la media —que solo compara una tendencia central—, el sesgo en amplitud examina **la forma completa de la distribución**, incluyendo rango, dispersión, varianza y presencia de valores atípicos. Estas características configuran un panorama mucho más rico para identificar desigualdades sistémicas que pueden quedar invisibilizadas en análisis superficiales.
+
+Desde la perspectiva de fairness, las distribuciones con amplitudes desiguales pueden reflejar inequidades profundas. Si un grupo presenta consistentemente un rango más reducido de valores, significa que existe **menor diversidad de oportunidades económicas** dentro de ese grupo, lo que puede trasladarse a predicciones injustas en sistemas automatizados. Un modelo entrenado bajo estas condiciones tiende a aprender funciones menos flexibles para ese segmento, generando errores sistemáticos como *underprediction*, que afectan de manera directa la capacidad de acceder a crédito o la valorización de activos como propiedades.
+
+En contextos inmobiliarios, la amplitud desigual es especialmente problemática. Este sector constituye una de las principales fuentes de acumulación patrimonial en sociedades modernas; por lo tanto, cualquier restricción sistemática en la variabilidad de precios para un grupo particular implica un impacto intergeneracional. La ética algorítmica contemporánea advierte que estos patrones no deben considerarse neutrales ni inevitables: son el resultado de dinámicas históricas y sociales que deben analizarse críticamente antes de ser replicadas por sistemas automatizados.
+
+---
+
+## Resultados
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica7/boxplot.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+Los boxplots incluidos permiten visualizar de forma clara cómo la estructura del mercado inmobiliario difiere entre zonas con alta y baja proporción afroamericana. La diferencia en la altura total de los diagramas evidencia que el **rango de precios** para el grupo "Baja_prop_afroam" es sustancialmente mayor, con valores máximos que superan ampliamente los observados para "Alta_prop_afroam". Esta ampliación del rango implica mayor flexibilidad del mercado, más oportunidades de valorización y mayor heterogeneidad en el tipo de viviendas presentes en estos barrios.
+
+Asimismo, la distancia entre los cuartiles revela que el **IQR del grupo mayoritario es mucho más amplio**, lo que indica una diversidad interna significativamente mayor. Esto contrasta con el IQR mucho más estrecho en el grupo asociado a alta proporción afroamericana, que sugiere una homogeneidad forzada, típicamente asociada a procesos de segregación histórica, limitaciones de acceso al crédito y patrones de valorización truncados.
+
+Finalmente, la presencia de más outliers altos en el grupo no minoritario pone de manifiesto que existen propiedades con valores excepcionalmente elevados que simplemente no aparecen en la otra distribución. Desde una perspectiva de fairness, esto representa un riesgo crítico: cualquier modelo que se entrene con estas distribuciones aprenderá un techo predictivo distinto para cada grupo, replicando y amplificando inequidades estructurales que tienen profundas implicancias socioeconómicas.
+
+---
+
+## Análisis de Sesgo en Amplitud
+
+El análisis de la distribución completa de precios permite observar una tendencia clara: el mercado limita estructuralmente las oportunidades de valorización para las zonas con mayor proporción afroamericana. Esta limitación no solo afecta a quienes venden o compran propiedades, sino también a todas las instituciones que dependen de modelos automatizados para evaluar riesgos, otorgar créditos o especular sobre la apreciación futura de activos inmobiliarios. El sesgo en amplitud, en este sentido, se convierte en un indicador clave para comprender las desigualdades urbanas.
+
+Un aspecto especialmente relevante es que la amplitud no depende exclusivamente de factores aislados como el tamaño de la vivienda o su estado, sino que refleja **patrones históricos de zonificación, inversión pública, discriminación crediticia y dinámicas residenciales**. Cuando un modelo absorbe esta información sin un análisis crítico, termina transformándose en un mecanismo que no solo predice, sino que refuerza activamente desigualdades preexistentes. La automatización, lejos de corregir sesgos, los solidifica al dotarlos de apariencia objetiva.
+
+Además, la desigualdad en amplitud implica una diferencia sustancial en el comportamiento de los errores de predicción. En zonas con baja variabilidad, los modelos tienden a mostrar menor error general, pero también menor sensibilidad a diferencias reales entre propiedades individuales. Esto significa que las predicciones son más homogéneas y, por ende, menos capaces de capturar particularidades relevantes. En contextos donde estas predicciones se utilizan para decidir montos de crédito, tasas de interés o impuestos, las consecuencias pueden ser notables y desproporcionadas.
+
+En contraste, en zonas con amplia variabilidad los modelos pueden ajustarse de manera más rica y flexible, capturando diversidad estructural y otorgando predicciones que reflejan mejor el valor real de las propiedades. Si esta capacidad predictiva solo se aplica a un grupo y no al otro, se configura un sesgo que afecta no solo la predicción, sino la dinámica económica de comunidades enteras.
+
+---
+
+## Integración conceptual
+
+Este análisis se conecta con los resultados de Boston Housing, Titanic y Ames Housing: cada uno muestra una forma diferente de sesgo, pero todos comparten un punto común: los modelos reproducen sin cuestionar las desigualdades presentes en los datos. Lo que distingue al sesgo en amplitud es que obliga a trabajar con la estructura completa de la información, no solo con resúmenes estadísticos. Esto lo convierte en una herramienta poderosa para detectar inequidades estructurales antes de que se materialicen en decisiones automatizadas.
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset</th>
+      <th>Tipo de Sesgo Detectado</th>
+      <th>Dimensión</th>
+      <th>Técnica Aplicada</th>
+      <th>Resultado</th>
+      <th>Decisión Ética</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Boston Housing</td>
+      <td>Racial</td>
+      <td>Media y amplitud históricas</td>
+      <td>Detección</td>
+      <td>Correlación racial significativa</td>
+      <td>Uso exclusivamente educativo</td>
+    </tr>
+    <tr>
+      <td>Titanic</td>
+      <td>Género y clase</td>
+      <td>Diferencias de tasas</td>
+      <td>Fairlearn (EG)</td>
+      <td>DP mejorado, pérdida menor de accuracy</td>
+      <td>Evaluar trade-offs</td>
+    </tr>
+    <tr>
+      <td>Ames Housing</td>
+      <td>Geográfico / Temporal</td>
+      <td>Amplitud y distribución</td>
+      <td>Análisis crítico</td>
+      <td>Brechas amplias en valor</td>
+      <td>Evitar en crédito</td>
+    </tr>
+  </tbody>
+</table>
+
+
+---
+
+## Conclusiones 
+
+El análisis detallado de amplitudes y distribuciones demuestra que la inequidad no siempre se manifiesta de forma evidente en los promedios. En este caso, la desigualdad estructural se revela en la capacidad diferencial de los mercados para ofrecer oportunidades de valorización. Los modelos predictivos, si no se auditan cuidadosamente, replicarán estos patrones y los convertirán en mecanismos formales de exclusión económica.
+
+A nivel ético, la recomendación es clara: antes de entrenar o desplegar modelos basados en datos inmobiliarios —especialmente en contextos sensibles como hipotecas o tasaciones— es indispensable analizar no solo las medias, sino también la dispersión, la amplitud y la estructura completa de los datos. Estos patrones distribucionales suelen estar cargados de historia y desigualdad, y su reproducción automática en sistemas algorítmicos puede consolidar injusticias de larga duración.
+
+Finalmente, esta práctica refuerza la importancia de integrar evaluaciones de fairness desde el inicio del proceso de modelado. Detectar sesgo no siempre implica corregirlo; en muchos casos, implica diseñar mejores sistemas de decisión, reconsiderar el uso de ciertos datos o incluso evitar el uso de modelos automatizados cuando estos amplifican inequidades sistémicas. La auditoría distributiva no es solo un paso técnico, sino un componente fundamental de la responsabilidad profesional en ciencia de datos.
