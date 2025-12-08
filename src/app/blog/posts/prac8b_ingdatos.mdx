@@ -1,0 +1,44 @@
+---
+title: "Más Allá de la Predicción: Descubriendo el Potencial Oculto de un Modelo a Través de Feature Engineering Inteligente."
+publishedAt: "2025-10-13"
+summary: "Modelo temporal multicliente con ingeniería de series de tiempo, detección dinámica de anomalías y evaluación comparativa de enfoques con lags y ventanas móviles."
+tag: "Curso: Ingeniería de Datos"
+image: "/practica8/portada.jpeg"
+---
+
+# Profundizando en Feature Engineering Inmobiliario: Análisis, Transformaciones y Evidencias
+
+## Introducción 
+
+El proceso desarrollado en esta práctica ampliada tiene como propósito evaluar la robustez, escalabilidad y capacidad explicativa de un pipeline de modelado aplicado tanto a un dataset sintético como al reconocido conjunto de datos Ames Housing. Tras consolidar un primer flujo de trabajo básico, se avanzó hacia una etapa superior de experimentación donde se implementaron técnicas de ingeniería de características, selección automática de variables y transformaciones complejas. Este recorrido permitió comparar directamente el rendimiento entre un conjunto idealizado —puramente sintético, controlado y sin irregularidades— y un dataset real, cargado de variabilidad estructural, ruido contextual y relaciones no lineales.
+
+El proceso consistió en introducir transformaciones polinómicas, aplicar estrategias de selección automática mediante RFE, enriquecer la semántica espacial mediante codificación categórica y consolidar todas estas operaciones dentro de un pipeline completamente reproducible. El gráfico comparativo generado sintetiza los resultados clave, permitiendo observar cómo cada enfoque afecta tanto la capacidad explicativa del modelo (R²) como su error absoluto medio (MAE). Esta visualización sirve como puente entre la teoría y la práctica, evidenciando que la ingeniería de características no solo incrementa la precisión, sino que también clarifica qué variables realmente gobiernan la dinámica del precio en contextos reales.
+
+---
+
+## Marco Teórico
+
+La ingeniería de características constituye un área central dentro del aprendizaje automático tradicional, especialmente en problemas tabulares donde las relaciones entre variables rara vez se presentan de manera lineal o explícita. En este marco, las **transformaciones polinómicas** permiten ampliar el espacio de representación creando términos que capturan interacciones entre variables o curvaturas intrínsecas del fenómeno. Esta idea se fundamenta en la teoría de aproximación: cualquier función suficientemente regular puede representarse mediante polinomios, lo que habilita a los modelos a capturar patrones más complejos sin recurrir a arquitecturas profundas.
+
+Por su parte, la **selección automática de variables**, como RFE (Recursive Feature Elimination), se apoya en el principio de parsimonia: un modelo debe ser tan simple como sea posible sin sacrificar poder predictivo. RFE opera eliminando iterativamente variables menos relevantes según un estimador base —en este caso un Random Forest— y permite construir modelos eficientes y explicativos, reduciendo la dimensionalidad y destacando atributos que poseen verdadera relevancia semántica.
+
+La **codificación categórica**, especialmente mediante One-Hot Encoding, se sustenta en la necesidad de transformar variables nominales en estructuras numéricas interpretables para los modelos. En problemas inmobiliarios, categorías como “Neighborhood” representan dimensiones socioeconómicas, espaciales y culturales que influyen fuertemente en el precio; su ausencia puede ocultar gran parte de la señal del fenómeno.
+
+Finalmente, los **pipelines** componen un marco formalizado para encapsular todas las etapas del preprocesamiento y modelado. Desde un punto de vista teórico, un pipeline es una composición funcional que preserva consistencia, evita fugas de información (data leakage) y habilita reproducibilidad, condiciones indispensables para un análisis serio y para cualquier despliegue en entornos reales. En conjunto, estas técnicas permiten trascender el enfoque superficial de entrenar modelos “en crudo” y pasar a una fase de diseño estructurado del conocimiento.
+
+---
+
+## Resultados de Implementación 
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica8/bonus.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={900}
+    height={500}
+  />
+</div>
+
+Los resultados obtenidos demuestran con claridad que la ingeniería de características amplía significativamente la capacidad del modelo para capturar la complejidad de los datos reales. Mientras que el dataset sintético permite alcanzar valores casi perfectos de R² debido a su naturaleza controlada, el conjunto Ames Housing revela la verdadera dificultad del problema: variabilidad, dependencia contextual, información espacial y relaciones no lineales que un modelo simple no logra modelar adecuadamente. Las transformaciones polinómicas mejoraron la sensibilidad del modelo ante patrones curvos, RFE ayudó a resaltar variables clave con alta relevancia semántica, y la codificación categórica permitió incorporar la estructura espacial del entorno urbano.
+
+La integración de todo el flujo dentro de un pipeline reproducible mostró ser fundamental para garantizar coherencia, limpieza metodológica y la posibilidad de repetir experimentos de manera confiable. De este proceso se concluye que un buen modelo no emerge únicamente de algoritmos sofisticados, sino de una estrategia rigurosa de preparación, selección y transformación de los datos. En definitiva, este análisis reafirma que el valor del *feature engineering* reside en su capacidad para exponer la verdadera arquitectura del fenómeno, haciendo que el modelo no solo prediga mejor, sino que entienda mejor.
