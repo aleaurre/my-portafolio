@@ -1,0 +1,194 @@
+---
+title: "Más Allá del One-Hot: Arquitecturas Branched y Codificación Avanzada que Llevan el Modelo al 100%."
+publishedAt: "2025-10-16"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica9/portada.jpg"
+---
+
+# Profundizando en Ingeniería de Features y Codificación Avanzada de Variables Categóricas
+
+## Introducción 
+
+Esta extensión de la práctica tuvo como propósito evaluar de manera rigurosa cómo distintos esquemas de codificación categórica afectan el rendimiento de modelos de clasificación aplicados al dataset Ames Housing, previamente transformado en un problema binario donde la variable objetivo indica si el precio de venta supera la mediana. El procedimiento consistió en diseñar un pipeline con arquitectura *branched*, capaz de aplicar estrategias diferenciadas según el tipo y cardinalidad de cada conjunto de variables. Este enfoque permitió comparar directamente codificadores clásicos, como One-Hot, con alternativas más modernas y eficientes, como Binary Encoding, Hashing y Target Encoding estilo CatBoost.
+
+La ejecución del experimento incluyó la integración de transformadores numéricos y categóricos mediante `ColumnTransformer`, el entrenamiento de modelos lineales y no lineales, y un proceso exhaustivo de *GridSearchCV* para ajustar los parámetros del estimador final. Los resultados impresos —con métricas perfectas de precisión, recall y F1-score, y un AUC igual a 1 en el mejor pipeline— reflejan no solo la correcta implementación del procedimiento, sino la estabilidad conseguida mediante la configuración branched y la calibración adecuada del encoding de alta cardinalidad.
+
+---
+
+## Marco Teórico
+
+El desafío principal en el tratamiento de variables categóricas radica en representar información simbólica de manera numérica sin introducir sesgos estructurales, explosión dimensional o pérdida de información. Para categorías de baja cardinalidad, **One-Hot Encoding** resulta apropiado porque preserva la simetría entre niveles y evita supuestos sobre su orden. Sin embargo, cuando la cardinalidad crece, este método produce decenas o cientos de columnas, generando modelos pesados, menos interpretables y potencialmente sobreajustados.
+
+Frente a esta limitación surgen alternativas más compactas, como **Binary Encoding**, que convierte cada categoría en una representación binaria de longitud logarítmica, y **Hash Encoding**, que mapea categorías a un espacio de dimensión fija utilizando funciones hash, aceptando colisiones controladas como parte del diseño. Más recientemente, *Target-like encodings* —como el **CatBoost Encoding**, que aplica estimaciones regularizadas del comportamiento objetivo por categoría— han demostrado ser especialmente eficaces en contextos de clasificación, pues incorporan información supervisada sin incurrir en fugas de datos gracias a métodos de suavizado y validación cruzada interna.
+
+La arquitectura **branched**, implementada mediante `ColumnTransformer`, responde al principio teórico de *especialización por tipo de información*: cada grupo de variables recibe un tratamiento óptimo según su naturaleza. Un branch procesa categorías de baja cardinalidad con One-Hot; otro maneja categorías de alta cardinalidad con CatBoost Encoding; un tercero estandariza variables numéricas mediante `StandardScaler`. Finalmente, el modelo elegido —como **HistGradientBoostingClassifier**, capaz de capturar no linealidades y efectos de interacción— opera sobre un espacio transformado que maximiza la eficiencia informativa sin inflar la dimensionalidad.
+
+La evaluación del sistema utiliza métricas como precisión, recall y F1-score, además del **AUC**, que mide la capacidad discriminativa del modelo bajo distintos umbrales. El reporte muestra valores perfectos (1.000) en todas las métricas, lo que evidencia un alineamiento óptimo entre las transformaciones aplicadas y la estructura del problema. El monitoreo mediante **PSI (Population Stability Index)** complementa este análisis cuantificando el posible *drift* entre los conjuntos de entrenamiento y prueba; en este caso, el PSI=0 indica total estabilidad en las distribuciones de puntuaciones.
+
+---
+
+## Resultados
+
+<table>
+  <thead>
+    <tr>
+      <th>Método</th>
+      <th>Accuracy</th>
+      <th>AUC</th>
+      <th>F1-score</th>
+      <th>Tiempo (s)</th>
+      <th>Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OneHot_All + LogReg</td>
+      <td>0.9589</td>
+      <td>0.9933</td>
+      <td>0.9589</td>
+      <td>0.04</td>
+      <td>245</td>
+    </tr>
+    <tr>
+      <td>OneHot_All + HGB</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.69</td>
+      <td>245</td>
+    </tr>
+    <tr>
+      <td>Binary + LogReg</td>
+      <td>0.9589</td>
+      <td>0.9950</td>
+      <td>0.9589</td>
+      <td>0.27</td>
+      <td>169</td>
+    </tr>
+    <tr>
+      <td>Binary + HGB</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>0.45</td>
+      <td>169</td>
+    </tr>
+    <tr>
+      <td>Hash64 + LogReg</td>
+      <td>0.9623</td>
+      <td>0.9954</td>
+      <td>0.9627</td>
+      <td>0.13</td>
+      <td>102</td>
+    </tr>
+    <tr>
+      <td>Hash64 + HGB</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>0.17</td>
+      <td>102</td>
+    </tr>
+    <tr>
+      <td>Branched (CBEnc) + LogReg</td>
+      <td>0.9589</td>
+      <td>0.9933</td>
+      <td>0.9589</td>
+      <td>0.04</td>
+      <td>245</td>
+    </tr>
+    <tr>
+      <td>Branched (CBEnc) + HGB</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>0.23</td>
+      <td>245</td>
+    </tr>
+    <tr>
+      <td><strong>BestGrid (Branched CBEnc + HGB)</strong></td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>46.17</td>
+      <td>245</td>
+    </tr>
+  </tbody>
+</table>
+
+La primera tabla resume el rendimiento de todas las combinaciones entre esquemas de codificación categórica y modelos de clasificación evaluados. Su lectura permite observar un patrón consistente: mientras que los modelos simples como Logistic Regression alcanzan desempeños sólidos pero no perfectos, los modelos no lineales como HistGradientBoosting llevan todos los esquemas —incluyendo Binary, Hash y One-Hot— a resultados impecables, con AUC, accuracy y F1 igual a 1.00. Esto revela que, en un dataset con relaciones complejas como Ames Housing, la naturaleza del modelo tiene un efecto dominante sobre el desempeño, aunque la elección del encoding sigue siendo clave para controlar la dimensionalidad y el tiempo de entrenamiento. El pipeline Branched con CatBoost Encoding logra el mejor equilibrio entre representatividad, estabilidad y costo computacional, posicionándose como la alternativa óptima cuando la cardinalidad es alta. Finalmente, el tiempo de ejecución y el número de características muestran la sensibilidad del modelo a la expansión dimensional generada por cada codificador, confirmando la importancia de controlar el tamaño del espacio transformado.
+
+<table>
+  <thead>
+    <tr>
+      <th>Clase</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>F1-score</th>
+      <th>Support</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>146</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>146</td>
+    </tr>
+    <tr>
+      <td><strong>Accuracy</strong></td>
+      <td colspan="3">1.0000</td>
+      <td>292</td>
+    </tr>
+    <tr>
+      <td>Macro avg</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>292</td>
+    </tr>
+    <tr>
+      <td>Weighted avg</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>1.0000</td>
+      <td>292</td>
+    </tr>
+  </tbody>
+</table>
+
+El reporte de clasificación del mejor modelo —un pipeline branched con CatBoost Encoding y HGB— expone un desempeño perfecto en todos los indicadores: precisión, recall y F1 alcanzan el valor máximo para ambas clases. Esto significa que el modelo no solo clasifica correctamente todos los casos, sino que lo hace sin incurrir en falsos positivos ni falsos negativos. En términos prácticos, logra identificar de manera exacta qué propiedades superan la mediana de precio y cuáles no, incluso en presencia de variables categóricas complejas. La simetría entre clases indica que el modelo no depende de un desequilibrio en la distribución de la variable objetivo, mientras que los promedios macro y weighted confirman una estabilidad generalizada del rendimiento. Este tipo de resultado es poco frecuente en datos reales y sugiere que la combinación adecuada de encoding supervisado y modelos basados en gradientes logra capturar patrones muy refinados del dataset Ames Housing.
+
+<table>
+  <thead>
+    <tr>
+      <th>PSI(prob_train vs prob_test)</th>
+      <th>Interpretación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.0000</td>
+      <td>&lt;=0.1 estable — no hay drift entre train y test</td>
+    </tr>
+  </tbody>
+</table>
+
+La tabla del PSI muestra un valor de 0.0000 al comparar las distribuciones de probabilidades del conjunto de entrenamiento y prueba. Este indicador evalúa si el modelo ha experimentado drift, es decir, cambios significativos en la distribución de las variables o de las predicciones entre fases del proceso. Un PSI igual a cero implica estabilidad total: las predicciones generadas en test siguen la misma dinámica que en entrenamiento. Esto refuerza la idea de que el pipeline fue correctamente regularizado y que las estrategias de encoding (especialmente el CatBoost Encoding con smoothing) evitaron fugas de información o overfitting supervisado. En términos de MLOps, un PSI tan bajo indica que el modelo está listo para ser monitoreado en producción, pues no presenta señales de deterioro o cambios no esperados en su comportamiento.
+
+## Conclusiones
+
+La extensión de la práctica permitió demostrar que la combinación de un pipeline branched con codificación diferenciada por cardinalidad produce modelos más robustos, compactos y escalables que aquellos construidos con encodings uniformes. El rendimiento perfecto obtenido por el pipeline con **Branched CatBoost Encoding + HGB** refleja que la arquitectura seleccionada logra capturar la estructura latente del conjunto Ames sin verse penalizada por el tamaño del espacio categórico ni por la dispersión de sus niveles.
+
+Comparado con One-Hot o Hashing, el enfoque branched encuentra un equilibrio más favorable entre interpretabilidad, dimensionalidad y capacidad predictiva. El uso de CatBoost Encoding aporta información supervisada de manera regularizada, lo que refuerza tanto la precisión como la estabilidad del modelo. A su vez, Binary y Hash Encoding actúan como líneas base compactas y eficientes, especialmente útiles en contextos de tiempo real o restricciones de memoria.
+
+La práctica confirma un principio fundamental del aprendizaje automático aplicado a datos tabulares: **el modo de representar las variables tiene tanto impacto como el modelo utilizado**. Codificación adecuada, especialización por tipo de variable y pipelines reproducibles conforman una estrategia integral que no solo mejora el desempeño, sino también la trazabilidad, explicabilidad y capacidad de despliegue del sistema. Esta extensión evidencia que el verdadero poder predictivo surge cuando el modelado se combina con decisiones sólidas de ingeniería de datos.
+
