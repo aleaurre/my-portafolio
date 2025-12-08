@@ -1,0 +1,159 @@
+---
+title: "Ingeniería de Features y Codificación Avanzada: Una Arquitectura Óptima para Datos Categóricos."
+publishedAt: "2025-10-16"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica9/portada.jpg"
+---
+
+# Ingeniería de Features y Codificación Avanzada de Variables Categóricas
+Modelo, Dimensionalidad e Interpretabilidad en un Pipeline Mixto Productivo
+
+## Marco Teórico
+
+El tratamiento adecuado de variables categóricas constituye uno de los pilares del feature engineering moderno. Dado que los algoritmos de aprendizaje supervisado trabajan de forma nativa con representaciones numéricas, la elección del método de codificación afecta profundamente el comportamiento del modelo. Aspectos como estabilidad, tendencia al overfitting, interpretabilidad y costo computacional dependen directamente de cómo se representen las categorías.
+
+En este trabajo se comparan tres grandes enfoques: Label Encoding, One-Hot Encoding y Target Encoding con smoothing, además de un pipeline ramificado que combina estratégicamente los anteriores según cardinalidad. La hipótesis guía es que no existe un encoding universalmente óptimo, sino que su rendimiento depende de la distribución de categorías, su cardinalidad y la interacción con el modelo base.
+
+## Objetivos
+- Comparar impacto en precisión, AUC, F1 y dimensionalidad.
+- Diseñar un pipeline modular y escalable basado en ColumnTransformer.
+- Analizar Feature Importances y SHAP para evaluar interpretabilidad.
+- Discutir implicancias éticas y de fairness en modelos con variables sensibles.
+- Integrar todo el análisis en formato reproducible y técnicamente riguroso.
+
+---
+
+## Metodología
+
+En esta práctica desarrollé un proceso completo de feature engineering orientado al tratamiento avanzado de variables categóricas, con el objetivo de evaluar cómo diferentes técnicas de codificación afectan el rendimiento, la interpretabilidad y la eficiencia de un modelo de clasificación. Comencé realizando un análisis detallado de la cardinalidad de cada variable para identificar cuáles eran candidatas óptimas para Label Encoding, One-Hot Encoding o Target Encoding, dado que la estructura de las categorías condiciona fuertemente el riesgo de explosión dimensional, el tiempo de cómputo y el potencial de overfitting. A partir de este diagnóstico, diseñé e implementé múltiples pipelines experimentales, incluyendo un pipeline ramificado con ColumnTransformer que aplica automáticamente el método de codificación más adecuado según la naturaleza de cada variable, garantizando reproducibilidad y evitando data leakage mediante validación cruzada.
+
+Además de comparar los encodings en términos de métricas predictivas —accuracy, AUC, F1-score— también analicé su impacto en la cantidad final de features, el tiempo de entrenamiento y la estabilidad del modelo. Complementé este estudio con herramientas de interpretabilidad como feature importance y SHAP, lo que permitió examinar no solo el desempeño del modelo, sino también cómo la elección del encoding modifica la relevancia atribuida a cada variable. Finalmente, extendí el análisis con técnicas adicionales e integré una reflexión sobre fairness y aplicabilidad práctica, construyendo así una perspectiva integral que conecta las decisiones de ingeniería con su efecto real en la calidad y transparencia del modelo.
+
+---
+
+## Resultados — Comparación de Modelos
+
+<table>
+<thead>
+<tr>
+<th>Método</th><th>Accuracy</th><th>AUC-ROC</th><th>F1-Score</th><th>Tiempo (s)</th><th>Nº Features</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Label Encoding</td><td>0.8610</td><td>0.9101</td><td>0.6883</td><td>0.18</td><td>14</td></tr>
+<tr><td>One-Hot (baja card.)</td><td>0.8471</td><td>0.8998</td><td>0.6615</td><td>0.17</td><td>30</td></tr>
+<tr><td>Target Encoding (alta card.)</td><td>0.8029</td><td>0.8274</td><td>0.5551</td><td>0.20</td><td>6</td></tr>
+<tr><td>Pipeline Branched</td><td>0.8472</td><td>0.8998</td><td>0.6624</td><td>0.19</td><td>30</td></tr>
+</tbody>
+</table>
+
+---
+
+### Cardinalidad de Variables Categóricas
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica9/cardinal.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={400}
+  />
+</div>
+
+La gráfica muestra con claridad cómo algunas variables del dataset presentan una cantidad elevada de categorías únicas, particularmente native-country con 42 niveles. Esta observación es clave, ya que la cardinalidad influye directamente en la elección del método de codificación: mientras OHE funciona bien para cardinalidades bajas, se vuelve ineficiente y propenso a la explosión dimensional en casos como este.
+
+El análisis también permite detectar variables de baja y media cardinalidad, facilitando una estrategia híbrida. Identificar estos grupos desde el inicio evita sobreajustar el modelo y permite planificar un pipeline más estable. La segmentación categórica es un paso fundamental que, aunque frecuentemente subestimado, tiene un impacto directo en la capacidad generalizadora del modelo.
+
+---
+
+### Comparación de Métricas entre Métodos de Encoding
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica9/Encoding.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={1000}
+    height={600}
+  />
+</div>
+
+Esta matriz de gráficos sintetiza cómo cada método afecta distintas dimensiones del rendimiento. Se observa que Label Encoding alcanza los mejores valores de accuracy y AUC, aunque esto puede deberse parcialmente a que introduce relaciones ordinales artificiales que los árboles pueden aprovechar. Por otra parte, One-Hot Encoding, pese a su buen desempeño, incrementa el número de columnas, lo que impacta el tiempo de entrenamiento en modelos más complejos.
+
+Lo más interesante surge al comparar Target Encoding, que logra una reducción extrema de dimensionalidad con solo seis columnas. Aunque su precisión es menor en este dataset, su ventaja se vuelve evidente en contextos donde la cardinalidad es aún mayor, o en modelos sensibles a la dimensionalidad. En síntesis: la relación entre encoding y rendimiento no es lineal, y comprender estas interacciones es indispensable para diseñar arquitecturas robustas.
+
+---
+
+### Importancia de Variables (Random Forest)
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica9/importance.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+La gráfica revela que las variables numéricas, como edad, peso poblacional y educación, concentran la mayor parte de la importancia del modelo. Esto es consistente con literatura previa en análisis socioeconómico, donde la edad y el nivel educativo suelen ser predictores significativos del nivel de ingresos. De forma interesante, variables categóricas como estado civil también aparecen destacadas cuando se codifican adecuadamente.
+
+Este comportamiento pone en evidencia cómo la calidad del encoding afecta no solo las métricas finales, sino la interpretación y transparencia del modelo. Un encoding deficiente podría ocultar relaciones reales o amplificar artefactos estadísticos. Aquí, la combinación de numéricas + categóricas bien representadas construye un modelo más explicable y alineado con comportamientos demográficos reales.
+
+---
+
+### Importancia por Tipo de Encoding
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica9/compaencoding.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={900}
+    height={500}
+  />
+</div>
+
+Al comparar las variables más influyentes bajo distintos métodos de codificación, se aprecia cómo cada técnica resalta distintos patrones. En Label Encoding, algunas categorías reciben valores numéricos altos que los árboles interpretan como más influyentes, aun cuando no exista relación ordinal. En contraste, el One-Hot despliega un conjunto más equilibrado de variables, permitiendo que el modelo distinga relaciones de forma granular.
+
+Target Encoding, por su parte, concentra importancia en pocas variables, especialmente numéricas, debido a la reducción de dimensiones. Esto explica por qué su interpretabilidad tiende a ser más sencilla, pero también más dependiente del smoothing utilizado. Estas diferencias demuestran que la elección del método de codificación no solo modifica el rendimiento, sino el perfil de explicación del modelo.
+
+---
+
+### Distribución de Features
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica9/disfeatures.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={300}
+  />
+</div>
+
+El histograma evidencia una distribución fuertemente asimétrica, donde pocas variables concentran una fracción significativa de la importancia. Este fenómeno es común en modelos que reflejan inequidades estructurales: características como educación, edad y horas trabajadas suelen ser altamente predictoras de ingresos.
+
+La línea vertical marca la importancia promedio. La mayoría de las variables categóricas codificadas se ubican muy por debajo, lo que sugiere que, aunque agregan valor, su contribución es más contextual que decisiva. Esto abre una discusión importante sobre fairness: las variables demográficas tienen poco peso relativo, lo que reduce riesgo de sesgo, pero requiere análisis adicional con métricas de igualdad.
+
+--- 
+
+## Discusión Crítica
+
+Uno de los aprendizajes más relevantes es que la cardinalidad dicta la estrategia de codificación. Ningún método es universalmente superior: cada uno implica compromisos entre estabilidad, dimensionalidad e interpretabilidad. Así, los pipelines ramificados se presentan como la solución más madura, permitiendo asignar el encoding adecuado a cada variable.
+
+Además, se confirma que la interpretabilidad no debe abordarse como un paso posterior al modelado, sino como un criterio que guía decisiones desde el preprocesamiento. Métodos como SHAP y Feature Importance revelan cómo decisiones tempranas afectan no solo predicción, sino también transparencia y responsabilidad del modelo.
+
+---
+
+## Implicancias Éticas y Fairness
+
+Trabajar con datos demográficos exige considerar sesgos potenciales. Variables como género, raza y estado civil pueden introducir inequidades si el modelo aprende patrones discriminatorios. Aunque en este trabajo no se evidenció una influencia desproporcionada de estas variables, se recomienda aplicar métricas de equidad como:
+- Equal Opportunity Difference
+- Demographic Parity
+- Disparate Impact
+Un modelo sin evaluación de fairness carece de validez para aplicaciones sociales o empresariales sensibles.
+
+---
+
+## Referencias
+- Géron, A. Hands-On Machine Learning with Scikit-Learn & TensorFlow.
+- Kuhn & Johnson. Feature Engineering and Selection.
+- Scikit-Learn Documentation.
+- Category Encoders Documentation.
