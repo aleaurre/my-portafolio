@@ -1,0 +1,215 @@
+---
+title: " Más allá del Análisis Geoespacial Integral de la Ciudad de Bs As: Ahora en Uruguay."
+publishedAt: "2025-11-10"
+tag: "Curso: Ingeniería de Datos"
+image: "/practica12/portada.png"
+---
+
+
+# Geoanálisis Avanzado de Uruguay: Morfología Territorial, Compacidad y Heterogeneidad Espacial
+
+## Introducción
+
+La presente práctica se enmarca en el análisis geométrico avanzado del territorio uruguayo utilizando un enfoque completamente reproducible basado en *geopandas*, *shapely* y *matplotlib*. La consigna fue trabajar únicamente con un archivo geoespacial local —sin depender de fuentes externas— y a partir de él explorar la estructura del país mediante métricas fundamentales como área, perímetro, compacidad, rankings comparativos entre departamentos y análisis espacial detallado de Montevideo mediante un hex-grid regular. El objetivo no fue solo describir el territorio, sino comprender cómo sus propiedades geométricas influyen en la interpretación espacial y en la forma en que los datos pueden agruparse o visualizarse.
+
+El proceso inició con la carga y validación del archivo geográfico, seguido por la identificación automática de la columna que contenía el nombre de los departamentos, la re-proyección métrica del dataset y el cálculo de indicadores esenciales. Finalmente, se generaron mapas coropléticos, rankings analíticos y un hex-grid sobre Montevideo que permite comprender la microestructura del departamento.
+
+---
+
+## Marco Teórico
+
+El estudio geométrico de entidades territoriales se basa en principios fundamentales de la geografía cuantitativa y el análisis espacial. Tres conceptos guían esta práctica:
+
+### Sistemas de Referencia y Proyecciones Métricas
+
+Los datos geoespaciales usualmente se encuentran en un CRS geográfico (como EPSG:4326), adecuado para ubicación pero no para medir superficies o distancias. Para obtener áreas es indispensable convertir el dataset a un CRS proyectado, como EPSG:3857, donde las unidades se expresan en metros. Solo así es posible calcular métricas geométricas con precisión.
+
+### Área, Perímetro y Compacidad
+
+La **compacidad** expresa cuán “cercana a un círculo” es la forma de un polígono. Valores cercanos a 1 implican formas regulares y compactas; valores bajos indican contornos complejos o elongados. Esta métrica es ampliamente utilizada en geografía electoral, morfología urbana y análisis territorial comparativo.
+
+### Hex-grids y análisis espacial regularizado
+
+Las cuadrículas hexagonales ofrecen ventajas frente a las rectangulares: cada celda tiene la misma distancia a sus vecinas, reduce artefactos angulares y permite estimar densidades uniformes. Aplicar un hex-grid sobre Montevideo permite fragmentar el área en unidades homogéneas, fundamentales para estudios ambientales, de movilidad, infraestructura o planificación territorial.
+
+---
+
+## Desarrollo de la Práctica y Análisis de Resultados
+
+### Identificación de Montevideo y re-proyección métrica
+
+El script detecta automáticamente la columna con el nombre del departamento utilizando coincidencias con *“monte”*. Luego re-proyecta el dataset a EPSG:3857 y calcula superficies y perímetros.
+Montevideo muestra un área aproximada de **706 km²**, valor que será relevante para su análisis comparativo posterior.
+
+---
+
+### Uruguay con Montevideo destacado
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/bonus1.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+La visualización muestra el contorno completo del Uruguay, con todos los departamentos renderizados en un tono gris neutro y Montevideo recortado en amarillo. Esta elección cromática permite apreciar de inmediato la posición del departamento en el extremo sur del país, así como su escala relativa frente al resto del territorio. Se aprecia claramente que Montevideo es uno de los departamentos con menor superficie, lo que contrasta fuertemente con la magnitud territorial del norte y noreste del país. Su localización costera y su forma compacta anticipan su rol administrativo y demográfico central.
+
+---
+
+### Coropleta de Área por Departamento
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/bonus2.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+En esta coropleta, los departamentos están coloreados según su superficie medida en km². Se observan tonalidades más oscuras en Tacuarembó, Salto y Paysandú, que concentran las mayores extensiones territoriales. Por otro lado, Montevideo aparece en tonos muy claros debido a su tamaño reducido. El gradiente azul permite identificar un patrón claro: el Uruguay interior y norte tiende a tener superficies más amplias, mientras que la región sur, especialmente la franja costera, presenta departamentos más pequeños. Este contraste geográfico se relaciona con procesos históricos de ocupación del territorio y su estructuración agroproductiva.
+
+---
+
+### Coropleta de Compacidad Geométrica
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/bonus3.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+Este mapa revela el grado de regularidad de cada departamento. Las tonalidades rojizas representan menor compacidad, es decir, formas más irregulares o elongadas. Se observa que departamentos como Rivera, Rocha o Artigas poseen fronteras sinuosas que disminuyen su compacidad. En cambio, Flores, Salto y Florida presentan colores más claros, lo que indica formas más redondeadas y eficientes. Estas diferencias no son arbitrarias: responden a procesos geopolíticos, naturales y administrativos que definieron el trazado histórico de los límites.
+
+---
+
+### Ranking por Área
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/bonus4.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+La visualización corrobora cuantitativamente lo observado en la coropleta: Tacuarembó encabeza el ranking con holgura, seguido por Salto y Paysandú. Hacia el final, Montevideo se posiciona claramente como el departamento más pequeño. El gráfico permite comparar rápidamente magnitudes y confirma que la distribución de superficies departamentales es altamente desigual, con diferencias de escala superiores a 20 veces entre el más grande y el más pequeño.
+
+---
+
+### Ranking de Compacidad (Departamentos menos compactos)
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/bonus5.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={600}
+  />
+</div>
+
+Aquí se ordenan los departamentos desde los más irregulares a los de mayor compacidad. Llama la atención que Montevideo aparece como el menos compacto de todos, con un valor cercano a 0.20. Esto se debe a su perímetro costero, cuya curvatura incrementa el perímetro sin aumentar proporcionalmente el área. Esta observación es clave: una forma pequeña no necesariamente es compacta. Rivera, Maldonado y Rocha también aparecen en posiciones destacadas por su irregularidad. En contraste, departamentos como Flores y Salto exhiben valores cercanos a 0.60, lo cual denota contornos más equilibrados.
+
+---
+
+### Hex-Grid sobre Montevideo
+
+<div style={{ display: "flex", justifyContent: "center", margin: "24px 0" }}>
+  <Image
+    src="/practica12/bonus6.png"
+    alt="Boxplots mostrando diferencias de escala"
+    width={800}
+    height={800}
+  />
+</div>
+
+El hex-grid fragmenta Montevideo en 33 hexágonos de aproximadamente 10.64 km² cada uno. La distribución espacial del grid muestra cómo el departamento se adapta a esta partición regular, revelando zonas con mayor o menor superposición dependiendo de la curvatura costera. Los tonos del mapa representan el área efectivamente cubierta dentro de cada hexágono —una medida indirecta de la complejidad fronteriza del departamento. Esta herramienta resulta útil para modelar fenómenos espaciales como densidad poblacional, acceso a transporte o distribución de equipamientos urbanos.
+
+---
+
+## Resumen geométrico
+
+<table>
+  <thead>
+    <tr>
+      <th>Grupo</th>
+      <th>Departamento</th>
+      <th>Índice de compacidad</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Menor compacidad (más irregulares)</td>
+      <td>Montevideo</td>
+      <td>0.1968</td>
+    </tr>
+    <tr>
+      <td>Menor compacidad (más irregulares)</td>
+      <td>Rivera</td>
+      <td>0.2064</td>
+    </tr>
+    <tr>
+      <td>Menor compacidad (más irregulares)</td>
+      <td>Maldonado</td>
+      <td>0.2664</td>
+    </tr>
+    <tr>
+      <td>Menor compacidad (más irregulares)</td>
+      <td>Rocha</td>
+      <td>0.3116</td>
+    </tr>
+    <tr>
+      <td>Menor compacidad (más irregulares)</td>
+      <td>Artigas</td>
+      <td>0.3281</td>
+    </tr>
+    <tr>
+      <td>Mayor compacidad</td>
+      <td>Florida</td>
+      <td>0.5661</td>
+    </tr>
+    <tr>
+      <td>Mayor compacidad</td>
+      <td>Lavalleja</td>
+      <td>0.5722</td>
+    </tr>
+    <tr>
+      <td>Mayor compacidad</td>
+      <td>Durazno</td>
+      <td>0.5770</td>
+    </tr>
+    <tr>
+      <td>Mayor compacidad</td>
+      <td>Salto</td>
+      <td>0.5872</td>
+    </tr>
+    <tr>
+      <td>Mayor compacidad</td>
+      <td>Flores</td>
+      <td>0.6632</td>
+    </tr>
+  </tbody>
+</table>
+
+Las métricas numéricas del resumen geométrico confirman, en forma condensada, varios de los patrones que ya se intuían a partir de los mapas. El área total del país, cercana a los 252 mil km², sitúa a Uruguay como un territorio relativamente compacto a escala regional, mientras que los aproximadamente 706 km² de Montevideo muestran que la capital ocupa una porción ínfima del espacio nacional: apenas un 0,28 % de la superficie. Esta desproporción entre tamaño físico y peso político-demográfico es un rasgo clásico de la geografía uruguaya, donde una fracción muy pequeña del territorio concentra una parte sustantiva de la población y de las funciones administrativas.
+
+Los indicadores asociados al hex-grid sobre Montevideo aportan una lectura más fina del espacio capitalino. La presencia de 33 hexágonos con un área media de 10,64 km² sugiere una partición relativamente homogénea del departamento en células espaciales comparables, lo que resulta especialmente útil para futuros análisis de densidad, accesibilidad o cobertura de servicios. El hecho de que el área promedio por hexágono sea del orden de decenas de kilómetros cuadrados indica que cada celda puede representar un “bloque” territorial significativo, capaz de captar variaciones intra-departamentales sin caer en una fragmentación excesiva.
+
+La tabla de compacidad permite entender cómo se distribuye la regularidad geométrica a lo largo del país. En el extremo de menor compacidad aparece Montevideo, con un índice cercano a 0,20, seguido por Rivera, Maldonado, Rocha y Artigas. Estos valores tan bajos reflejan contornos muy irregulares, influenciados por fronteras fluviales, costeras o límites administrativos sinuosos. En el caso de Montevideo, la costa del Río de la Plata genera un perímetro altamente recortado que penaliza su compacidad pese a ser un departamento pequeño. En contraste, Florida, Lavalleja, Durazno, Salto y especialmente Flores muestran valores superiores a 0,56, lo que indica formas más redondeadas y “ eficientes” en términos geométricos. Esta diferencia entre departamentos irregulares y compactos sugiere que el trazado de límites responde a lógicas históricas y naturales diversas: mientras algunos siguen ríos, serranías o la costa, otros obedecen a divisiones más rectilíneas y administrativas.
+
+En conjunto, las tablas del resumen geométrico refuerzan la idea de que la morfología del territorio no es un detalle menor sino una dimensión analítica central. El contraste entre el peso simbólico de Montevideo y su diminuta proporción espacial, la relativa homogeneidad del hex-grid en la capital y la diversidad de compacidades entre departamentos muestran que el país combina una fuerte centralidad urbana con una estructura territorial heterogénea en forma y escala. Estas métricas, leídas junto con los mapas, ofrecen una base sólida para discusiones futuras sobre planificación, regionalización y políticas públicas ancladas en la estructura geográfica real del Uruguay.
+
+---
+
+## Conclusiones
+
+El análisis geométrico realizado demuestra que Uruguay presenta una diversidad territorial significativa tanto en superficie como en forma. Mientras el norte y noreste albergan los departamentos más extensos, la región sur concentra unidades más pequeñas y con una fuerte especialización funcional. La compacidad emerge como una métrica reveladora: departamentos pequeños como Montevideo pueden ser altamente irregulares, mientras que otros con mayor superficie pueden presentar formas sorprendentemente eficientes.
+
+El hex-grid aplicado a Montevideo confirma la utilidad de métodos de partición espacial regularizada para estudiar fenómenos urbanos y territoriales con mayor granularidad. En conjunto, todas las visualizaciones y métricas construyen una imagen detallada y rigurosa del territorio uruguayo, mostrando que la geografía geométrica no es solo un ejercicio descriptivo, sino una herramienta esencial para comprender dinámicas políticas, ambientales y urbanas.
+
