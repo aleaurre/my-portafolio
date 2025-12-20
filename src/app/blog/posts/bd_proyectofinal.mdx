@@ -1,0 +1,93 @@
+---
+title: "Arquitectura de Base de Datos y Sistema de Gestión Académica para Deportes de Nieve."
+publishedAt: "2025-12-21"
+tag: "Curso: Base de Datos 1"
+image: "/estinf/portada.png"
+---
+
+## Contexto del proyecto
+
+Este proyecto consistió en el **diseño e implementación integral de un sistema de gestión académica** para una institución educativa que amplía su oferta deportiva incorporando actividades de nieve (snowboard, moto de nieve, entre otras). El objetivo principal fue construir una **base de datos relacional robusta**, acompañada por una **capa de aplicación en Python**, capaz de gestionar usuarios, clases, turnos, inscripciones, equipamiento y reportes, respetando reglas de negocio estrictas y criterios de seguridad.
+
+El trabajo fue desarrollado de forma grupal en el marco de la materia **Base de Datos I (Universidad Católica del Uruguay)** y abarcó desde el modelado conceptual hasta la implementación funcional completa del sistema.
+
+
+## Diseño del modelo de datos
+
+El esquema relacional fue diseñado sobre:
+
+- **Normalización** y coherencia semántica  
+- **Preservación de historial** mediante bajas lógicas (`fecha_de_baja`)
+- **Restricciones de integridad** a nivel de base de datos
+- Separación clara entre **identidad, roles y permisos**
+
+Se incorporaron decisiones de diseño relevantes, como:
+- Uso de claves surrogate (`id_login`) para evitar problemas derivados de claves naturales mutables.
+- Restricciones `UNIQUE` para evitar solapamientos de clases por instructor o alumno.
+- Agrupación del equipamiento en **kits por actividad**, simplificando la lógica operativa.
+
+## Lógica de negocio y reglas operativas
+
+La capa de aplicación fue desarrollada en Python, utilizando una arquitectura modular. Se implementaron validaciones tanto **previas a la inserción** como **en tiempo de ejecución**, evitando que la base de datos reciba estados inconsistentes.
+
+Algunas reglas clave:
+- Un alumno no puede inscribirse a dos clases en el mismo turno.
+- Un instructor no puede dictar clases superpuestas.
+- No se permite modificar ni dar de baja entidades asociadas a clases activas.
+- Todas las operaciones críticas utilizan **transacciones con rollback**.
+
+Este enfoque reduce errores silenciosos, mejora la trazabilidad y facilita el mantenimiento futuro.
+
+## Seguridad y control de accesos
+
+El sistema implementa **autenticación y autorización basada en roles** (administrador, instructor, alumno):
+
+- Contraseñas almacenadas mediante **hashing con bcrypt**
+- Accesos diferenciados según rol, tanto a nivel aplicación como de base de datos
+- Principio de **mínimo privilegio** aplicado a cada tipo de usuario
+
+Si bien se utilizó un *salt* fijo para el hashing (por compatibilidad y simplicidad), el análisis de vulnerabilidades identifica claramente este punto como una mejora futura, demostrando una mirada crítica sobre las decisiones técnicas.
+
+## Reportes y vistas analíticas
+
+Se diseñaron **vistas SQL** para desacoplar la lógica analítica del código de aplicación, facilitando consultas complejas y reportes reutilizables, tales como:
+
+- Actividades con mayor cantidad de alumnos
+- Turnos con más clases dictadas
+- Actividades que generan mayores ingresos (actividad + equipamiento)
+
+Este enfoque permite escalar el sistema sin reescribir lógica en la capa de aplicación.
+
+## Herramientas y tecnologías
+
+- **MySQL** — modelado relacional, vistas, restricciones y eventos
+- **Python** — lógica de negocio, validaciones, flujo de usuario
+- **PyMySQL** — conexión segura y transaccional
+- **bcrypt** — hashing de contraseñas
+- **Rich** — mejora de la experiencia de usuario en consola
+- **Docker / DataGrip / PyCharm** — entorno de desarrollo
+
+## Aprendizajes clave
+
+Este proyecto consolidó conocimientos en:
+
+- Modelado relacional aplicado a un dominio real
+- Diseño de sistemas transaccionales con reglas de negocio complejas
+- Integración segura entre aplicación y base de datos
+- Uso de transacciones, rollback y control de errores
+- Pensamiento crítico sobre seguridad, mantenibilidad y escalabilidad
+
+Más allá de cumplir con la consigna académica, el sistema fue concebido con criterios cercanos a un **entorno productivo real**, priorizando consistencia, trazabilidad y claridad arquitectónica.
+
+---
+
+## Autores
+
+Proyecto desarrollado en conjunto con:
+- Ignacio Aguerrondo  
+- Juan Paroli  
+
+## Enlaces
+- 📎**Repositorio del proyecto:** [Ir a Github](https://github.com/aleaurre/Obligatorio_BaseDatos)
+
+- 📎**Informe Técnico:** [Ir al PDF](https://github.com/aleaurre/Obligatorio_BaseDatos/blob/main/Oblig_BD.pdf)
