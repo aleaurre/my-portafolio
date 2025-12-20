@@ -1,6 +1,74 @@
 ---
-title: "Gato vs Ratón, un Algoritmo contra Otro."
-publishedAt: "2025-12-20"
+title: "Factores fisicoquímicos y calidad del vino: un enfoque estadístico."
+publishedAt: "2025-12-21"
 tag: "Curso: Estadística Inferencial"
-image: "/estinf/portada.png"
+image: "/estinf/portada.jpg"
 ---
+
+
+## Análisis de la calidad del vino  
+
+En este proyecto se desarrolló en el marco del curso de **Estadística Inferencial**, sobre la calidad del vino tinto y blanco utilizando el dataset *Wine Quality*, con el objetivo de comprender qué variables fisicoquímicas se asocian de forma significativa con la calidad percibida y evaluar la capacidad explicativa de distintos modelos de regresión lineal.
+
+El trabajo fue realizado de manera grupal y siguió una metodología rigurosa, combinando análisis exploratorio, modelado estadístico e interpretación crítica de resultados.
+
+---
+
+## Metodología y herramientas
+
+El análisis fue implementado íntegramente en **R**, utilizando un enfoque reproducible y modular. Se emplearon, entre otras, las siguientes librerías:
+
+- **tidyverse / dplyr / tibble** para manipulación, limpieza y estructuración de datos.  
+- **e1071** para el cálculo de asimetría y curtosis.  
+- **caret** para métricas de error predictivo (RMSE, MAE).  
+- **lmtest** y **tseries** para la verificación de supuestos estadísticos.  
+- **knitr** para la generación de tablas reproducibles.
+
+---
+
+## Análisis descriptivo y exploratorio
+
+Se realizó un estudio descriptivo exhaustivo de todas las variables, calculando medidas de tendencia central, dispersión, rango intercuartílico, asimetría y curtosis. Este análisis permitió caracterizar la distribución de los atributos fisicoquímicos y detectar desviaciones respecto a la normalidad, así como posibles fuentes de heterogeneidad entre vinos tintos y blancos.
+
+Complementariamente, se analizó la estructura de correlaciones entre variables para identificar relaciones lineales relevantes y posibles problemas de multicolinealidad. Este paso fue clave para justificar la inclusión o exclusión de variables en los modelos posteriores.
+
+
+## Construcción de modelos de regresión
+
+Se definieron y compararon tres tipos de modelos de regresión lineal para cada tipo de vino:
+
+- **Modelo simple (M1):** regresión univariada utilizando únicamente el contenido de alcohol como predictor.  
+- **Modelo múltiple completo (M2):** incluye todas las variables fisicoquímicas disponibles.  
+- **Modelo múltiple reducido (M3):** obtenido mediante *backward selection*, eliminando iterativamente variables no significativas según un umbral de significancia estadística.
+
+La selección del modelo reducido se basó en criterios inferenciales (p-values), priorizando la **parsimonia** sin sacrificar excesivamente capacidad explicativa.
+
+## Evaluación y comparación de modelos
+
+Los modelos fueron comparados utilizando:
+
+- **Tests F anidados**, para evaluar si la reducción del modelo implicaba una pérdida significativa de información.  
+- **Métricas de ajuste y error**, incluyendo \(R^2\) ajustado, RMSE, MAE, AIC y BIC.
+
+Este análisis permitió discutir el compromiso entre complejidad y desempeño, mostrando que los modelos reducidos conservan una capacidad explicativa razonable en un fenómeno inherentemente complejo y subjetivo como la calidad del vino.
+
+## Inferencia estadística y verificación de supuestos
+
+Se realizó un análisis detallado de significancia individual de los coeficientes mediante estadísticos t, utilizando valores críticos calculados según los grados de libertad residuales de cada modelo.
+Asimismo, se evaluaron los supuestos clásicos del modelo lineal:
+
+- **Normalidad de los residuos**, mediante el test de Jarque–Bera y estadísticos descriptivos de residuos.  
+- **Especificación funcional**, utilizando el test RESET de Ramsey, lo que permitió identificar posibles limitaciones del enfoque lineal y la presencia de relaciones no capturadas por el modelo.
+
+Estos resultados fueron discutidos críticamente, destacando que, si bien los modelos lineales son útiles para interpretación, presentan restricciones al modelar fenómenos sensoriales complejos.
+
+## Capacidad predictiva
+
+Como ejercicio ilustrativo, se estimó la calidad esperada para perfiles promedio de vino construidos a partir de las covariables de cada modelo reducido, incluyendo intervalos de confianza al 95 %. Este análisis permitió contextualizar la capacidad predictiva del modelo dentro del rango observado de los datos, sin extrapolaciones.
+
+---
+
+## Aprendizajes clave
+
+Este proyecto consolidó competencias técnicas en análisis estadístico aplicado, modelado lineal, inferencia y validación de supuestos, así como en la comunicación rigurosa de resultados. Además, permitió comprender las fortalezas y limitaciones de los modelos lineales en contextos reales, sentando bases para enfoques más avanzados de modelado predictivo.
+
