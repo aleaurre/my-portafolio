@@ -1,0 +1,52 @@
+---
+title: "Gato vs Ratón, un Algoritmo contra Otro."
+publishedAt: "2025-12-20"
+tag: "Curso: Algoritmos Avanzados de Búsqueda y Optimización"
+image: "/algoritmos/portada3.png"
+---
+
+
+# Gato y Ratón
+
+Este proyecto fue desarrollado en equipo como trabajo final de la materia **Algoritmos Avanzados de Búsqueda y Optimización** (Facultad de Ingeniería). El objetivo central fue diseñar un entorno adversarial multiagente que permitiera analizar, comparar y comprender el comportamiento de distintos algoritmos de búsqueda y toma de decisiones en un escenario dinámico y competitivo.
+
+El problema modela un juego entre dos agentes con objetivos opuestos: un gato que intenta capturar a un ratón en la menor cantidad de pasos posible, y un ratón que debe evadir al gato, obtener un queso y luego alcanzar una meta final. Cada movimiento redefine la distancia entre captura y escape, generando una dinámica de tensión constante que resulta especialmente adecuada para estudiar algoritmos clásicos de inteligencia artificial.
+
+### Modelado del entorno
+
+El entorno se representa como un grafo discreto no ponderado. Cada nodo corresponde a una posición del tablero y cada arista representa un movimiento válido, incluyendo desplazamientos diagonales. El estado del sistema queda determinado por la posición del gato, la posición del ratón, el turno de juego y el estado del objetivo del ratón (si ya obtuvo o no el queso).
+
+Se implementaron dos configuraciones de tablero: una versión reducida con once nodos y una versión ampliada con veinticinco nodos. Esta dualidad permitió estudiar cómo escalan los algoritmos frente al aumento del espacio de estados y del factor de ramificación, manteniendo constante la lógica del juego.
+
+### Algoritmos implementados
+
+- **A\***: algoritmo de búsqueda informada que combina costo real y heurística. Se utilizó distancia Manhattan como heurística admisible y consistente. El gato emplea A\* para perseguir al ratón por rutas óptimas, mientras que el ratón lo utiliza para planificar dinámicamente la búsqueda del queso y luego la ruta hacia la meta, evitando la posición del gato.
+
+- **Minimax con poda alfa–beta**: enfoque adversarial que modela el juego como un árbol de decisiones con turnos alternados. El gato intenta minimizar la distancia al ratón y el ratón maximizarla. La función de evaluación se basa en la distancia mínima entre agentes, calculada mediante BFS, y la poda alfa–beta permite reducir el costo computacional sin alterar la decisión óptima dentro del horizonte de búsqueda.
+
+- **Random**: estrategia de referencia que selecciona movimientos de forma aleatoria. Se utilizó como baseline experimental para dimensionar el impacto real de los algoritmos informados.
+
+### Experimentos y análisis
+
+Se realizaron experimentos automáticos combinando los distintos algoritmos para ambos agentes, tanto en el mapa reducido como en el ampliado, ejecutando múltiples partidas por configuración. Se analizaron métricas como la tasa de captura del gato, la tasa de escape del ratón, el número promedio de pasos por partida y la frecuencia de empates.
+
+Los resultados muestran que A\* presenta el mejor desempeño global, generando partidas más cortas y resolutivas. Minimax, en cambio, tiende a producir partidas más largas y defensivas, con mayor cantidad de empates, debido a la simplicidad de su función de evaluación y a la ausencia de una modelización explícita de los objetivos del ratón. El comportamiento aleatorio confirma su rol como baseline sin estrategia efectiva.
+
+### Conclusiones
+
+El proyecto evidencia que la correcta modelización de los objetivos del entorno es determinante para el desempeño de los agentes. Mientras que A\* se beneficia de objetivos claros y heurísticas bien definidas, los enfoques adversariales como Minimax requieren funciones de evaluación más ricas para evitar estancamientos y comportamientos conservadores.
+
+Este trabajo permitió profundizar en la implementación práctica de algoritmos clásicos de búsqueda y decisión, comprender sus limitaciones en entornos dinámicos y adversariales, y analizar cómo pequeñas decisiones de modelado impactan de forma significativa en el comportamiento emergente del sistema.
+
+### Tecnologías utilizadas
+- **Python**
+- **Pygame** (visualización del entorno)
+
+### Enlaces
+- 📎**Repositorio del proyecto:** [Ir a Github](https://github.com/aleaurre/Gato_raton)
+
+- 📎**Informe Técnico:** [Ir al PDF](https://github.com/aleaurre/Gato_raton/blob/master/docs/Informe_Gato_Rat%C3%B3n.pdf)
+
+
+
+
