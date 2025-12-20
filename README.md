@@ -1,141 +1,74 @@
-# Portafolio de Ingeniería en IA y Ciencia de Datos
+# Portafolio de Ingeniería en Inteligencia Artificial y Ciencia de Datos
 
-Este portafolio documenta mi recorrido académico y profesional como estudiante de **Ingeniería en Inteligencia Artificial y Ciencia de Datos**. Aquí encontrarás una selección creciente de proyectos técnicos, prácticas integrales y desarrollos aplicados, con foco en:
+Este repositorio contiene **mi portafolio personal** como estudiante de **Ingeniería en Inteligencia Artificial y Ciencia de Datos**. Reúne proyectos académicos y desarrollos técnicos propios, documentados de forma completa y reproducible, que reflejan mi formación, intereses y evolución profesional.
 
-* Ingeniería de datos y construcción de pipelines reproducibles
-* Modelado predictivo, machine learning y análisis estadístico
-* Visualización y comunicación efectiva de resultados
-* Desarrollo de software y buenas prácticas de ingeniería
-* Computación embebida y procesamiento de señales
-* Ética y responsabilidad en Inteligencia Artificial
-
-El objetivo principal es presentar **trabajos completos**, con código estructurado, análisis detallado y resultados interpretables que reflejan mi formación y evolución.
+Los contenidos presentados —proyectos, análisis, código, visualizaciones y documentación— son **de autoría propia**, salvo que se indique explícitamente lo contrario en cada caso.
 
 ---
 
-## Organización del portafolio
+## Enfoque del portafolio
 
-Cada proyecto/documento incluye:
+Los proyectos incluidos abordan, entre otros, los siguientes ejes:
 
-* Contexto del problema
-* Herramientas y tecnologías utilizadas
-* Proceso de desarrollo (ETL / feature engineering / modelado / pruebas)
-* Evaluación de resultados y conclusiones
-* Archivos reproducibles (notebooks, dashboards, datasets de referencia)
+- Ingeniería de datos y construcción de *pipelines* reproducibles  
+- Modelado predictivo, *machine learning* y análisis estadístico  
+- Visualización y comunicación técnica de resultados  
+- Desarrollo de software y buenas prácticas de ingeniería  
+- Computación embebida y procesamiento de señales  
+- Ética y responsabilidad en Inteligencia Artificial  
 
-Los proyectos están organizados según cursos, temáticas y entregables académicos, y se irán **actualizando y ampliando periódicamente** a medida que avance en la carrera.
+El objetivo del portafolio es presentar **trabajos técnicamente sólidos**, con énfasis en la claridad metodológica, la reproducibilidad y la interpretación crítica de resultados.
 
 ---
 
-## Tecnologías destacadas
+## Organización del contenido
 
-* Lenguajes: **Python**, SQL, C/ASM para sistemas embebidos
-* ML/DS: pandas, scikit-learn, XGBoost, CatBoost, Fairlearn
-* Visualización: Power BI, matplotlib, seaborn
-* Infraestructura: Docker, GitHub, pipelines automatizados
-* Geodatos, audio e imagen: geopandas, librosa, OpenCV
-* Otros: DAX, APIs, Next.js/MDX para documentación técnica
+Cada proyecto o entrada incluye, según corresponda:
+
+- Contexto y definición del problema  
+- Herramientas y tecnologías utilizadas  
+- Proceso de desarrollo (ETL, *feature engineering*, modelado, validación)  
+- Evaluación de resultados y conclusiones  
+- Material reproducible (notebooks, scripts, dashboards, datasets)  
+
+El contenido se organiza por cursos, temáticas y entregables académicos, y se **actualiza de forma continua**.
+
+---
+
+## Tecnologías y herramientas
+
+- **Lenguajes**: Python, SQL, C y ASM  
+- **Ciencia de Datos y ML**: pandas, scikit-learn, XGBoost, CatBoost, Fairlearn  
+- **Visualización**: Power BI, matplotlib, seaborn  
+- **Infraestructura**: Docker, GitHub, automatización de *pipelines*  
+- **Datos espaciales, audio e imagen**: geopandas, librosa, OpenCV  
+- **Documentación técnica**: MDX, Next.js, DAX, APIs  
 
 ---
 
 ## Contacto
 
-Si te interesa conocer más sobre mi trabajo, colaborar en proyectos o realizar una consulta profesional:
+Para consultas, colaboraciones o referencias técnicas:
 
-* GitHub: [github.com/aleaurre](https://github.com/aleaurre)
-* Email: [alexiaurrecochea@gmail.com](mailto:alexiaurrecochea@gmail.com)
-* Ubicación: Montevideo, Uruguay
-  
+- **GitHub**: https://github.com/aleaurre  
+- **Email**: alexiaurrecochea@gmail.com  
+- **Ubicación**: Montevideo, Uruguay  
+
 ---
 
-# La plantilla utilizada fue Magic Portfolio
+## Sobre la infraestructura del sitio
 
-Magic Portfolio is a simple, clean, beginner-friendly portfolio template. It supports an MDX-based content system for projects and blog posts, an about / CV page and a gallery.
+El sitio del portafolio está construido utilizando **Magic Portfolio**, una plantilla *open source* desarrollada por terceros, basada en **Once UI** y **Next.js**.
 
-View the demo [here](https://demo.magic-portfolio.com).
+La plantilla provee exclusivamente la **estructura visual y técnica del sitio** (layout, sistema MDX, SEO, componentes), mientras que **todo el contenido del portafolio —proyectos, textos, análisis y código— es de elaboración propia**.
 
-## Getting started
+- Repositorio de la plantilla: https://github.com/once-ui-system/magic-portfolio  
+- Demo oficial: https://demo.magic-portfolio.com  
 
-**1. Clone the repository**
-```
-git clone https://github.com/once-ui-system/magic-portfolio.git
-```
+---
 
-**2. Install dependencies**
-```
-npm install
-```
+## Licencia y atribución
 
-**3. Run dev server**
-```
-npm run dev
-```
-
-**4. Edit config**
-```
-src/resources/once-ui.config.js
-```
-
-**5. Edit content**
-```
-src/resources/content.js
-```
-
-**6. Create blog posts / projects**
-```
-Add a new .mdx file to src/app/blog/posts or src/app/work/projects
-```
-
-Magic Portfolio was built with [Once UI](https://once-ui.com) for [Next.js](https://nextjs.org). It requires Node.js v18.17+.
-
-## Documentation
-
-Docs available at: [docs.once-ui.com](https://docs.once-ui.com/docs/magic-portfolio/quick-start)
-
-## Features
-
-### Once UI
-- All tokens, components & features of [Once UI](https://once-ui.com)
-
-### SEO
-- Automatic open-graph and X image generation with next/og
-- Automatic schema and metadata generation based on the content file
-
-### Design
-- Responsive layout optimized for all screen sizes
-- Timeless design without heavy animations and motion
-- Endless customization options through [data attributes](https://once-ui.com/docs/theming)
-
-### Content
-- Render sections conditionally based on the content file
-- Enable or disable pages for blog, work, gallery and about / CV
-- Generate and display social links automatically
-- Set up password protection for URLs
-
-### Localization
-- A localized, earlier version of Magic Portfolio is available with the next-intl library
-- To use localization, switch to the 'i18n' branch
-
-## Creators
-
-Lorant One: [Threads](https://www.threads.net/@lorant.one) / [LinkedIn](https://www.linkedin.com/in/lorant-one/)
-
-## Get involved
-
-- Join the Design Engineers Club on [Discord](https://discord.com/invite/5EyAQ4eNdS) and share your project with us!
-- Deployed your docs? Share it on the [Once UI Hub](https://once-ui.com/hub) too! We feature our favorite apps on our landing page.
-
-## License
-
-Distributed under the CC BY-NC 4.0 License.
-- Attribution is required.
-- Commercial usage is not allowed.
-- You can extend the license to [Dopler CC](https://dopler.app/license) by purchasing a [Once UI Pro](https://once-ui.com/pricing) license.
-
-See `LICENSE.txt` for more information.
-
-## Deploy with Vercel
-
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonce-ui-system%2Fmagic-portfolio&project-name=portfolio&repository-name=portfolio&redirect-url=https%3A%2F%2Fgithub.com%2Fonce-ui-system%2Fmagic-portfolio&demo-title=Magic%20Portfolio&demo-description=Showcase%20your%20designers%20or%20developer%20portfolio&demo-url=https%3A%2F%2Fdemo.magic-portfolio.com&demo-image=%2F%2Fraw.githubusercontent.com%2Fonce-ui-system%2Fmagic-portfolio%2Fmain%2Fpublic%2Fimages%2Fog%2Fhome.jpg)
+- El contenido del portafolio (proyectos, textos y análisis) es de autoría personal, salvo indicación expresa.
+- La plantilla **Magic Portfolio** se utiliza bajo licencia **CC BY-NC 4.0**, con la atribución correspondiente a sus creadores.
 
