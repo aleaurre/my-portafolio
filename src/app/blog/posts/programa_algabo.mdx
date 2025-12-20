@@ -1,0 +1,58 @@
+---
+title: "Teórico de Algoritmos Avanzados de Búsqueda y Optimización (2025, 2do Semestre)."
+publishedAt: "2025-12-20"
+tag: "Curso: Algoritmos Avanzados de Búsqueda y Optimización"
+image: "/ALGABO/portada.jpg"
+---
+
+# Programa del Curso y Material Teórico
+
+### Conceptos fundamentales de búsqueda y optimización
+Un **algoritmo** es un conjunto finito y ordenado de pasos que transforman una entrada en una salida. En ALGABO se distinguen los **problemas de búsqueda**, cuyo objetivo es encontrar una secuencia de acciones que lleve de un estado inicial a un estado objetivo, y los **problemas de optimización**, que buscan minimizar o maximizar una función objetivo bajo restricciones. Estos problemas se formulan mediante un **espacio de estados**, estados individuales representados como **nodos**, **acciones** que generan transiciones y un **costo** asociado. Una solución es una secuencia de acciones válida, y es **óptima** si minimiza el costo total del camino.
+
+### Grafos y representaciones
+Muchos problemas de búsqueda se modelan como **grafos** `G = (V, A)`, donde `V` es el conjunto de vértices y `A` el conjunto de aristas. Se utilizan conceptos como **camino**, **camino mínimo**, **ciclo** y **grafo ponderado**. Computacionalmente, los grafos pueden implementarse mediante **matriz de adyacencia** (acceso O(1), alto consumo de memoria) o **lista de adyacencia** (más eficiente en grafos dispersos).
+
+## Búsqueda no informada
+La búsqueda no informada explora el espacio de estados sin usar conocimiento adicional del problema. **BFS** (búsqueda en amplitud) explora por niveles y es completa y óptima cuando los costos son uniformes. **DFS** (búsqueda en profundidad) explora una rama hasta el final, usa menos memoria, pero no garantiza encontrar la solución óptima. Ambos algoritmos pueden resultar ineficientes en espacios de búsqueda grandes.
+
+## Búsqueda informada y heurísticas
+La búsqueda informada utiliza **heurísticas** para guiar la exploración. Una heurística `h(n)` estima el costo restante hasta el objetivo. Es **admisible** si nunca sobreestima el costo real: `h(n) ≤ C(n)`, y es **consistente** si cumple la desigualdad triangular: `h(n) ≤ c(n,n') + h(n')`. Heurísticas dominantes aportan mayor información sin perder corrección, y suelen obtenerse mediante **relajación del problema**.
+
+## Algoritmos heurísticos de búsqueda
+Entre los algoritmos heurísticos se encuentran **Greedy Best-First Search**, que prioriza nodos según `f(n) = h(n)`, y **A***, que combina costo acumulado y heurística: `f(n) = g(n) + h(n)`. A* es completo y óptimo si la heurística es admisible y consistente. **IDA*** (Iterative Deepening A*) reduce el uso de memoria combinando A* con profundización iterativa sobre un umbral heurístico.
+
+## Algoritmo de Dijkstra
+El algoritmo de **Dijkstra** resuelve el problema de camino mínimo en grafos con pesos no negativos. Mantiene una distancia acumulada `dist[u]` y utiliza una **cola de prioridad (min-heap)** para expandir siempre el nodo con menor costo. Al extraer un nodo del heap, su distancia se considera óptima. Su complejidad típica es `O((V + E) log V)`.
+
+## Búsqueda local
+La búsqueda local trabaja sobre soluciones completas y mejora iterativamente su calidad. **Hill Climbing** se mueve al mejor vecino inmediato y puede quedar atrapado en óptimos locales. **Haz Local (Local Beam Search)** mantiene `k` soluciones simultáneamente para aumentar diversidad. **Temple Simulado** acepta movimientos peores con probabilidad `P(aceptar) = exp(-Δ / T)`, donde `Δ` es el empeoramiento y `T` la temperatura, que decrece gradualmente.
+
+## Programación dinámica
+La **programación dinámica (PD)** se aplica a problemas con **subestructura óptima** y **subproblemas superpuestos**. Almacena resultados intermedios para evitar recomputaciones, transformando soluciones exponenciales en polinomiales. Se implementa mediante **memoización (top-down)** o **tabulación (bottom-up)**, definiendo claramente estados, transiciones y casos base.
+
+## Problemas clásicos de programación dinámica
+Ejemplos centrales son **Fibonacci**, la **Mochila 0/1** y el **Traveling Salesman Problem (TSP)**. En la mochila, el estado típico es:
+`dp[i][W] = max(dp[i-1][W], v_i + dp[i-1][W-w_i])`,
+con complejidad `O(nW)`. Para TSP, el algoritmo **Held–Karp** usa PD por subconjuntos y logra una complejidad `O(n^2 2^n)`, siendo exacto pero exponencial.
+
+## Branch and Bound
+**Branch & Bound** es una técnica exacta que explora un árbol de decisiones aplicando poda mediante **cotas**. Se define una **cota superior (UB)** optimista y una **cota inferior (LB)** basada en la mejor solución factible. Un subárbol se poda si `UB ≤ LB`. Se utilizan estrategias de exploración DFS, BFS o best-first, y se aplica a problemas como Mochila, TSP y JSSP.
+
+## Algoritmos genéticos
+Los **algoritmos genéticos (AG)** son metaheurísticas inspiradas en la evolución natural. Operan sobre una población de individuos evaluados por una función de **fitness**, aplicando selección, cruza, mutación y elitismo. No garantizan optimalidad, pero exploran eficazmente espacios grandes y complejos, balanceando exploración y explotación.
+
+## Algoritmos genéticos para aproximación de funciones
+En la aproximación de funciones, cada individuo representa un vector real de coeficientes `[..., a0, a1, a2, ...]` que define un modelo, por ejemplo un polinomio:
+`f(x,y) = a0 + a1 x + a2 y + a3 x^2 + a4 x y + a5 y^2`.
+Los AG buscan el conjunto de coeficientes que mejor ajusta los datos, sin necesidad de derivadas y tolerando múltiples mínimos locales.
+
+## Evaluación mediante RMSE y fitness
+La calidad del ajuste se mide con el **RMSE (Root Mean Squared Error)**:
+`RMSE = sqrt((1/N) * Σ (M_real - M_pred)^2)`.
+Como el objetivo es minimizar el RMSE, se redefine la evaluación como un problema de maximización mediante:
+`fitness(x) = 1 / (ε + RMSE(x))`,
+donde `ε` evita divisiones por cero. El uso de **minibatches** reduce el costo computacional y ayuda a evitar sobreajuste.
+
+## Análisis de complejidad algorítmica
+El análisis de complejidad estudia el crecimiento del consumo de tiempo y memoria cuando `n → ∞`. Se utilizan las notaciones **Big-O**, **Θ** y **Ω** para describir cotas superiores, exactas e inferiores. Se distinguen los casos **mejor**, **peor** y **medio**, y se analizan clases como `O(1)`, `O(log n)`, `O(n)`, `O(n log n)`, `O(n^2)` y `O(2^n)`, fundamentales para comparar algoritmos y elegir estrategias adecuadas.

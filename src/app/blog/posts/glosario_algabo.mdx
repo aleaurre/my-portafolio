@@ -1,0 +1,570 @@
+---
+title: "Glosario de Algoritmos, ALGABO (2025, 2do Semestre)."
+publishedAt: "2025-12-20"
+tag: "Curso: Algoritmos Avanzados de Búsqueda y Optimización"
+image: "/ALGABO/portada2.jpg"
+---
+
+## Básicos
+
+#### Búsqueda en Amplitud (BFS)
+La búsqueda en amplitud explora el espacio de estados por niveles, expandiendo primero todos los nodos a una cierta profundidad antes de avanzar a la siguiente. Es un algoritmo no informado, ya que no utiliza conocimiento del problema para priorizar caminos. Garantiza completitud y optimalidad cuando todos los costos son iguales, pero puede consumir mucha memoria en espacios grandes.
+Tiempo: `O(|V| + |E|)`  
+Espacio: `O(|V|)`
+
+```python
+def bfs_path(adj, s, t):
+    # Cola FIFO para explorar por niveles
+    q = deque([s])
+
+    # Diccionario para reconstruir el camino
+    # parent[v] = nodo desde el que se llegó a v
+    parent = {s: None}
+
+    # Mientras haya nodos por explorar
+    while q:
+        # Tomamos el nodo más antiguo de la cola
+        u = q.popleft()
+
+        # Si llegamos al objetivo, cortamos
+        if u == t:
+            break
+
+        # Exploramos los vecinos del nodo actual
+        for v in adj.get(u, []):
+            # Si el vecino no fue visitado
+            if v not in parent:
+                parent[v] = u   # registramos de dónde venimos
+                q.append(v)     # lo agregamos a la cola
+
+    # Si nunca llegamos al objetivo
+    if t not in parent:
+        return None
+
+    # Reconstrucción del camino desde t hasta s
+    path, cur = [], t
+    while cur is not None:
+        path.append(cur)
+        cur = parent[cur]
+
+    # Invertimos para obtener s -> t
+    return list(reversed(path))
+```
+
+
+
+#### Búsqueda en Profundidad (DFS)
+La búsqueda en profundidad explora una rama del espacio de estados hasta el final antes de retroceder. También es un algoritmo no informado, con bajo consumo de memoria, pero no garantiza encontrar la solución óptima y puede quedar atrapado en ramas profundas o incluso en ciclos si no se controla adecuadamente.
+Tiempo: `O(|V| + |E|)`
+Espacio: `O(|V|) (por stack o recursión)`
+
+```python
+def dfs_visit(adj, s):
+    # Pila LIFO para DFS
+    stack = [s]
+
+    # Conjunto de nodos ya visitados
+    seen = {s}
+
+    # Orden de visita
+    order = []
+
+    while stack:
+        # Tomamos el último nodo agregado
+        u = stack.pop()
+        order.append(u)
+
+        # Recorremos vecinos
+        for v in adj.get(u, []):
+            if v not in seen:
+                seen.add(v)      # marcamos como visitado
+                stack.append(v)  # lo agregamos a la pila
+
+    return order
+```
+
+
+
+#### Greedy Best-First Search
+Elige el nodo más prometedor según la heurística 'f(n) = h(n)', el nodo que parece más cercano al objetivo según la heurística. Utiliza únicamente la estimación heurística y no considera el costo acumulado, por lo que puede ser rápido, pero no garantiza optimalidad y puede tomar decisiones localmente buenas pero globalmente malas.
+
+```python
+def greedy_best_first(adj, s, t, h):
+    # Heap ordenado solo por heurística
+    heap = [(h[s], s)]
+
+    # Para reconstruir el camino
+    parent = {s: None}
+
+    while heap:
+        # Extraemos el nodo con menor h(n)
+        _, u = heapq.heappop(heap)
+
+        if u == t:
+            break
+
+        for v in adj.get(u, []):
+            if v not in parent:
+                parent[v] = u
+                heapq.heappush(heap, (h[v], v))
+
+    if t not in parent:
+        return None
+
+    # Reconstrucción del camino
+    path, cur = [], t
+    while cur is not None:
+        path.append(cur)
+        cur = parent[cur]
+
+    return list(reversed(path))
+```
+
+
+
+
+#### A*
+Combina costo real y heurística: 'f(n) = g(n) + h(n)'. Es completo y óptimo con heurísticas admisibles y consistentes.
+
+```python
+def astar(adj_w, s, t, h):
+    # g[n] = costo real mínimo conocido desde s hasta n
+    g = {s: 0.0}
+
+    # Para reconstruir el camino
+    parent = {s: None}
+
+    # Heap ordenado por f(n) = g(n) + h(n)
+    heap = [(h[s], s)]
+
+    while heap:
+        _, u = heapq.heappop(heap)
+
+        # Si llegamos al objetivo, terminamos
+        if u == t:
+            break
+
+        for v, w in adj_w.get(u, []):
+            # Candidato a nuevo costo pasando por u
+            cand = g[u] + w
+
+            # Si mejora el costo conocido
+            if cand < g.get(v, math.inf):
+                g[v] = cand
+                parent[v] = u
+                heapq.heappush(heap, (cand + h[v], v))
+
+    if t not in parent:
+        return None, math.inf
+
+    # Reconstrucción del camino
+    path, cur = [], t
+    while cur is not None:
+        path.append(cur)
+        cur = parent[cur]
+
+    return list(reversed(path)), g[t]
+```
+
+
+
+
+
+#### IDA* (Iterative Deepening A*)
+A* con profundización iterativa sobre un umbral creciente. En lugar de almacenar todos los nodos abiertos, realiza múltiples búsquedas en profundidad acotadas por un valor máximo de la función de evaluación. Reduce significativamente el uso de memoria, a costa de repetir exploraciones.
+
+```python
+def ida_star(adj_w, s, t, h):
+    # DFS acotado por un umbral f <= bound
+    def dfs(u, g_u, bound, visited):
+        f_u = g_u + h[u]
+
+        # Si supera el umbral, se poda
+        if f_u > bound:
+            return f_u, None
+
+        # Si llegamos al objetivo
+        if u == t:
+            return f_u, [u]
+
+        best = math.inf
+
+        for v, w in adj_w.get(u, []):
+            if v in visited:
+                continue
+
+            visited.add(v)
+            nb, path = dfs(v, g_u + w, bound, visited)
+            visited.remove(v)
+
+            if path:
+                return nb, [u] + path
+
+            best = min(best, nb)
+
+        return best, None
+
+    # Umbral inicial
+    bound = h[s]
+
+    while True:
+        nb, path = dfs(s, 0.0, bound, {s})
+
+        if path:
+            return path
+
+        if nb == math.inf:
+            return None
+
+        bound = nb
+```
+
+
+
+
+
+#### Dijkstra
+Relaja aristas manteniendo la menor distancia conocida, utiliza una cola de prioridad (min-heap) para expandir siempre el nodo de menor costo acumulado., requiere pesos no negativos.
+
+```python
+def dijkstra(adj_w, s, t=None):
+    # dist[u] = mejor distancia conocida desde s
+    dist = {s: 0.0}
+
+    # parent[u] = nodo previo en el camino óptimo
+    parent = {s: None}
+
+    # Heap ordenado por distancia acumulada
+    heap = [(0.0, s)]
+
+    while heap:
+        d, u = heapq.heappop(heap)
+
+        # Ignoramos entradas obsoletas
+        if d != dist.get(u, math.inf):
+            continue
+
+        for v, w in adj_w.get(u, []):
+            nd = d + w
+
+            # Relajación
+            if nd < dist.get(v, math.inf):
+                dist[v] = nd
+                parent[v] = u
+                heapq.heappush(heap, (nd, v))
+
+    return dist, parent
+```
+
+
+
+
+#### Hill Climbing
+Se mueve al mejor vecino inmediato. Puede quedar atrapado en óptimos locales.
+
+```python
+def hill_climbing(s0, neighbors, f, max_steps=10000):
+    s = s0
+
+    for _ in range(max_steps):
+        # Elegimos el mejor vecino según f
+        best = min(neighbors(s), key=f)
+
+        # Si no mejora, nos detenemos
+        if f(best) >= f(s):
+            return s
+
+        s = best
+
+    return s
+```
+
+
+#### Local Beam Search
+El Haz Local extiende Hill Climbing manteniendo varias soluciones simultáneamente. En cada iteración genera todos los vecinos y conserva solo los mejores. Esto introduce diversidad y reduce la probabilidad de estancamiento, aunque aumenta el costo computacional. Cuando el tamaño del haz es uno, el algoritmo se reduce a Hill Climbing.
+```python
+def local_beam_search(initial_states, neighbors, f, k=5, iters=200):
+    # Inicializamos el haz con los k mejores
+    beam = sorted(initial_states, key=f)[:k]
+
+    for _ in range(iters):
+        candidates = []
+
+        # Generamos todos los vecinos
+        for s in beam:
+            candidates.extend(neighbors(s))
+
+        # Conservamos los k mejores
+        beam = sorted(candidates, key=f)[:k]
+
+    return min(beam, key=f)
+```
+
+
+
+
+
+
+#### Simulated Annealing
+El Temple Simulado es un algoritmo de búsqueda local que permite aceptar soluciones peores con cierta probabilidad, controlada por una temperatura que disminuye gradualmente. Al inicio explora ampliamente el espacio y, a medida que la temperatura baja, se vuelve más conservador. Este mecanismo permite escapar de óptimos locales y aproximarse a soluciones de alta calidad.
+
+```python
+def simulated_annealing(s0, neighbor, J, T0=1.0, alpha=0.99, Tmin=1e-6):
+    s = s0
+    best = s0
+    T = T0
+
+    while T > Tmin:
+        s_new = neighbor(s)
+        delta = J(s_new) - J(s)
+
+        # Aceptación determinista o probabilística
+        if delta <= 0 or random.random() < math.exp(-delta / T):
+            s = s_new
+            if J(s) < J(best):
+                best = s
+
+        # Enfriamiento
+        T *= alpha
+
+    return best
+```
+
+
+
+
+
+
+
+#### Held–Karp (TSP)
+Programación dinámica por subconjuntos. Exacto pero exponencial.
+
+```python
+def held_karp(d, s=0):
+    n = len(d)
+    DP = {(1<<s, s): 0.0}
+
+    nodes = [i for i in range(n) if i != s]
+
+    for r in range(1, n):
+        for subset in combinations(nodes, r):
+            mask = 1<<s
+            for x in subset:
+                mask |= 1<<x
+
+            for j in subset:
+                pm = mask & ~(1<<j)
+                DP[(mask, j)] = min(
+                    DP[(pm, i)] + d[i][j]
+                    for i in range(n)
+                    if (pm, i) in DP
+                )
+
+    full = (1<<n) - 1
+    return min(DP[(full, j)] + d[j][s] for j in nodes)
+```
+
+
+
+#### Esqueleto Algoritmos Genéricos
+Los algoritmos genéticos son metaheurísticas inspiradas en la evolución biológica. Trabajan con una población de soluciones que evoluciona mediante selección, cruza, mutación y elitismo, guiada por una función de fitness. No garantizan encontrar el óptimo global, pero son muy eficaces en espacios grandes, no lineales o discontinuos.
+```python
+def genetic_algorithm(init_pop, fitness, select, crossover, mutate, generations=200, elite=2):
+    pop = init_pop()
+
+    for _ in range(generations):
+        # Ordenamos por fitness
+        pop = sorted(pop, key=fitness, reverse=True)
+
+        # Elitismo
+        new_pop = pop[:elite]
+
+        # Generación de nuevos individuos
+        while len(new_pop) < len(pop):
+            p1, p2 = select(pop), select(pop)
+            c1, c2 = crossover(p1, p2)
+            new_pop.append(mutate(c1))
+            if len(new_pop) < len(pop):
+                new_pop.append(mutate(c2))
+
+        pop = new_pop
+
+    return max(pop, key=fitness)
+```
+
+
+
+
+#### Branch & Bound (BnB)
+**Método exacto de optimización combinatoria** que explora sistemáticamente el espacio de soluciones mediante un **árbol de decisiones** (*branch*), descartando grandes porciones del árbol mediante **poda** (*bound*).
+La exploración se basa en el uso de **cotas** que permiten decidir si un subproblema puede conducir o no a una mejor solución que la ya encontrada.
+- Cota inferior (LB)
+La **lower bound (LB)** representa la **mejor solución factible encontrada hasta el momento**.  
+En problemas de **maximización**, corresponde al **mejor valor real alcanzado** durante la exploración y actúa como referencia mínima que cualquier nueva solución debe superar.
+- Cota superior (UB)
+La **upper bound (UB)** es una estimación **optimista** del **mejor valor posible** que podría alcanzarse al completar un nodo parcial.  
+Se obtiene típicamente resolviendo una **relajación del problema**, por ejemplo permitiendo fracciones en la mochila.
+- Regla de poda (maximización)
+Un subárbol se descarta cuando se cumple que: `UB(nodo) ≤ LB`
+En este caso, incluso en el mejor escenario posible, el nodo no puede mejorar la mejor solución conocida, por lo que continuar explorándolo es innecesario.
+Branch & Bound **garantiza encontrar la solución óptima** siempre que la cota superior sea **válida**, es decir, que **no subestime** el mejor valor alcanzable desde el nodo. Bajo esta condición, la poda no elimina soluciones óptimas y el método es correcto.
+
+
+
+```python
+from dataclasses import dataclass
+import math
+
+def bnb_knapsack_fractional_ub(weights, values, capacity):
+    n = len(weights)
+
+    # Ordenar items por densidad v/w (para UB fraccional)
+    order = list(range(n))
+    order.sort(key=lambda i: values[i] / weights[i], reverse=True)
+
+    best_val = 0
+    best_take = [0] * n
+
+    def upper_bound(idx, cur_w, cur_v):
+        """UB fraccional: llena la capacidad desde idx con items completos y 1 fracción final."""
+        w = cur_w
+        v = cur_v
+        for k in range(idx, n):
+            i = order[k]
+            if w + weights[i] <= capacity:
+                w += weights[i]
+                v += values[i]
+            else:
+                remain = capacity - w
+                if remain > 0:
+                    v += values[i] * (remain / weights[i])
+                break
+        return v
+
+    def dfs(idx, cur_w, cur_v, take):
+        nonlocal best_val, best_take
+
+        # Si llegamos al final, actualizamos LB (mejor factible)
+        if idx == n:
+            if cur_v > best_val:
+                best_val = cur_v
+                best_take = take[:]
+            return
+
+        # Bound/poda
+        ub = upper_bound(idx, cur_w, cur_v)
+        if ub <= best_val:
+            return
+
+        i = order[idx]
+
+        # Branch 1: tomar i (si cabe)
+        if cur_w + weights[i] <= capacity:
+            take[i] = 1
+            dfs(idx + 1, cur_w + weights[i], cur_v + values[i], take)
+            take[i] = 0
+
+        # Branch 2: no tomar i
+        dfs(idx + 1, cur_w, cur_v, take)
+
+    dfs(0, 0, 0, [0] * n)
+    return best_val, best_take
+```
+
+
+
+
+## Avanzados
+
+#### Uniform Cost Search (UCS)
+Uniform Cost Search es un algoritmo de búsqueda no informada que expande siempre el nodo con menor costo acumulado desde el origen. A diferencia de BFS, no asume costos uniformes: funciona correctamente cuando las transiciones tienen pesos arbitrarios (no negativos). Garantiza optimalidad y completitud, ya que nunca expande un camino más caro antes que uno más barato. Conceptualmente, UCS es equivalente a Dijkstra cuando el objetivo es alcanzar un estado meta específico, y no calcular todas las distancias.
+
+#### Depth-Limited Search (DLS)
+Depth-Limited Search es una variante de DFS que introduce un límite máximo de profundidad. Su objetivo es evitar los problemas clásicos de DFS en espacios infinitos o muy profundos, como bucles o exploraciones interminables. No garantiza optimalidad ni completitud en general, pero es útil cuando se conoce de antemano una cota razonable para la profundidad de la solución.
+
+#### Iterative Deepening Depth-First Search (IDDFS)
+IDDFS combina lo mejor de BFS y DFS. Realiza múltiples búsquedas en profundidad con un límite creciente (0, 1, 2, …). Aunque repite exploraciones, el costo adicional es aceptable y permite lograr completitud y optimalidad (con costos uniformes) usando memoria lineal, a diferencia de BFS. Es una técnica fundamental cuando el espacio es grande y la memoria es un recurso crítico.
+
+#### Bidirectional Search
+La búsqueda bidireccional ejecuta dos búsquedas simultáneamente: una desde el estado inicial y otra desde el estado objetivo. El proceso termina cuando ambas fronteras se encuentran. Teóricamente reduce el factor exponencial del espacio de búsqueda de b a la d, a b a la d/2, lo que puede ser una mejora enorme. Su principal dificultad es definir correctamente el criterio de encuentro y manejar las estructuras de datos necesarias.
+
+#### Beam Search (heurístico clásico, no local)
+Beam Search es una búsqueda heurística que, en cada nivel, conserva solo los k mejores nodos según una función de evaluación. A diferencia de BFS, descarta sistemáticamente opciones consideradas poco prometedoras. Esto reduce drásticamente memoria y tiempo, pero sacrifica completitud y optimalidad. Es ampliamente usado en procesamiento del lenguaje natural y generación de secuencias.
+
+#### Anytime A*
+Anytime A* es una variante de A* diseñada para contextos donde se necesita una solución rápida, aunque no sea óptima, y se dispone de más tiempo para mejorarla. Devuelve una primera solución subóptima y continúa refinándola. Es clave en sistemas en tiempo real, donde “una buena solución ahora” es mejor que “la óptima demasiado tarde”.
+
+#### Weighted A*
+Weighted A* modifica A* multiplicando la heurística por un peso w mayor a 1. Esto empuja la búsqueda a seguir más agresivamente la heurística, reduciendo tiempo de ejecución a costa de perder optimalidad estricta. El algoritmo ofrece una garantía de suboptimalidad acotada: la solución encontrada no será peor que un factor w respecto al óptimo.
+
+#### Multi-Objective A*
+Multi-Objective A* extiende el enfoque clásico para problemas donde existen múltiples criterios de optimización (por ejemplo, costo, tiempo y riesgo). En lugar de una única solución, produce un conjunto de soluciones Pareto-óptimas, donde ninguna domina completamente a otra. Es fundamental en planificación realista, donde no existe un único “mejor” criterio.
+
+#### Lifelong Planning A* (LPA*)
+LPA* es un algoritmo incremental: reutiliza resultados de búsquedas anteriores cuando el grafo cambia ligeramente. En vez de recomputar desde cero, actualiza solo las partes afectadas. Esto lo hace especialmente valioso en entornos dinámicos, como mapas que se actualizan gradualmente.
+
+#### D* (Dynamic A*)
+D* (Dynamic A*) y su versión simplificada D* Lite son algoritmos de planificación reactiva usados en robótica. Permiten recalcular rutas eficientemente cuando el agente descubre obstáculos nuevos durante la ejecución. Conceptualmente, invierten el razonamiento de A*: planifican “desde el objetivo hacia atrás”, facilitando la replanificación local.
+
+#### Bellman–Ford
+Bellman–Ford es un algoritmo de caminos mínimos que admite pesos negativos y puede detectar ciclos negativos, algo que Dijkstra no puede hacer. Su costo es mayor '(O(VE))', pero su robustez lo vuelve esencial en ciertos dominios, como análisis de redes y sistemas económicos.
+
+#### Floyd–Warshall
+Floyd–Warshall es un algoritmo de programación dinámica que calcula los caminos mínimos entre todos los pares de nodos. Es conceptualmente simple y muy general, pero su complejidad cúbica lo limita a grafos pequeños o medianos. Es una herramienta base para entender PD aplicada a grafos.
+
+#### Johnson’s Algorithm
+Johnson combina Bellman–Ford y Dijkstra para resolver caminos mínimos entre todos los pares en grafos dispersos con pesos negativos (sin ciclos negativos). Reescala los pesos para eliminar negatividad y luego ejecuta Dijkstra desde cada nodo, logrando una mejora sustancial respecto a Floyd–Warshall.
+
+#### K-Shortest Paths (Yen)
+El algoritmo de Yen calcula los k caminos más cortos distintos entre dos nodos. Es útil cuando se necesitan alternativas, por ejemplo en sistemas de ruteo o planificación robusta. Extiende el concepto de camino mínimo único hacia un conjunto ordenado de soluciones.
+
+#### Backtracking
+Backtracking es una técnica de búsqueda sistemática que construye soluciones paso a paso y retrocede cuando una solución parcial viola restricciones. Aunque en el peor caso es exponencial, es la base de muchos algoritmos exactos y se potencia enormemente cuando se combina con poda.
+
+#### Constraint Satisfaction Search (CSP)
+Los CSP modelan problemas como asignación de variables con dominios finitos y restricciones. La búsqueda se centra en encontrar asignaciones consistentes. Es un marco general que engloba problemas como sudoku, horarios y planificación lógica.
+
+#### Forward Checking
+Forward Checking es una técnica de poda en CSP que, al asignar una variable, elimina valores incompatibles de los dominios de variables futuras. Reduce drásticamente el espacio de búsqueda y detecta inconsistencias tempranas.
+
+#### Arc Consistency (AC-3)
+AC-3 es un algoritmo que impone consistencia de arcos: para cada par de variables relacionadas, todo valor debe tener soporte en la otra. Es una forma más fuerte de poda que el forward checking y se aplica como preprocesamiento o durante la búsqueda.
+
+#### Minimax
+Minimax es un algoritmo de búsqueda adversaria para juegos de suma cero con información perfecta. Modela decisiones alternadas entre un jugador que maximiza y otro que minimiza la utilidad, asumiendo oponentes óptimos.
+
+#### Alpha–Beta Pruning
+Alpha–Beta es una optimización de Minimax que elimina ramas que no pueden afectar la decisión final. No cambia el resultado, pero puede reducir exponencialmente el número de nodos evaluados, haciendo viable Minimax en juegos más profundos.
+
+#### Expectiminimax
+Expectiminimax extiende Minimax incorporando nodos de azar, donde los resultados tienen probabilidades. Se utiliza en juegos que combinan estrategia y suerte, como backgammon.
+
+#### Monte Carlo Tree Search (MCTS)
+MCTS construye el árbol de búsqueda mediante simulaciones aleatorias y balancea exploración y explotación. No necesita heurísticas explícitas y ha sido clave en avances como AlphaGo. Es especialmente potente en espacios enormes.
+
+#### Random Restart Search
+Esta estrategia ejecuta múltiples búsquedas locales desde estados iniciales aleatorios. No cambia el algoritmo base, pero aumenta significativamente la probabilidad de escapar de óptimos locales.
+
+#### Tabu Search
+Tabu Search es una metaheurística que utiliza memoria a corto plazo (lista tabú) para impedir volver a soluciones recientes. Esto introduce exploración dirigida y evita ciclos, mejorando la calidad de la búsqueda local.
+
+#### Variable Neighborhood Search (VNS)
+Metaheurística que cambia sistemáticamente la estructura de vecindad para escapar de óptimos locales.
+
+#### Ant Colony Optimization (ACO)
+Metaheurística bioinspirada donde agentes artificiales depositan feromonas para guiar la búsqueda hacia soluciones prometedoras.
+
+#### Particle Swarm Optimization (PSO)
+Algoritmo de optimización continua basado en el movimiento colectivo de partículas guiadas por la mejor experiencia individual y global.
+
+#### Differential Evolution (DE)
+Algoritmo evolutivo para optimización continua que genera nuevos candidatos mediante combinaciones diferenciales de soluciones existentes.
+
+#### Harmony Search
+Metaheurística inspirada en la improvisación musical, que equilibra memoria histórica, aleatoriedad y ajuste local.
+
+#### Genetic Programming (GP)
+Extensión de los algoritmos genéticos donde los individuos son **programas o expresiones**, no vectores de parámetros.
+
+#### Simulated Quantum Annealing
+Variante moderna del temple simulado que introduce conceptos de túnel cuántico para explorar mejor el espacio de soluciones.
