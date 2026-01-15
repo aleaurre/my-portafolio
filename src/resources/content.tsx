@@ -103,19 +103,8 @@ const about: About = {
   },
   work: {
     display: true,
-    title: "Experiencia Laboral",
+    title: "Experiencia Academica",
     experiences: [
-      {
-        company: "Practia",
-        timeframe: "2024",
-        role: "Desarrolladora e Investigación en IA (Pasantía)",
-        achievements: [
-          <>Implementación de soluciones de Inteligencia Artificial aplicadas a casos reales.</>,
-          <>Desarrollo, pruebas y puesta en producción de modelos predictivos.</>,
-          <>Trabajo colaborativo bajo metodologías ágiles y buenas prácticas de ingeniería.</>,
-        ],
-        images: [],
-      },
       {
         company: "Universidad de la República (UDELAR)",
         timeframe: "2023 - Actualidad",
