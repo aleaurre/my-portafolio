@@ -110,7 +110,6 @@ const about: About = {
         timeframe: "2023 - Actualidad",
         role: "Investigación y desarrollo en Ciencia de Datos",
         achievements: [
-          <>Participación en proyectos vinculados a automatización, limpieza y análisis de datos.</>,
           <>Colaboración interdisciplinaria en soluciones tecnológicas para investigación científica.</>,
         ],
         images: [],
