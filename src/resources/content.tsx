@@ -107,7 +107,7 @@ const about: About = {
     experiences: [
       {
         company: "Universidad de la República (UDELAR)",
-        timeframe: "2023 - Actualidad",
+        timeframe: "2024 - Actualidad",
         role: "Investigación y desarrollo en Ciencia de Datos",
         achievements: [
           <>Colaboración interdisciplinaria en soluciones tecnológicas para investigación científica.</>,
